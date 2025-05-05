@@ -1,25 +1,17 @@
 import React from "react";
 import {Routes, Route} from "react-router-dom";
 
-import Home from "../components/Home";
-import Login from "../components/Login";
-import Register from "../components/Register";
-import Profile from "../components/Profile";
-import BoardUser from "../components/BoardUser";
-import BoardModerator from "../components/BoardModerator";
-import BoardAdmin from "../components/BoardAdmin";
+import Profile from "../components/Profile/Profile";
+import LoginPage from "../pages/LoginPage";
+import RegisterPage from "../pages/RegisterPage";
 
 const AppRoutes: React.FC = () => {
   return (
     <Routes>
-      <Route path="/" element={<Login />} />
-      <Route path="/home" element={<Home />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+      <Route path="/" element={<LoginPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
       <Route path="/profile" element={<Profile />} />
-      <Route path="/user" element={<BoardUser />} />
-      <Route path="/mod" element={<BoardModerator />} />
-      <Route path="/admin" element={<BoardAdmin />} />
     </Routes>
   );
 };
