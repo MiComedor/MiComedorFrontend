@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 import { getModeratorBoard } from "../services/user.service";
-import EventBus from "../common/EventBus";
+import EventBus from "./common/EventBus";
 
 const BoardModerator: React.FC = () => {
   const [content, setContent] = useState<string>("");

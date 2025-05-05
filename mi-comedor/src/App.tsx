@@ -1,21 +1,12 @@
-import React from "react";
-import { useState, useEffect } from "react";
-import { Routes, Route, Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 
 import * as AuthService from "./services/auth.service";
-import IUser from './types/user.type';
-
-import Login from "./components/Login";
-import Register from "./components/Register";
-import Home from "./components/Home";
-import Profile from "./components/Profile";
-import BoardUser from "./components/BoardUser";
-import BoardModerator from "./components/BoardModerator";
-import BoardAdmin from "./components/BoardAdmin";
-
-import EventBus from "./common/EventBus";
+import IUser from "./types/user.type";
+import AppRoutes from "./routes/routes";
+import EventBus from "./components/common/EventBus";
 
 const App: React.FC = () => {
   const [showModeratorBoard, setShowModeratorBoard] = useState<boolean>(false);
@@ -45,43 +36,38 @@ const App: React.FC = () => {
 
   return (
     <div>
-      <nav className="navbar navbar-expand navbar-dark bg-dark">
-        <Link to={"/"} className="navbar-brand">
-          bezKoder
-        </Link>
-        <div className="navbar-nav mr-auto">
-          <li className="nav-item">
-            <Link to={"/home"} className="nav-link">
-              Home
-            </Link>
-          </li>
-
-          {showModeratorBoard && (
+      {currentUser && (
+        <nav className="navbar navbar-expand navbar-dark bg-dark">
+          <Link to={"/"} className="navbar-brand">
+            bezKoder
+          </Link>
+          <div className="navbar-nav mr-auto">
             <li className="nav-item">
-              <Link to={"/mod"} className="nav-link">
-                Moderator Board
+              <Link to={"/home"} className="nav-link">
+                Home
               </Link>
             </li>
-          )}
-
-          {showAdminBoard && (
-            <li className="nav-item">
-              <Link to={"/admin"} className="nav-link">
-                Admin Board
-              </Link>
-            </li>
-          )}
-
-          {currentUser && (
+            {showModeratorBoard && (
+              <li className="nav-item">
+                <Link to={"/mod"} className="nav-link">
+                  Moderator Board
+                </Link>
+              </li>
+            )}
+            {showAdminBoard && (
+              <li className="nav-item">
+                <Link to={"/admin"} className="nav-link">
+                  Admin Board
+                </Link>
+              </li>
+            )}
             <li className="nav-item">
               <Link to={"/user"} className="nav-link">
                 User
               </Link>
             </li>
-          )}
-        </div>
+          </div>
 
-        {currentUser ? (
           <div className="navbar-nav ml-auto">
             <li className="nav-item">
               <Link to={"/profile"} className="nav-link">
@@ -94,34 +80,11 @@ const App: React.FC = () => {
               </a>
             </li>
           </div>
-        ) : (
-          <div className="navbar-nav ml-auto">
-            <li className="nav-item">
-              <Link to={"/login"} className="nav-link">
-                Login
-              </Link>
-            </li>
-
-            <li className="nav-item">
-              <Link to={"/register"} className="nav-link">
-                Sign Up
-              </Link>
-            </li>
-          </div>
-        )}
-      </nav>
+        </nav>
+      )}
 
       <div className="container mt-3">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/home" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/user" element={<BoardUser />} />
-          <Route path="/mod" element={<BoardModerator />} />
-          <Route path="/admin" element={<BoardAdmin />} />
-        </Routes>
+        <AppRoutes />
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 import { getUserBoard } from "../services/user.service";
-import EventBus from "../common/EventBus";
+import EventBus from "./common/EventBus";
 
 const BoardUser: React.FC = () => {
   const [content, setContent] = useState<string>("");
