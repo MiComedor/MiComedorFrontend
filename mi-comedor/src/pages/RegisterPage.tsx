@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import * as Yup from "yup";
 
-import { register, login } from "../services/auth.service";  // ✅ importar login
+import { register, login } from "../services/auth.service";
 import RegisterForm from "../components/Auth/RegisterForm";
+import EventBus from "../components/common/EventBus";
 
 const RegisterPage: React.FC = () => {
   const [successful, setSuccessful] = useState<boolean>(false);
@@ -45,15 +46,15 @@ const RegisterPage: React.FC = () => {
         setSuccessful(true);
         setLoading(false);
 
-        // ✅ LOGIN AUTOMÁTICO después de registro
         login(username, password).then(
           () => {
+            EventBus.dispatch("login");
             navigate("/profile");
             window.location.reload();
           },
           (error) => {
             const resMessage =
-              (error.response?.data?.message) ||
+              error.response?.data?.message ||
               error.message ||
               error.toString();
             setMessage(resMessage);

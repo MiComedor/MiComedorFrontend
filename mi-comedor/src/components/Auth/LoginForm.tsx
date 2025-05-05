@@ -2,7 +2,6 @@ import React from "react";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
 
-// Define el tipo de valores que espera el formulario
 type LoginFormValues = {
   username: string;
   password: string;

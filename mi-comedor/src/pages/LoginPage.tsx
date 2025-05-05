@@ -4,6 +4,7 @@ import * as Yup from "yup";
 
 import { login } from "../services/auth.service";
 import LoginForm from "../components/Auth/LoginForm";
+import EventBus from "../components/common/EventBus";
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -27,6 +28,7 @@ const LoginPage: React.FC = () => {
 
     login(username, password).then(
       () => {
+        EventBus.dispatch("login");
         navigate("/profile");
         window.location.reload();
       },
