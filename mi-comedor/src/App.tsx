@@ -82,10 +82,7 @@ const App: React.FC = () => {
           </div>
         </nav>
       )}
-
-      <div className="container mt-3">
-        <AppRoutes />
-      </div>
+      <AppRoutes />
     </div>
   );
 };
