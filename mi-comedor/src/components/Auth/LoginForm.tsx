@@ -31,66 +31,70 @@ const LoginForm: React.FC<LoginFormProps> = ({
   const navigate = useNavigate();
 
   return (
-    <Stack direction="row" className="login-stack">
+    <Stack
+      direction={{ xs: "column", sm: "row" }} // Adjust direction for smaller screens
+      className="login-stack"
+      spacing={2} // Add spacing between elements
+    >
       {/* Panel izquierdo */}
       <div className="login-left">
-      <div className="titulo-Pderecho">
+        <div className="titulo-Pderecho">
           <h2>INICIAR SESIÓN</h2>
         </div>
         <div className="formulario-grupo-completo">
-                  <Formik
-                    initialValues={initialValues}
-                    validationSchema={validationSchema}
-                    onSubmit={onSubmit}
-                  >
-                    <Form>
-                        <Stack spacing={1} className="login-form-stack">
-                          <div className="form-group">
-                            <label>Usuario</label>
-                            <Field name="username" type="text" className="form-input" />
-                            <ErrorMessage
-                              name="username"
-                              component="div"
-                              className="error-message"
-                            />
-                          </div>
-        
-                          <div className="form-group">
-                            <label>Contraseña</label>
-                            <Field
-                              name="password"
-                              type="password"
-                              className="form-input"
-                            />
-                            <ErrorMessage
-                              name="password"
-                              component="div"
-                              className="error-message"
-                            />
-                          </div>
-                        </Stack>
-        
-                      <button
-                        type="submit"
-                        className="login-submit-button"
-                        disabled={loading}
-                      >
-                        Iniciar sesión
-                      </button>
-        
-                      {message && (
-                        <div className="form-group">
-                          <div
-                            className={successful ? "success-message" : "error-message"}
-                            role="alert"
-                          >
-                            {message}
-                          </div>
-                        </div>
-                      )}
-                    </Form>
-                  </Formik>
+          <Formik
+            initialValues={initialValues}
+            validationSchema={validationSchema}
+            onSubmit={onSubmit}
+          >
+            <Form>
+              <Stack spacing={1} className="login-form-stack">
+                <div className="form-group">
+                  <label>Usuario</label>
+                  <Field name="username" type="text" className="form-input" />
+                  <ErrorMessage
+                    name="username"
+                    component="div"
+                    className="error-message"
+                  />
                 </div>
+
+                <div className="form-group">
+                  <label>Contraseña</label>
+                  <Field
+                    name="password"
+                    type="password"
+                    className="form-input"
+                  />
+                  <ErrorMessage
+                    name="password"
+                    component="div"
+                    className="error-message"
+                  />
+                </div>
+              </Stack>
+
+              <button
+                type="submit"
+                className="login-submit-button"
+                disabled={loading}
+              >
+                Iniciar sesión
+              </button>
+
+              {message && (
+                <div className="form-group">
+                  <div
+                    className={successful ? "success-message" : "error-message"}
+                    role="alert"
+                  >
+                    {message}
+                  </div>
+                </div>
+              )}
+            </Form>
+          </Formik>
+        </div>
       </div>
 
       {/* Panel derecho */}

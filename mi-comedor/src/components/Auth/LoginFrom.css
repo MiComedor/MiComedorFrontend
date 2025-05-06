@@ -102,3 +102,58 @@
 .formulario-grupo-completo {
     padding-left: 25%;
 }
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .login-stack {
+        flex-direction: column;
+    }
+
+    .login-right, .login-left {
+        flex: none;
+        width: 100%;
+        padding: 20px;
+    }
+
+    .login-right h2 {
+        font-size: 35px;
+    }
+
+    .login-form-stack {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .login-submit-button {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .formulario-grupo-completo {
+        padding-left: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .login-right h2 {
+        font-size: 28px;
+    }
+
+    .login-right-button {
+        font-size: 16px;
+        padding: 8px 20px;
+    }
+
+    .form-group {
+        font-size: 18px;
+    }
+
+    .form-input {
+        font-size: 0.9rem;
+    }
+
+    .login-submit-button {
+        font-size: 16px;
+        padding: 8px 15px;
+    }
+}
