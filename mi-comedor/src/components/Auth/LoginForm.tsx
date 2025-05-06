@@ -31,9 +31,9 @@ const LoginForm: React.FC<LoginFormProps> = ({
   const navigate = useNavigate();
 
   return (
-    <Stack direction="row" className="register-stack">
+    <Stack direction="row" className="login-stack">
       {/* Panel izquierdo */}
-      <div className="register-right">
+      <div className="login-left">
       <div className="titulo-Pderecho">
           <h2>INICIAR SESIÓN</h2>
         </div>
@@ -44,7 +44,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
                     onSubmit={onSubmit}
                   >
                     <Form>
-                        <Stack spacing={1} className="register-form-stack">
+                        <Stack spacing={1} className="login-form-stack">
                           <div className="form-group">
                             <label>Usuario</label>
                             <Field name="username" type="text" className="form-input" />
@@ -72,7 +72,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
         
                       <button
                         type="submit"
-                        className="register-submit-button"
+                        className="login-submit-button"
                         disabled={loading}
                       >
                         Iniciar sesión
@@ -94,10 +94,10 @@ const LoginForm: React.FC<LoginFormProps> = ({
       </div>
 
       {/* Panel derecho */}
-      <div className="register-left">
+      <div className="login-right">
         <h2>Crea tu cuenta</h2>
         <button
-          className="register-left-button"
+          className="login-right-button"
           onClick={() => navigate("/register")}
         >
           Registrar
