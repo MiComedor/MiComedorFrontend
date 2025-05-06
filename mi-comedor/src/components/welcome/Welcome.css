@@ -9,3 +9,29 @@
     max-width: 250px; /* Ajusta el tamaño según lo que necesites */
     height: auto; /* Mantiene la proporción del logo */
 }
+.loading-bar {
+    width: 15%; /* Cambia el tamaño a mediano ajustando el ancho */
+    height: 4px;
+    background-color: #f3f3f3; /* Color de fondo de la barra */
+    position: relative;
+    overflow: hidden;
+    margin: 0 auto; /* Centra la barra horizontalmente */
+}
+
+.loading-bar::before {
+    content: '';
+    position: absolute;
+    width: 50%;
+    height: 100%;
+    background-color: #4caf50; /* Color de la barra de progreso */
+    animation: loading-animation 2s infinite;
+}
+
+@keyframes loading-animation {
+    0% {
+        left: -50%;
+    }
+    100% {
+        left: 100%;
+    }
+}
