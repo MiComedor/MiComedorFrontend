@@ -1,6 +1,10 @@
 import React from "react";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import Stack from "@mui/material/Stack";
+import "./LoginFrom.css";
+import { useNavigate } from "react-router-dom";
+
 
 type LoginFormValues = {
   username: string;
@@ -12,8 +16,8 @@ type LoginFormProps = {
   validationSchema: Yup.ObjectSchema<LoginFormValues>;
   onSubmit: (values: LoginFormValues) => void;
   loading: boolean;
+  successful: boolean;
   message: string;
-  onSignUpClick: () => void;
 };
 
 const LoginForm: React.FC<LoginFormProps> = ({
@@ -21,72 +25,89 @@ const LoginForm: React.FC<LoginFormProps> = ({
   validationSchema,
   onSubmit,
   loading,
+  successful,
   message,
-  onSignUpClick,
-}) => (
-  <div className="col-md-12">
-    <div className="card card-container">
-      <img
-        src="//ssl.gstatic.com/accounts/ui/avatar_2x.png"
-        alt="profile-img"
-        className="profile-img-card"
-      />
-      <Formik
-        initialValues={initialValues}
-        validationSchema={validationSchema}
-        onSubmit={onSubmit}
-      >
-        <Form>
-          <div className="form-group">
-            <label htmlFor="username">Username</label>
-            <Field name="username" type="text" className="form-control" />
-            <ErrorMessage
-              name="username"
-              component="div"
-              className="alert alert-danger"
-            />
-          </div>
+}) => {
+  const navigate = useNavigate();
 
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <Field name="password" type="password" className="form-control" />
-            <ErrorMessage
-              name="password"
-              component="div"
-              className="alert alert-danger"
-            />
-          </div>
+  return (
+    <Stack direction="row" className="register-stack">
+      {/* Panel izquierdo */}
+      <div className="register-right">
+      <div className="titulo-Pderecho">
+          <h2>INICIAR SESIÓN</h2>
+        </div>
+        <div className="formulario-grupo-completo">
+                  <Formik
+                    initialValues={initialValues}
+                    validationSchema={validationSchema}
+                    onSubmit={onSubmit}
+                  >
+                    <Form>
+                        <Stack spacing={1} className="register-form-stack">
+                          <div className="form-group">
+                            <label>Usuario</label>
+                            <Field name="username" type="text" className="form-input" />
+                            <ErrorMessage
+                              name="username"
+                              component="div"
+                              className="error-message"
+                            />
+                          </div>
+        
+                          <div className="form-group">
+                            <label>Contraseña</label>
+                            <Field
+                              name="password"
+                              type="password"
+                              className="form-input"
+                            />
+                            <ErrorMessage
+                              name="password"
+                              component="div"
+                              className="error-message"
+                            />
+                          </div>
+                        </Stack>
+        
+                      <button
+                        type="submit"
+                        className="register-submit-button"
+                        disabled={loading}
+                      >
+                        Iniciar sesión
+                      </button>
+        
+                      {message && (
+                        <div className="form-group">
+                          <div
+                            className={successful ? "success-message" : "error-message"}
+                            role="alert"
+                          >
+                            {message}
+                          </div>
+                        </div>
+                      )}
+                    </Form>
+                  </Formik>
+                </div>
+      </div>
 
-          <div className="form-group">
-            <button
-              type="submit"
-              className="btn btn-primary btn-block"
-              disabled={loading}
-            >
-              {loading && (
-                <span className="spinner-border spinner-border-sm"></span>
-              )}
-              <span>Login</span>
-            </button>
-          </div>
-
-          {message && (
-            <div className="form-group">
-              <div className="alert alert-danger" role="alert">
-                {message}
-              </div>
-            </div>
-          )}
-        </Form>
-      </Formik>
-
-      <div className="form-group text-center">
-        <button type="button" className="btn btn-link" onClick={onSignUpClick}>
-          crear cuenta
+      {/* Panel derecho */}
+      <div className="register-left">
+        <h2>Crea tu cuenta</h2>
+        <button
+          className="register-left-button"
+          onClick={() => navigate("/register")}
+        >
+          Registrar
         </button>
       </div>
-    </div>
-  </div>
-);
+    </Stack>
+  );
+};
 
 export default LoginForm;
+
+
+
