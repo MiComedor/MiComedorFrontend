@@ -2,4 +2,10 @@
     width: 100%;
     text-align: center;
     margin-bottom: 20px;
+    font-weight: 400; /* Hace que la letra sea regular */
+}
+
+.welcome-logo {
+    max-width: 250px; /* Ajusta el tamaño según lo que necesites */
+    height: auto; /* Mantiene la proporción del logo */
 }
