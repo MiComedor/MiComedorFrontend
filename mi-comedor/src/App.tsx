@@ -40,7 +40,7 @@ const App: React.FC = () => {
               <img
                 src="https://i.postimg.cc/4dsLbM1C/logo.jpg"
                 alt="Logo"
-                className="welcome-logo"
+                className="navbar-logo"
               />
               <Typography
                 variant="h4"

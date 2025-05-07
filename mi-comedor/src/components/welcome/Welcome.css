@@ -1,21 +1,25 @@
-.titulo-Pderecho {
+.titulo-wderecho {
     width: 100%;
     text-align: center;
     margin-bottom: 20px;
+    font-size: 3.0rem; /* Tamaño de fuente grande */
     font-weight: 400;
 }
 
 .welcome-logo {
     max-width: 250px; 
-    height: auto;
+    height: auto; /* Mantiene la proporción del logo */
+    display: block; /* Convierte el elemento en un bloque */
+    margin: 0 auto; /* Centra horizontalmente la imagen */
 }
+
 .loading-bar {
-    width: 15%; 
+    width: 50%; /* Cambia el tamaño a mediano ajustando el ancho */
     height: 4px;
-    background-color: #f3f3f3; 
+    background-color: #f3f3f3; /* Color de fondo de la barra */
     position: relative;
     overflow: hidden;
-    margin: 0 auto; 
+    margin: 0 auto; /* Centra la barra horizontalmente */
 }
 
 .loading-bar::before {
@@ -23,7 +27,7 @@
     position: absolute;
     width: 50%;
     height: 100%;
-    background-color: #f69023; 
+    background-color: #df7243; /* Color de la barra de progreso */
     animation: loading-animation 2s infinite;
 }
 
@@ -34,4 +38,13 @@
     100% {
         left: 100%;
     }
+}
+
+.content-welcome {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 90vh; /* Altura completa de la ventana */
+    margin: 0 auto; /* Asegura el centrado horizontal */
+    flex-direction: column; /* Opcional: organiza los elementos en columna */
 }
