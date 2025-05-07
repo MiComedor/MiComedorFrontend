@@ -41,7 +41,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
         <div className="titulo-Pderecho">
           <h2>INICIAR SESIÓN</h2>
         </div>
-        <div className="formulario-grupo-completo">
+        <div className="formulario-grupo-completo1">
           <Formik
             initialValues={initialValues}
             validationSchema={validationSchema}

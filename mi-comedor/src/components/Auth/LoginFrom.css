@@ -36,11 +36,13 @@
     flex-direction: column;
     justify-content: flex-start;
     padding-left: 0;
-    padding-top: 110px;
+    padding-top: 0px;
+    align-items: center;
 }
 
 .titulo-Pderecho {
     width: 100%;
+    padding-top: 50px;
     text-align: center;
     margin-bottom: 20px;
 }
@@ -99,8 +101,10 @@
     text-align: center;
 }
 
-.formulario-grupo-completo {
-    padding-left: 25%;
+.formulario-grupo-completo1 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 /* Responsive Design */
@@ -109,10 +113,15 @@
         flex-direction: column;
     }
 
-    .login-right, .login-left {
+    .login-right {
         flex: none;
         width: 100%;
-        padding: 20px;
+        padding: 2px;
+        padding-bottom: 100%;
+    }
+    .login-left {
+        flex: none;
+        padding-top: 0px;
     }
 
     .login-right h2 {
@@ -130,7 +139,8 @@
     }
 
     .formulario-grupo-completo {
-        padding-left: 0;
+        padding-left: 10px;
+        padding-right: 20px;
     }
 }
 
