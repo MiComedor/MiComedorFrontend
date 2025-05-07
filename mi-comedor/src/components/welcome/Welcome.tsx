@@ -12,6 +12,7 @@ const Welcome: React.FC = () => {
                     className="welcome-logo mt-5 img-fluid"
                 />
                 <br />
+                <br></br>
                 <div className="loading-bar mt-3">
                     <div className="loading-bar-progress"></div>
                 </div>
