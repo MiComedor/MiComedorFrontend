@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import "bootstrap/dist/css/bootstrap.min.css";
+import { AppBar, Toolbar, Typography, Button, Box } from "@mui/material";
 import "./App.css";
+import LogoutIcon from "@mui/icons-material/Logout";
 
 import * as AuthService from "./services/auth.service";
 import IUser from "./types/user.type";
@@ -9,8 +10,6 @@ import AppRoutes from "./routes/routes";
 import EventBus from "./components/common/EventBus";
 
 const App: React.FC = () => {
-  const [showModeratorBoard, setShowModeratorBoard] = useState<boolean>(false);
-  const [showAdminBoard, setShowAdminBoard] = useState<boolean>(false);
   const [currentUser, setCurrentUser] = useState<IUser | undefined>(undefined);
 
   useEffect(() => {
@@ -29,58 +28,57 @@ const App: React.FC = () => {
 
   const logOut = () => {
     AuthService.logout();
-    setShowModeratorBoard(false);
-    setShowAdminBoard(false);
     setCurrentUser(undefined);
   };
 
   return (
     <div>
       {currentUser && (
-        <nav className="navbar navbar-expand navbar-dark bg-dark">
-          <Link to={"/"} className="navbar-brand">
-            bezKoder
-          </Link>
-          <div className="navbar-nav mr-auto">
-            <li className="nav-item">
-              <Link to={"/home"} className="nav-link">
-                Home
-              </Link>
-            </li>
-            {showModeratorBoard && (
-              <li className="nav-item">
-                <Link to={"/mod"} className="nav-link">
-                  Moderator Board
-                </Link>
-              </li>
-            )}
-            {showAdminBoard && (
-              <li className="nav-item">
-                <Link to={"/admin"} className="nav-link">
-                  Admin Board
-                </Link>
-              </li>
-            )}
-            <li className="nav-item">
-              <Link to={"/user"} className="nav-link">
-                User
-              </Link>
-            </li>
-          </div>
+        <AppBar position="static" sx={{ backgroundColor: "#F57C00" }}>
+          <Toolbar>
+            <Box display="flex" alignItems="center">
+              <img
+                src="https://i.postimg.cc/4dsLbM1C/logo.jpg"
+                alt="Logo"
+                className="welcome-logo"
+              />
+              <Typography
+                variant="h4"
+                component={Link}
+                to="/"
+                sx={{
+                  color: "white",
+                  fontWeight: "bold",
+                  textDecoration: "none",
+                }}
+              >
+                MiComedor
+              </Typography>
+            </Box>
 
-          <div className="navbar-nav ml-auto">
-            <li className="nav-item">
-              <Link to={"/profile"} className="nav-link">
+            <Box display="flex" alignItems="center" marginLeft="auto">
+              <Typography sx={{ fontSize: "22px", marginRight: "10px" }}>
                 {currentUser.username}
-              </Link>
-            </li>
-            <li className="nav-item">
-              <a href="/login" className="nav-link" onClick={logOut}>
-                LogOut
-              </a>
-            </li>
-          </div>
-        </nav>
+              </Typography>
+
+              <Button
+                variant="contained"
+                startIcon={<LogoutIcon />}
+                onClick={logOut}
+                sx={{
+                  ml: 2,
+                  fontWeight: "bold",
+                  backgroundColor: "#BF360C", 
+                  "&:hover": {
+                    backgroundColor: "#e74c3c", 
+                  },
+                }}
+              >
+                Cerrar sesión
+              </Button>
+            </Box>
+          </Toolbar>
+        </AppBar>
       )}
       <AppRoutes />
     </div>

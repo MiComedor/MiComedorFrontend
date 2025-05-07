@@ -30,3 +30,16 @@ label {
   -webkit-border-radius: 50%;
   border-radius: 50%;
 }
+
+.welcome-logo {
+  border-radius: 20px;
+  width: 110px;
+  height: auto;
+  margin-right: 20px;
+  margin-top: 6px;
+  margin-bottom:6px;
+}
+
+.custom-navbar .nav-link:hover {
+  text-decoration: underline;
+}
