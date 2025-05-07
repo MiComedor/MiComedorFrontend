@@ -74,13 +74,14 @@ const LoginForm: React.FC<LoginFormProps> = ({
                 </div>
               </Stack>
 
-              <button
+                <button
                 type="submit"
                 className="login-submit-button"
                 disabled={loading}
-              >
+                style={{ cursor: loading ? "not-allowed" : "pointer" }}
+                >
                 Iniciar sesión
-              </button>
+                </button>
 
               {message && (
                 <div className="form-group">
