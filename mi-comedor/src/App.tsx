@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AppBar, Toolbar, Typography, Button, Box } from "@mui/material";
 import "./App.css";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -11,10 +11,10 @@ import EventBus from "./components/common/EventBus";
 
 const App: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<IUser | undefined>(undefined);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const user = AuthService.getCurrentUser();
-
     if (user) {
       setCurrentUser(user);
     }
@@ -29,6 +29,7 @@ const App: React.FC = () => {
   const logOut = () => {
     AuthService.logout();
     setCurrentUser(undefined);
+    navigate("/login");
   };
 
   return (
@@ -58,7 +59,7 @@ const App: React.FC = () => {
 
             <Box display="flex" alignItems="center" marginLeft="auto">
               <Typography sx={{ fontSize: "22px", marginRight: "10px" }}>
-                {currentUser.username}
+                {currentUser.name}
               </Typography>
 
               <Button
@@ -68,9 +69,9 @@ const App: React.FC = () => {
                 sx={{
                   ml: 2,
                   fontWeight: "bold",
-                  backgroundColor: "#BF360C", 
+                  backgroundColor: "#BF360C",
                   "&:hover": {
-                    backgroundColor: "#e74c3c", 
+                    backgroundColor: "#e74c3c",
                   },
                 }}
               >

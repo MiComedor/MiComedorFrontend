@@ -8,7 +8,7 @@ const WelcomePage: React.FC = () => {
     useEffect(() => {
         const timer = setTimeout(() => {
             navigate('/login'); // Cambia '/login' por la ruta de tu vista de login
-        }, 10000); // 10 segundos
+        }, 5000); // 10 segundos
 
         return () => clearTimeout(timer); // Limpia el temporizador al desmontar el componente
     }, [navigate]);
