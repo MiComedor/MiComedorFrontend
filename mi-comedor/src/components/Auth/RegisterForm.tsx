@@ -4,7 +4,6 @@ import * as Yup from "yup";
 import Stack from "@mui/material/Stack";
 import "./RegisterForm.css";
 import { useNavigate } from "react-router-dom";
-
 type RegisterFormValues = {
   username: string;
   name: string;
@@ -38,7 +37,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
         <h2>BIENVENIDO</h2>
         <button
           className="register-left-button"
-          onClick={() => navigate("/login")} // ✅ aquí funciona
+          onClick={() => navigate("/login")} //  aquí funciona
         >
           Iniciar Sesión
         </button>
@@ -56,51 +55,51 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
             onSubmit={onSubmit}
           >
             <Form>
-                <Stack spacing={1} className="register-form-stack">
-                  <div className="form-group">
-                    <label>Usuario</label>
-                    <Field name="username" type="text" className="form-input" />
-                    <ErrorMessage
-                      name="username"
-                      component="div"
-                      className="error-message"
-                    />
-                  </div>
+              <Stack spacing={1} className="register-form-stack">
+                <div className="form-group">
+                  <label>Usuario</label>
+                  <Field name="username" type="text" className="form-input" />
+                  <ErrorMessage
+                    name="username"
+                    component="div"
+                    className="error-message"
+                  />
+                </div>
 
-                  <div className="form-group">
-                    <label>Nombre</label>
-                    <Field name="name" type="text" className="form-input" />
-                    <ErrorMessage
-                      name="name"
-                      component="div"
-                      className="error-message"
-                    />
-                  </div>
+                <div className="form-group">
+                  <label>Nombre</label>
+                  <Field name="name" type="text" className="form-input" />
+                  <ErrorMessage
+                    name="name"
+                    component="div"
+                    className="error-message"
+                  />
+                </div>
 
-                  <div className="form-group">
-                    <label>Correo Electrónico</label>
-                    <Field name="mail" type="email" className="form-input" />
-                    <ErrorMessage
-                      name="mail"
-                      component="div"
-                      className="error-message"
-                    />
-                  </div>
+                <div className="form-group">
+                  <label>Correo Electrónico</label>
+                  <Field name="mail" type="email" className="form-input" />
+                  <ErrorMessage
+                    name="mail"
+                    component="div"
+                    className="error-message"
+                  />
+                </div>
 
-                  <div className="form-group">
-                    <label>Contraseña</label>
-                    <Field
-                      name="password"
-                      type="password"
-                      className="form-input"
-                    />
-                    <ErrorMessage
-                      name="password"
-                      component="div"
-                      className="error-message"
-                    />
-                  </div>
-                </Stack>
+                <div className="form-group">
+                  <label>Contraseña</label>
+                  <Field
+                    name="password"
+                    type="password"
+                    className="form-input"
+                  />
+                  <ErrorMessage
+                    name="password"
+                    component="div"
+                    className="error-message"
+                  />
+                </div>
+              </Stack>
 
               <button
                 type="submit"
