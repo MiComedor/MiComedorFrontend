@@ -13,9 +13,9 @@
     align-items: center;
 }
 
-.login-right h2 {
+.login-left h2 {
     margin-bottom: 20px;
-    font-size: 45px;
+    font-size: 43px;
 }
 
 .login-right-button {
@@ -36,20 +36,19 @@
     flex-direction: column;
     justify-content: flex-start;
     padding-left: 0;
-    padding-top: 0px;
+    padding-top: 110px;
     align-items: center;
 }
 
 .titulo-Pderecho {
     width: 100%;
-    padding-top: 50px;
     text-align: center;
     margin-bottom: 20px;
 }
 
 .login-right h2 {
     align-items: flex-end;
-    font-size: 45px;
+    font-size: 40px;
     font-size: bold;
 }
 
@@ -110,61 +109,28 @@
 /* Responsive Design */
 @media (max-width: 768px) {
     .login-stack {
-        flex-direction: column;
+        flex-direction: column !important;
     }
 
     .login-right {
-        flex: none;
+        order:2;
         width: 100%;
-        padding: 2px;
-        padding-bottom: 100%;
+        min-height: 50vh;
+        flex: none;
+        height: 500px;
     }
 
     .login-left {
+        min-height: 50vh;
+        order: 1;
+        width: 100%;
         flex: none;
         padding-top: 0px;
+        padding-bottom: 10px;
     }
 
-    .login-right h2 {
-        font-size: 35px;
-    }
-
-    .login-form-stack {
-        width: 100%;
-        margin-left: 0;
-    }
-
-    .login-submit-button {
-        margin-left: 0;
-        width: 100%;
-    }
-
-    .formulario-grupo-completo {
-        padding-left: 10px;
-        padding-right: 20px;
-    }
-}
-
-@media (max-width: 480px) {
-    .login-right h2 {
-        font-size: 28px;
-    }
-
-    .login-right-button {
-        font-size: 16px;
-        padding: 8px 20px;
-    }
-
-    .form-group {
-        font-size: 18px;
-    }
-
-    .form-input {
-        font-size: 0.9rem;
-    }
-
-    .login-submit-button {
-        font-size: 16px;
-        padding: 8px 15px;
+    .titulo-Pderecho {
+        padding: 0px;
+        margin-bottom: 0px;
     }
 }

@@ -100,7 +100,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
 
       {/* Panel derecho */}
       <div className="login-right">
-        <h2>Crea tu cuenta</h2>
+        <h2>CREA TU CUENTA</h2>
         <button
           className="login-right-button"
           onClick={() => navigate("/register")}
