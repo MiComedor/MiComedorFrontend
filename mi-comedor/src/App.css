@@ -37,9 +37,48 @@ label {
   height: auto;
   margin-right: 20px;
   margin-top: 6px;
-  margin-bottom:6px;
+  margin-bottom: 6px;
 }
 
 .custom-navbar .nav-link:hover {
   text-decoration: underline;
+}
+
+.logo-mobile {
+  display: none;
+}
+
+/* Responsive */
+
+@media (max-width: 600px) {
+  .navbar-logo {
+    display: none;
+  }
+
+  .logo-mobile {
+    height: 60px;
+    width: 100px;
+    margin-right: 6px;
+    border-radius: 8px;
+    display: block;
+    margin-top: 8px;
+    margin-bottom: 6px;
+  }
+
+  .navbar-title {
+    display: none;
+  }
+
+  .cerrar-sesion-btn {
+    text-align: center  !important;
+    justify-content: center !important;
+    font-size: 0 !important;
+    padding: 10px !important;
+    min-width: 30px !important;
+    width: 42px !important;
+  }
+
+  .cerrar-sesion-btn .MuiButton-startIcon {
+    margin: 0 !important;
+  }
 }
