@@ -15,17 +15,17 @@ export const cards = [
     description: "Beneficiarios",
   },
   {
-    id: 1,
+    id: 4,
     title: "M4",
     description: "Reporte del día y semanal",
   },
   {
-    id: 2,
+    id: 5,
     title: "M5",
     description: "Presupuesto",
   },
   {
-    id: 3,
+    id: 6,
     title: "M6",
     description: "Coordinación de tarea",
   },
