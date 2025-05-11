@@ -2,9 +2,10 @@ import React from "react";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import Stack from "@mui/material/Stack";
-import "./LoginFrom.css";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert, { AlertProps as MuiAlertProps } from "@mui/material/Alert";
+import "./LoginForm.css"; // Corregido
 import { useNavigate } from "react-router-dom";
-
 
 type LoginFormValues = {
   username: string;
@@ -20,6 +21,13 @@ type LoginFormProps = {
   message: string;
 };
 
+const Alert = React.forwardRef<HTMLDivElement, MuiAlertProps>(function Alert(
+  props,
+  ref
+) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
 const LoginForm: React.FC<LoginFormProps> = ({
   initialValues,
   validationSchema,
@@ -30,18 +38,49 @@ const LoginForm: React.FC<LoginFormProps> = ({
 }) => {
   const navigate = useNavigate();
 
+  const [open, setOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    if (message) {
+      setOpen(true);
+    }
+  }, [message, successful]);
+
+  const handleClose = (
+    event?: React.SyntheticEvent | Event,
+    reason?: string
+  ) => {
+    if (reason === "clickaway") return;
+    setOpen(false);
+  };
+
   return (
     <Stack
-      direction={{ xs: "column", sm: "row" }} // Adjust direction for smaller screens
+      direction={{ xs: "column", sm: "row" }}
       className="login-stack"
-      spacing={2} // Add spacing between elements
+      spacing={2}
     >
+      <Snackbar
+        open={open}
+        autoHideDuration={6000}
+        onClose={handleClose}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          onClose={handleClose}
+          severity={successful ? "success" : "error"}
+          sx={{ width: "100%" }}
+        >
+          {successful ? "Inicio exitoso" : "Usuario o contraseña incorrecta"}
+        </Alert>
+      </Snackbar>
+
       {/* Panel izquierdo */}
       <div className="login-left">
-        <div className="titulo-Pderecho">
+        <div className="login-left-title">
           <h2>INICIAR SESIÓN</h2>
         </div>
-        <div className="formulario-grupo-completo1">
+        <div className="login-form-wrapper">
           <Formik
             initialValues={initialValues}
             validationSchema={validationSchema}
@@ -50,8 +89,13 @@ const LoginForm: React.FC<LoginFormProps> = ({
             <Form>
               <Stack spacing={1} className="login-form-stack">
                 <div className="form-group">
-                  <label>Usuario</label>
-                  <Field name="username" type="text" className="form-input" />
+                  <label htmlFor="username">Usuario</label>
+                  <Field
+                    id="username"
+                    name="username"
+                    type="text"
+                    className="form-input"
+                  />
                   <ErrorMessage
                     name="username"
                     component="div"
@@ -60,8 +104,9 @@ const LoginForm: React.FC<LoginFormProps> = ({
                 </div>
 
                 <div className="form-group">
-                  <label>Contraseña</label>
+                  <label htmlFor="password">Contraseña</label>
                   <Field
+                    id="password"
                     name="password"
                     type="password"
                     className="form-input"
@@ -74,25 +119,13 @@ const LoginForm: React.FC<LoginFormProps> = ({
                 </div>
               </Stack>
 
-                <button
+              <button
                 type="submit"
-                className="login-submit-button"
+                className={`login-submit-button ${loading ? "disabled" : ""}`}
                 disabled={loading}
-                style={{ cursor: loading ? "not-allowed" : "pointer" }}
-                >
-                Iniciar sesión
-                </button>
-
-              {message && (
-                <div className="form-group">
-                  <div
-                    className={successful ? "success-message" : "error-message"}
-                    role="alert"
-                  >
-                    {message}
-                  </div>
-                </div>
-              )}
+              >
+                {loading ? "Cargando..." : "Iniciar sesión"}
+              </button>
             </Form>
           </Formik>
         </div>
@@ -113,6 +146,3 @@ const LoginForm: React.FC<LoginFormProps> = ({
 };
 
 export default LoginForm;
-
-
-

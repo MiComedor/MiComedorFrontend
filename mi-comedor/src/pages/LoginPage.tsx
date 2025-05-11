@@ -10,6 +10,7 @@ const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [successful, setSuccessful] = useState(false); // ✅ NUEVO
 
   const initialValues = {
     username: "",
@@ -25,9 +26,13 @@ const LoginPage: React.FC = () => {
     const { username, password } = formValue;
     setMessage("");
     setLoading(true);
+    setSuccessful(false); // reset
 
     login(username, password).then(
       () => {
+        setSuccessful(true); // ✅ login exitoso
+        setMessage("Inicio exitoso"); // ✅ mensaje para el snackbar
+
         EventBus.dispatch("login");
         navigate("/profile");
         window.location.reload();
@@ -41,7 +46,8 @@ const LoginPage: React.FC = () => {
           error.toString();
 
         setLoading(false);
-        setMessage(resMessage);
+        setSuccessful(false); // ✅ login fallido
+        setMessage(resMessage || "Usuario o contraseña incorrecta");
       }
     );
   };
@@ -57,6 +63,7 @@ const LoginPage: React.FC = () => {
       onSubmit={handleLogin}
       loading={loading}
       message={message}
+      successful={successful} // ✅ NUEVO
       onSignUpClick={goToRegister}
     />
   );
