@@ -22,11 +22,11 @@ export const cards = [
   {
     id: 2,
     title: "M5",
-    description: "Animals are a part of nature.",
+    description: "Presupuesto",
   },
   {
     id: 3,
     title: "M6",
-    description: "Humans depend on plants and animals for survival.",
+    description: "Coordinación de tarea",
   },
 ];
