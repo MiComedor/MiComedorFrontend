@@ -35,6 +35,8 @@ const NotasProfile: React.FC<NotasProfileProps> = ({
         <AddIcon sx={{ fontSize: 42 }} />
       </IconButton>
     </Box>
+
+    
   );
 };
 

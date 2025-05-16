@@ -1,5 +1,6 @@
 import api from "../axiosInstance";
 import Note from "../types/note.type";
+import NoteByUserId from "../types/noteByUserId";
 
 const API_URL = "/note";
 
@@ -22,6 +23,11 @@ class NoteService {
   eliminarNota = async (id: number): Promise<void> => {
     await api.delete(`${API_URL}/${id}`);
   };
+
+  buscarNotaPorUserId = async (id: number): Promise<NoteByUserId[]> => {
+    const response = await  api.get<NoteByUserId[]>(`${API_URL}/notaPorUsuario/${id}`);
+    return response.data;
+  }
 }
 
 export default new NoteService();
