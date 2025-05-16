@@ -2,7 +2,7 @@ import api from "../axiosInstance";
 import Note from "../types/note.type";
 import NoteByUserId from "../types/noteByUserId";
 
-const API_URL = "/note";
+const API_URL = "/note"; 
 
 class NoteService {
   insertarNota = async (note: Partial<Note>): Promise<Note> => {

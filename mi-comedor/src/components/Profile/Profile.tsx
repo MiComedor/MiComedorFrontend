@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -11,11 +12,12 @@ import { cards } from "../../pages/ProfileCards";
 import "./Profile.css";
 import NoteService from "../../services/note.service";
 import Note from "../../types/note.type";
-import NotasProfile from "./NotasProfileComponent/NotasProfile";
+import NotasProfile from "./Notas/NotasProfile";
 import NoteByUserId from "../../types/noteByUserId";
 
 const Profile: React.FC = () => {
   const [selectedCard, setSelectedCard] = useState(0);
+  const navigate = useNavigate();
 
   const initialNoteState: Note = {
     noteText: "",
@@ -31,14 +33,13 @@ const Profile: React.FC = () => {
   };
 
   const getNotas = () => {
-    
     const userStr = localStorage.getItem("user");
     const user = userStr ? JSON.parse(userStr) : null;
     if (!user) return;
 
     NoteService.buscarNotaPorUserId(user.idUser)
       .then((notas) => {
-        setNotasList(notas); 
+        setNotasList(notas);
       })
       .catch((error) => {
         console.error("❌ Error al obtener notas:", error);
@@ -52,7 +53,6 @@ const Profile: React.FC = () => {
   const saveNote = () => {
     const userStr = localStorage.getItem("user");
     const user = userStr ? JSON.parse(userStr) : null;
-
 
     if (!note.noteText.trim()) {
       console.warn("Nota vacía. Cancelando guardado.");
@@ -80,7 +80,12 @@ const Profile: React.FC = () => {
         {cards.map((card, index) => (
           <Card key={card.id} className="card-button">
             <CardActionArea
-              onClick={() => setSelectedCard(index)}
+              onClick={() => {
+                setSelectedCard(index);
+                if (card.route) {
+                  navigate(card.route);
+                }
+              }}
               data-active={selectedCard === index ? "true" : undefined}
               className="card-action"
             >

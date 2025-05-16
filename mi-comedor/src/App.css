@@ -38,6 +38,7 @@ label {
   margin-right: 20px;
   margin-top: 6px;
   margin-bottom: 6px;
+  cursor: pointer;
 }
 
 .custom-navbar .nav-link:hover {
@@ -70,7 +71,7 @@ label {
   }
 
   .cerrar-sesion-btn {
-    text-align: center  !important;
+    text-align: center !important;
     justify-content: center !important;
     font-size: 0 !important;
     padding: 10px !important;

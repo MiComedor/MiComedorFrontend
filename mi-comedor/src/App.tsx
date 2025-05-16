@@ -44,11 +44,13 @@ const App: React.FC = () => {
                   src="https://i.postimg.cc/4dsLbM1C/logo.jpg"
                   className="navbar-logo"
                   alt="Logo"
+                  onClick={() => navigate("/profile")}
                 />
                 <img
                   src="https://i.postimg.cc/cHR9Zcgf/png-Mesa-de-trabajo-1-4x.png"
                   className="logo-mobile"
                   alt="LogoMobile"
+                  onClick={() => navigate("/profile")}
                 />
               </>
 
@@ -56,7 +58,7 @@ const App: React.FC = () => {
                 className="navbar-title"
                 variant="h4"
                 component={Link}
-                to="/"
+                to="/profile"
                 sx={{
                   color: "white",
                   fontWeight: "bold",

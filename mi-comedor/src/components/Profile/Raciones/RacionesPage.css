@@ -1,0 +1,59 @@
+.form-input {
+  background-color: #AEE0FF;
+  border-radius: 8px;
+  padding: 8px;
+  border: 3px solid black;
+  width: 275px;
+}
+
+.form-input-fecha {
+  background-color: #AEE0FF;
+  border-radius: 8px;
+  padding: 8px;
+  border: 3px solid black;
+}
+
+.titulo-arriba-form {
+  margin-bottom: 5px;
+  font-weight: bold;
+  font-size: 20px;
+  color: #000000;
+}
+
+.form-input .MuiOutlinedInput-root {
+  border-radius: 8px;
+  border: 2px solid black;
+  background-color: #AEE0FF;
+}
+
+.form-input .MuiOutlinedInput-notchedOutline {
+  border: none;
+}
+
+.form-input .Mui-error .MuiOutlinedInput-notchedOutline {
+  border: 2px solid red !important;
+}
+
+.formulario-raciones {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.form-group-raciones {
+  display: flex;
+  flex-direction: column;
+  min-width: 100px;
+}
+
+.table-container-raciones {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+
+.table-container-raciones .MuiPaper-root {
+  width: 1200px;
+  max-width: 1500px;
+}
