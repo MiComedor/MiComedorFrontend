@@ -17,17 +17,11 @@ class NoteService {
   };
 
   actualizarNota = async (note: Note): Promise<Note> => {
-    if (!note.idNote) {
-      throw new Error("El campo 'idNote' es requerido para actualizar la nota.");
-    }
     const response = await api.put<Note>(`${API_URL}/${note.idNote}`, note);
     return response.data;
   };
 
-  eliminarNota = async (id: number | undefined): Promise<void> => {
-    if (typeof id === "undefined") {
-      throw new Error("El campo 'id' es requerido para eliminar la nota.");
-    }
+  eliminarNota = async (id: number): Promise<void> => {
     await api.delete(`${API_URL}/${id}`);
   };
 

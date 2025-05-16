@@ -42,7 +42,7 @@ const Profile: React.FC = () => {
   
   // Estado para manejar el diálogo de edición
   const [openEditDialog, setOpenEditDialog] = useState(false);
-  const [editingNote, setEditingNote] = useState<{ idNote: number; text: string } | null>(null);
+  const [editingNote, setEditingNote] = useState<{ id: number; text: string } | null>(null);
   
   // Estado para manejar notificaciones
   const [snackbar, setSnackbar] = useState({
@@ -148,9 +148,9 @@ const Profile: React.FC = () => {
   };
 
   // Función para abrir el diálogo de edición
-  const handleOpenEditDialog = (idNote: number, text: string) => {
-    console.log("ID de nota a editar:", idNote); // Depurar el ID que se está pasando
-    setEditingNote({ idNote, text });
+  const handleOpenEditDialog = (id: number, text: string) => {
+    console.log("ID de nota a editar:", id); // Depurar el ID que se está pasando
+    setEditingNote({ id, text });
     setOpenEditDialog(true);
   };
 
@@ -168,37 +168,34 @@ const Profile: React.FC = () => {
   };
 
   // Función para guardar los cambios de la nota editada
-  const saveEditedNote = async () => {
-    if (editingNote && editingNote.text.trim() && typeof editingNote.idNote === "number") {
+  const saveEditedNote = () => {
+    if (editingNote && editingNote.text.trim()) {
       const userStr = localStorage.getItem("user");
       const user = userStr ? JSON.parse(userStr) : null;
-  
-      try {
-        if (!user) {
-          showSnackbar("Sesión expirada. Por favor, inicia sesión de nuevo.", "error");
+
+      console.log(`Intentando actualizar nota con ID: ${editingNote.id}`);
+      console.log("Datos a enviar:", {
+        idNote: editingNote.id,
+        noteText: editingNote.text,
+        users: { idUser: user.idUser }
+      });
+
+      NoteService.actualizarNota({
+        idNote: editingNote.id,
+        noteText: editingNote.text,
+        users: { idUser: user.idUser },
+      })
+        .then(() => {
+          console.log(`✅ Nota con ID ${editingNote.id} actualizada correctamente`);
+          getNotas(); // Actualizar la lista de notas
           handleCloseEditDialog();
-          return;
-        }
-        await NoteService.actualizarNota({
-          idNote: editingNote.idNote,
-          noteText: editingNote.text,
-          users: { idUser: user.idUser },
-        });
-        showSnackbar("Nota actualizada correctamente", "success");
-        handleCloseEditDialog();
-        getNotas(); // Asegura que la lista se refresca después de cerrar el diálogo
-      } catch (error) {
-        console.error(`❌ Error al actualizar nota con ID ${editingNote?.idNote}:`, error);
-        if ((error as any)?.response?.status === 401) {
-          showSnackbar("No autorizado. Por favor, inicia sesión de nuevo.", "error");
-        } else {
+          showSnackbar("Nota actualizada correctamente", "success");
+        })
+        .catch((error) => {
+          console.error(`❌ Error al actualizar nota con ID ${editingNote.id}:`, error);
+          handleCloseEditDialog();
           showSnackbar("Error al actualizar nota", "error");
-        }
-        handleCloseEditDialog();
-      }
-    } else {
-      showSnackbar("Error: No se pudo identificar la nota a editar.", "error");
-      handleCloseEditDialog();
+        });
     }
   };
 
@@ -273,7 +270,7 @@ const Profile: React.FC = () => {
                   <IconButton 
                     color="primary"
                     onClick={() => {
-                      handleOpenEditDialog(nota.idNote, nota.noteTextByUser);
+                      handleOpenEditDialog(nota.idNoteByUser, nota.noteTextByUser);
                     }}
                   >
                     <EditIcon />
@@ -281,7 +278,7 @@ const Profile: React.FC = () => {
                   <IconButton 
                     color="error"
                     onClick={() => {
-                      handleOpenDeleteDialog(nota.idNote);
+                      handleOpenDeleteDialog(nota.idNoteByUser);
                     }}
                   >
                     <DeleteIcon />
