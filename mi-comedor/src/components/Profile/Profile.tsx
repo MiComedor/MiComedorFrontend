@@ -13,7 +13,6 @@ import "./Profile.css";
 import NoteService from "../../services/note.service";
 import Note from "../../types/note.type";
 import NotasProfile from "./Notas/NotasProfile";
-import NoteByUserId from "../../types/noteByUserId";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
@@ -23,6 +22,12 @@ import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
+
+interface NotaTransformada {
+  idNote: number;
+  noteText: string;
+  userId: number;
+}
 
 const Profile: React.FC = () => {
   const [selectedCard, setSelectedCard] = useState(0);
@@ -34,17 +39,11 @@ const Profile: React.FC = () => {
   };
 
   const [note, setNote] = useState<Note>(initialNoteState);
-  const [notasList, setNotasList] = useState<NoteByUserId[]>([]);
-  
-  // Estado para manejar el diálogo de confirmación de eliminación
+  const [notasList, setNotasList] = useState<NotaTransformada[]>([]);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [deleteNoteId, setDeleteNoteId] = useState<number | null>(null);
-  
-  // Estado para manejar el diálogo de edición
   const [openEditDialog, setOpenEditDialog] = useState(false);
-  const [editingNote, setEditingNote] = useState<{ id: number; text: string } | null>(null);
-  
-  // Estado para manejar notificaciones
+  const [editingNote, setEditingNote] = useState<{ idNote: number; text: string } | null>(null);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -63,8 +62,13 @@ const Profile: React.FC = () => {
 
     NoteService.buscarNotaPorUserId(user.idUser)
       .then((notas) => {
-        console.log("Notas recibidas:", notas); // Depurar lo que devuelve el backend
-        setNotasList(notas);
+        const transformadas = notas.map((n) => ({
+          idNote: n.idNote, // CAMBIA ESTO
+          noteText: n.noteTextByUser, // CAMBIA ESTO
+          userId: n.userId ?? 0, // si es necesario
+        }));
+
+        setNotasList(transformadas);
       })
       .catch((error) => {
         console.error("❌ Error al obtener notas:", error);
@@ -89,8 +93,7 @@ const Profile: React.FC = () => {
       noteText: note.noteText,
       users: { idUser: user.idUser },
     })
-      .then((response) => {
-        console.log("✅ Nota guardada:", response);
+      .then(() => {
         setNote({ noteText: "" });
         getNotas();
         showSnackbar("Nota guardada correctamente", "success");
@@ -101,41 +104,29 @@ const Profile: React.FC = () => {
       });
   };
 
-  // Función para mostrar notificaciones
   const showSnackbar = (message: string, severity: "success" | "error" | "info" | "warning") => {
-    setSnackbar({
-      open: true,
-      message,
-      severity
-    });
+    setSnackbar({ open: true, message, severity });
   };
 
   const handleCloseSnackbar = () => {
-    setSnackbar({...snackbar, open: false});
+    setSnackbar({ ...snackbar, open: false });
   };
 
-  // Función para abrir el diálogo de confirmación de eliminación
   const handleOpenDeleteDialog = (id: number) => {
-    console.log("ID de nota a eliminar:", id); // Depurar el ID que se está pasando
     setDeleteNoteId(id);
     setOpenDeleteDialog(true);
   };
 
-  // Función para cerrar el diálogo de confirmación de eliminación
   const handleCloseDeleteDialog = () => {
     setOpenDeleteDialog(false);
     setDeleteNoteId(null);
   };
 
-  // Función para confirmar la eliminación de la nota
   const confirmDeleteNote = () => {
     if (deleteNoteId !== null) {
-      console.log(`Intentando eliminar nota con ID: ${deleteNoteId}`);
-      
       NoteService.eliminarNota(deleteNoteId)
         .then(() => {
-          console.log(`✅ Nota con ID ${deleteNoteId} eliminada correctamente`);
-          getNotas(); // Actualizar la lista de notas
+          getNotas();
           handleCloseDeleteDialog();
           showSnackbar("Nota eliminada correctamente", "success");
         })
@@ -147,61 +138,55 @@ const Profile: React.FC = () => {
     }
   };
 
-  // Función para abrir el diálogo de edición
-  const handleOpenEditDialog = (id: number, text: string) => {
-    console.log("ID de nota a editar:", id); // Depurar el ID que se está pasando
-    setEditingNote({ id, text });
+  const handleOpenEditDialog = (idNote: number, text: string) => {
+    setEditingNote({ idNote, text });
     setOpenEditDialog(true);
   };
 
-  // Función para cerrar el diálogo de edición
   const handleCloseEditDialog = () => {
     setOpenEditDialog(false);
     setEditingNote(null);
   };
 
-  // Función para manejar el cambio en el campo de texto de edición
   const handleEditInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (editingNote) {
       setEditingNote({ ...editingNote, text: event.target.value });
     }
   };
 
-  // Función para guardar los cambios de la nota editada
-  const saveEditedNote = () => {
-    if (editingNote && editingNote.text.trim()) {
+  const saveEditedNote = async () => {
+    if (editingNote && editingNote.text.trim() && typeof editingNote.idNote === "number") {
       const userStr = localStorage.getItem("user");
       const user = userStr ? JSON.parse(userStr) : null;
 
-      console.log(`Intentando actualizar nota con ID: ${editingNote.id}`);
-      console.log("Datos a enviar:", {
-        idNote: editingNote.id,
-        noteText: editingNote.text,
-        users: { idUser: user.idUser }
-      });
-
-      NoteService.actualizarNota({
-        idNote: editingNote.id,
-        noteText: editingNote.text,
-        users: { idUser: user.idUser },
-      })
-        .then(() => {
-          console.log(`✅ Nota con ID ${editingNote.id} actualizada correctamente`);
-          getNotas(); // Actualizar la lista de notas
+      try {
+        if (!user) {
+          showSnackbar("Sesión expirada. Por favor, inicia sesión de nuevo.", "error");
           handleCloseEditDialog();
-          showSnackbar("Nota actualizada correctamente", "success");
-        })
-        .catch((error) => {
-          console.error(`❌ Error al actualizar nota con ID ${editingNote.id}:`, error);
-          handleCloseEditDialog();
-          showSnackbar("Error al actualizar nota", "error");
+          return;
+        }
+        await NoteService.actualizarNota({
+          idNote: editingNote.idNote,
+          noteText: editingNote.text,
+          users: { idUser: user.idUser },
         });
+        showSnackbar("Nota actualizada correctamente", "success");
+        handleCloseEditDialog();
+        setEditingNote(null);
+        getNotas();
+      } catch (error) {
+        console.error(`❌ Error al actualizar nota con ID ${editingNote?.idNote}:`, error);
+        showSnackbar("Error al actualizar nota", "error");
+        handleCloseEditDialog();
+      }
+    } else {
+      showSnackbar("Error: No se pudo identificar la nota a editar.", "error");
+      handleCloseEditDialog();
     }
   };
 
   return (
     <>
-      {/* Tarjetas principales */}
       <Box className="profile-container">
         {cards.map((card, index) => (
           <Card key={card.id} className="card-button">
@@ -215,22 +200,15 @@ const Profile: React.FC = () => {
               data-active={selectedCard === index ? "true" : undefined}
               className="card-action"
             >
-              <img
-                src={card.image}
-                alt={card.description}
-                className="card-image"
-              />
+              <img src={card.image} alt={card.description} className="card-image" />
               <CardContent>
-                <Typography className="card-title-modules">
-                  {card.description}
-                </Typography>
+                <Typography className="card-title-modules">{card.description}</Typography>
               </CardContent>
             </CardActionArea>
           </Card>
         ))}
       </Box>
 
-      {/* Formulario para escribir nota */}
       <Box mt={4}>
         <NotasProfile
           noteText={note.noteText}
@@ -239,7 +217,6 @@ const Profile: React.FC = () => {
         />
       </Box>
 
-      {/* Lista de notas */}
       <Box mt={2} className="notas-list-container">
         <Typography variant="h6" gutterBottom fontWeight="bold">
           Mis anotaciones
@@ -264,22 +241,19 @@ const Profile: React.FC = () => {
                   fontWeight="bold"
                   fontStyle="italic"
                 >
-                  {nota.noteTextByUser}
+                  {nota.noteText}
                 </Typography>
+
                 <Box>
-                  <IconButton 
+                  <IconButton
                     color="primary"
-                    onClick={() => {
-                      handleOpenEditDialog(nota.idNoteByUser, nota.noteTextByUser);
-                    }}
+                    onClick={() => handleOpenEditDialog(nota.idNote, nota.noteText)}
                   >
                     <EditIcon />
                   </IconButton>
-                  <IconButton 
+                  <IconButton
                     color="error"
-                    onClick={() => {
-                      handleOpenDeleteDialog(nota.idNoteByUser);
-                    }}
+                    onClick={() => handleOpenDeleteDialog(nota.idNote)}
                   >
                     <DeleteIcon />
                   </IconButton>
@@ -290,39 +264,27 @@ const Profile: React.FC = () => {
         )}
       </Box>
 
-      {/* Diálogo de confirmación para eliminar nota */}
-      <Dialog
-        open={openDeleteDialog}
-        onClose={handleCloseDeleteDialog}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">
-          {"¿Estás seguro de eliminar esta nota?"}
-        </DialogTitle>
+      <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
+        <DialogTitle>¿Estás seguro de eliminar esta nota?</DialogTitle>
         <DialogContent>
-          <DialogContentText id="alert-dialog-description">
+          <DialogContentText>
             Esta acción no se puede deshacer. Una vez eliminada, no podrás recuperar la nota.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDeleteDialog} color="primary">
-            Cancelar
-          </Button>
+          <Button onClick={handleCloseDeleteDialog}>Cancelar</Button>
           <Button onClick={confirmDeleteNote} color="error" autoFocus>
             Eliminar
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Diálogo para editar nota */}
       <Dialog open={openEditDialog} onClose={handleCloseEditDialog} fullWidth maxWidth="sm">
         <DialogTitle>Editar nota</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
             margin="dense"
-            id="note-edit"
             label="Texto de la nota"
             type="text"
             fullWidth
@@ -334,27 +296,20 @@ const Profile: React.FC = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseEditDialog} color="primary">
-            Cancelar
-          </Button>
-          <Button onClick={saveEditedNote} color="primary" variant="contained">
+          <Button onClick={handleCloseEditDialog}>Cancelar</Button>
+          <Button onClick={saveEditedNote} variant="contained" color="primary">
             Guardar
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Snackbar para notificaciones */}
-      <Snackbar 
-        open={snackbar.open} 
-        autoHideDuration={6000} 
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
         onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
-        <Alert 
-          onClose={handleCloseSnackbar} 
-          severity={snackbar.severity}
-          sx={{ width: '100%' }}
-        >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: "100%" }}>
           {snackbar.message}
         </Alert>
       </Snackbar>

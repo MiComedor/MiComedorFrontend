@@ -6,7 +6,7 @@ const getToken = () => {
   if (!userStr) return null;
 
   const user = JSON.parse(userStr);
-  return user?.accessToken || null;
+  return user?.token || user?.accessToken || null;
 };
 
 const api = axios.create({

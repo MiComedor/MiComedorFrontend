@@ -17,7 +17,7 @@ class NoteService {
   };
 
   actualizarNota = async (note: Note): Promise<Note> => {
-    const response = await api.put<Note>(`${API_URL}/${note.idNote}`, note);
+    const response = await api.put(`${API_URL}/${note.idNote}`, note);
     return response.data;
   };
 

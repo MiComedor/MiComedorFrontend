@@ -1,4 +1,5 @@
 export default interface NoteByUserId {
-  noteTextByUser:string;
-  idNoteByUser: number;
+  idNote: number;
+  noteTextByUser: string;
+  userId?: number;
 }
