@@ -158,7 +158,7 @@ const RegistroRaciones: React.FC = () => {
                                   e.key !== "Backspace" &&
                                   e.key !== "Tab"
                                 ) {
-                                  e.preventDefault(); // bloquea teclas no numéricas
+                                  e.preventDefault(); 
                                 }
                               },
                             }}

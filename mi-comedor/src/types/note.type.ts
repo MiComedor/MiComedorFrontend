@@ -1,5 +1,5 @@
 export default interface Note {
-  idNote?: number; // opcional porque no lo necesitas al crear
+  idNote?: number; 
   noteText: string;
   users?: {
     idUser: number;

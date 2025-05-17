@@ -1,6 +1,6 @@
 export default interface Ration {
   idRation?: number;
-  date: string; // formato YYYY-MM-DD
+  date: string; 
   price: number;
   users?: {
     idUser: number;

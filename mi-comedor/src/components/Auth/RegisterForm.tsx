@@ -58,7 +58,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
               <Stack spacing={1} className="register-form-stack">
                 <div className="form-group">
                   <label>Usuario</label>
-                  <Field name="username" type="text" className="form-input" />
+                  <Field name="username" type="text" className="form-input-login" />
                   <ErrorMessage
                     name="username"
                     component="div"
@@ -68,7 +68,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
 
                 <div className="form-group">
                   <label>Nombre</label>
-                  <Field name="name" type="text" className="form-input" />
+                  <Field name="name" type="text" className="form-input-login" />
                   <ErrorMessage
                     name="name"
                     component="div"
@@ -78,7 +78,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
 
                 <div className="form-group">
                   <label>Correo Electrónico</label>
-                  <Field name="mail" type="email" className="form-input" />
+                  <Field name="mail" type="email" className="form-input-login" />
                   <ErrorMessage
                     name="mail"
                     component="div"
@@ -91,7 +91,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
                   <Field
                     name="password"
                     type="password"
-                    className="form-input"
+                    className="form-input-login"
                   />
                   <ErrorMessage
                     name="password"

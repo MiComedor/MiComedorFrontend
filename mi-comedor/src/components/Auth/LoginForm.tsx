@@ -94,7 +94,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
                     id="username"
                     name="username"
                     type="text"
-                    className="form-input"
+                    className="form-input-login"
                   />
                   <ErrorMessage
                     name="username"
@@ -109,7 +109,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
                     id="password"
                     name="password"
                     type="password"
-                    className="form-input"
+                    className="form-input-login"
                   />
                   <ErrorMessage
                     name="password"
