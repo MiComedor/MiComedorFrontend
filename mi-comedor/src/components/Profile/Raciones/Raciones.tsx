@@ -57,38 +57,45 @@ const validationSchema = Yup.object({
 const RegistroRaciones: React.FC = () => {
   const [raciones, setRaciones] = useState<RationByUserId[]>([]);
 
-  const onSubmit = (
-    values: typeof initialRationValues,
-    actions: FormikHelpers<typeof initialRationValues>
-  ) => {
-    const parsedValues: RationByUserId = {
-      ...values,
-      price: Number(values.price),
-      idRation: Date.now(),
-      dniBenefeciary: Number(values.dniBenefeciary),
-    };
-
-    setRaciones((prev) => [...prev, parsedValues]);
-    actions.resetForm();
-    actions.setSubmitting(false);
-  };
-
   const getRaciones = async () => {
     const userStr = localStorage.getItem("user");
     const user = userStr ? JSON.parse(userStr) : null;
     if (!user) return;
 
-    RationService.buscarRacionPorUserId(user.idUser).then((raciones) => {
-      const transformadas = raciones.map((r) => ({
-        idRation: r.idRation,
-        date: r.date,
-        nameRationType: r.nameRationType,
-        dniBenefeciary: r.dniBenefeciary,
-        price: r.price,
-      }));
+    try {
+      const raciones = await RationService.buscarRacionPorUserId(user.idUser);
+      setRaciones(raciones);
+    } catch (error) {
+      console.error("❌ Error al obtener raciones:", error);
+    }
+  };
 
-      setRaciones(transformadas);
-    });
+  const saveRaciones = async (
+    values: typeof initialRationValues,
+    actions: FormikHelpers<typeof initialRationValues>
+  ) => {
+    const userStr = localStorage.getItem("user");
+    const user = userStr ? JSON.parse(userStr) : null;
+    if (!user) return;
+
+    try {
+      await RationService.insertarRacion({
+        date: values.date,
+        price: Number(values.price),
+        users: { idUser: user.idUser },
+        beneficiary: {
+          idBeneficiary: Number(values.dniBenefeciary), // ← Este debe ser el ID real del beneficiario
+        },
+        rationType: {
+          idRationType: 1, // ← Aquí debes obtener el ID del tipo de ración, no el nombre
+        },
+      });
+
+      actions.resetForm();
+      getRaciones();
+    } catch (error) {
+      console.error("❌ Error al guardar ración:", error);
+    }
   };
 
   useEffect(() => {
@@ -104,7 +111,7 @@ const RegistroRaciones: React.FC = () => {
             <Formik
               initialValues={initialRationValues}
               validationSchema={validationSchema}
-              onSubmit={onSubmit}
+              onSubmit={saveRaciones}
             >
               {({ errors, touched }) => (
                 <Form>
