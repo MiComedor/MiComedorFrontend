@@ -1,4 +1,5 @@
-import React, {  useState } from "react";import {
+import React, { useState, useEffect } from "react";
+import {
   Box,
   Button,
   Table,
@@ -22,52 +23,77 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import dayjs from "dayjs";
 import TextField from "@mui/material/TextField";
-
 import "./RacionesPage.css";
 import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
+import RationByUserId from "../../../types/rationByUserId";
+import RationService from "../../../services/ration.service";
 
-const initialValues = {
-  fecha: "",
-  tipoRacion: "",
-  dni: "",
-  precio: "",
+const initialRationValues = {
+  date: "",
+  nameRationType: "",
+  dniBenefeciary: "",
+  price: "",
 };
 
 const validationSchema = Yup.object({
-  fecha: Yup.string()
+  date: Yup.string()
     .required("Campo obligatorio")
     .test("is-valid-date", "Fecha inválida", (value) => !!value),
 
-  tipoRacion: Yup.string()
+  nameRationType: Yup.string()
     .matches(/^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/, "Solo letras")
     .required("Campo obligatorio"),
 
-  dni: Yup.string()
+  dniBenefeciary: Yup.string()
     .matches(/^[0-9]{8}$/, "DNI inválido: solo 8 dígitos")
     .required("Campo obligatorio"),
 
-  precio: Yup.number()
+  price: Yup.number()
     .typeError("Debe ser un número")
     .positive("Debe ser un número positivo")
     .required("Campo obligatorio"),
 });
 
 const RegistroRaciones: React.FC = () => {
-  const [raciones, setRaciones] = useState<(typeof initialValues)[]>([]);
+  const [raciones, setRaciones] = useState<RationByUserId[]>([]);
 
   const onSubmit = (
-    values: typeof initialValues,
-    actions: FormikHelpers<typeof initialValues>
+    values: typeof initialRationValues,
+    actions: FormikHelpers<typeof initialRationValues>
   ) => {
-    setRaciones((prev) => [...prev, values]);
+    const parsedValues: RationByUserId = {
+      ...values,
+      price: Number(values.price),
+      idRation: Date.now(),
+      dniBenefeciary: Number(values.dniBenefeciary),
+    };
+
+    setRaciones((prev) => [...prev, parsedValues]);
     actions.resetForm();
     actions.setSubmitting(false);
   };
 
-  const handleDelete = (index: number) => {
-    const nuevasRaciones = raciones.filter((_, i) => i !== index);
-    setRaciones(nuevasRaciones);
+  const getRaciones = async () => {
+    const userStr = localStorage.getItem("user");
+    const user = userStr ? JSON.parse(userStr) : null;
+    if (!user) return;
+
+    RationService.buscarRacionPorUserId(user.idUser).then((raciones) => {
+      const transformadas = raciones.map((r) => ({
+        idRation: r.idRation,
+        date: r.date,
+        nameRationType: r.nameRationType,
+        dniBenefeciary: r.dniBenefeciary,
+        price: r.price,
+      }));
+
+      setRaciones(transformadas);
+    });
   };
+
+  useEffect(() => {
+    getRaciones();
+  }, []);
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -76,7 +102,7 @@ const RegistroRaciones: React.FC = () => {
           {/* Formulario */}
           <div className="formulario-raciones">
             <Formik
-              initialValues={initialValues}
+              initialValues={initialRationValues}
               validationSchema={validationSchema}
               onSubmit={onSubmit}
             >
@@ -90,14 +116,14 @@ const RegistroRaciones: React.FC = () => {
                   >
                     <div className="form-group-raciones">
                       <label className="titulo-arriba-form">Fecha</label>
-                      <Field name="fecha" className="form-input-fecha">
+                      <Field name="date" className="form-input-fecha">
                         {({ field, form, meta }: FieldProps) => (
                           <MobileDatePicker
                             format="DD/MM/YYYY"
                             value={field.value ? dayjs(field.value) : null}
                             onChange={(date) =>
                               form.setFieldValue(
-                                "fecha",
+                                "date",
                                 date?.format("YYYY-MM-DD")
                               )
                             }
@@ -123,9 +149,12 @@ const RegistroRaciones: React.FC = () => {
                             {...field}
                             className="form-input"
                             error={
-                              touched.tipoRacion && Boolean(errors.tipoRacion)
+                              touched.nameRationType &&
+                              Boolean(errors.nameRationType)
                             }
-                            helperText={touched.tipoRacion && errors.tipoRacion}
+                            helperText={
+                              touched.nameRationType && errors.nameRationType
+                            }
                             inputProps={{
                               onKeyDown: (e) => {
                                 if (/[0-9]/.test(e.key)) {
@@ -144,7 +173,7 @@ const RegistroRaciones: React.FC = () => {
                         {({ field, meta }: FieldProps) => (
                           <TextField
                             {...field}
-                            id="dni"
+                            id="dniBenefeciary"
                             className="form-input"
                             error={meta.touched && Boolean(meta.error)}
                             helperText={meta.touched && meta.error}
@@ -158,7 +187,7 @@ const RegistroRaciones: React.FC = () => {
                                   e.key !== "Backspace" &&
                                   e.key !== "Tab"
                                 ) {
-                                  e.preventDefault(); 
+                                  e.preventDefault();
                                 }
                               },
                             }}
@@ -176,8 +205,8 @@ const RegistroRaciones: React.FC = () => {
                           <TextField
                             {...field}
                             className="form-input"
-                            error={touched.precio && Boolean(errors.precio)}
-                            helperText={touched.precio && errors.precio}
+                            error={touched.price && Boolean(errors.price)}
+                            helperText={touched.price && errors.price}
                             InputProps={{
                               startAdornment: (
                                 <InputAdornment position="start">
@@ -256,20 +285,19 @@ const RegistroRaciones: React.FC = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {raciones.map((racion, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{racion.fecha}</TableCell>
-                      <TableCell>{racion.tipoRacion}</TableCell>
-                      <TableCell>{racion.dni}</TableCell>
-                      <TableCell>S/ {racion.precio}</TableCell>
+                  {raciones.map((racion) => (
+                    <TableRow key={racion.idRation}>
+                      <TableCell>
+                        {dayjs(racion.date).format("DD/MM/YYYY")}
+                      </TableCell>
+                      <TableCell>{racion.nameRationType}</TableCell>
+                      <TableCell>{racion.dniBenefeciary}</TableCell>
+                      <TableCell>S/ {racion.price.toFixed(2)}</TableCell>
                       <TableCell>
                         <IconButton color="primary">
                           <EditIcon />
                         </IconButton>
-                        <IconButton
-                          color="error"
-                          onClick={() => handleDelete(index)}
-                        >
+                        <IconButton color="error">
                           <DeleteIcon />
                         </IconButton>
                       </TableCell>

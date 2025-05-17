@@ -43,11 +43,14 @@ const Profile: React.FC = () => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [deleteNoteId, setDeleteNoteId] = useState<number | null>(null);
   const [openEditDialog, setOpenEditDialog] = useState(false);
-  const [editingNote, setEditingNote] = useState<{ idNote: number; text: string } | null>(null);
+  const [editingNote, setEditingNote] = useState<{
+    idNote: number;
+    text: string;
+  } | null>(null);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
-    severity: "success" as "success" | "error" | "info" | "warning"
+    severity: "success" as "success" | "error" | "info" | "warning",
   });
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,7 +107,10 @@ const Profile: React.FC = () => {
       });
   };
 
-  const showSnackbar = (message: string, severity: "success" | "error" | "info" | "warning") => {
+  const showSnackbar = (
+    message: string,
+    severity: "success" | "error" | "info" | "warning"
+  ) => {
     setSnackbar({ open: true, message, severity });
   };
 
@@ -131,7 +137,10 @@ const Profile: React.FC = () => {
           showSnackbar("Nota eliminada correctamente", "success");
         })
         .catch((error) => {
-          console.error(`❌ Error al eliminar nota con ID ${deleteNoteId}:`, error);
+          console.error(
+            `❌ Error al eliminar nota con ID ${deleteNoteId}:`,
+            error
+          );
           handleCloseDeleteDialog();
           showSnackbar("Error al eliminar nota", "error");
         });
@@ -148,20 +157,29 @@ const Profile: React.FC = () => {
     setEditingNote(null);
   };
 
-  const handleEditInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleEditInputChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     if (editingNote) {
       setEditingNote({ ...editingNote, text: event.target.value });
     }
   };
 
   const saveEditedNote = async () => {
-    if (editingNote && editingNote.text.trim() && typeof editingNote.idNote === "number") {
+    if (
+      editingNote &&
+      editingNote.text.trim() &&
+      typeof editingNote.idNote === "number"
+    ) {
       const userStr = localStorage.getItem("user");
       const user = userStr ? JSON.parse(userStr) : null;
 
       try {
         if (!user) {
-          showSnackbar("Sesión expirada. Por favor, inicia sesión de nuevo.", "error");
+          showSnackbar(
+            "Sesión expirada. Por favor, inicia sesión de nuevo.",
+            "error"
+          );
           handleCloseEditDialog();
           return;
         }
@@ -175,7 +193,10 @@ const Profile: React.FC = () => {
         setEditingNote(null);
         getNotas();
       } catch (error) {
-        console.error(`❌ Error al actualizar nota con ID ${editingNote?.idNote}:`, error);
+        console.error(
+          `❌ Error al actualizar nota con ID ${editingNote?.idNote}:`,
+          error
+        );
         showSnackbar("Error al actualizar nota", "error");
         handleCloseEditDialog();
       }
@@ -200,9 +221,15 @@ const Profile: React.FC = () => {
               data-active={selectedCard === index ? "true" : undefined}
               className="card-action"
             >
-              <img src={card.image} alt={card.description} className="card-image" />
+              <img
+                src={card.image}
+                alt={card.description}
+                className="card-image"
+              />
               <CardContent>
-                <Typography className="card-title-modules">{card.description}</Typography>
+                <Typography className="card-title-modules">
+                  {card.description}
+                </Typography>
               </CardContent>
             </CardActionArea>
           </Card>
@@ -228,7 +255,11 @@ const Profile: React.FC = () => {
         </Typography>
 
         {notasList.length === 0 ? (
-          <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ textAlign: "center", py: 2 }}
+          >
             No tienes notas guardadas. ¡Crea una nueva arriba!
           </Typography>
         ) : (
@@ -252,7 +283,9 @@ const Profile: React.FC = () => {
                 <Box>
                   <IconButton
                     color="primary"
-                    onClick={() => handleOpenEditDialog(nota.idNote, nota.noteText)}
+                    onClick={() =>
+                      handleOpenEditDialog(nota.idNote, nota.noteText)
+                    }
                   >
                     <EditIcon />
                   </IconButton>
@@ -273,7 +306,8 @@ const Profile: React.FC = () => {
         <DialogTitle>¿Estás seguro de eliminar esta nota?</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Esta acción no se puede deshacer. Una vez eliminada, no podrás recuperar la nota.
+            Esta acción no se puede deshacer. Una vez eliminada, no podrás
+            recuperar la nota.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -284,34 +318,43 @@ const Profile: React.FC = () => {
         </DialogActions>
       </Dialog>
 
-      <Dialog open={openEditDialog} onClose={handleCloseEditDialog} fullWidth maxWidth="sm">
+      <Dialog
+        open={openEditDialog}
+        onClose={handleCloseEditDialog}
+        fullWidth
+        maxWidth="sm"
+      >
         <DialogTitle>Editar nota</DialogTitle>
         <DialogContent>
           <Box display="flex" flexDirection="column" gap={2}>
-        <TextField
-          autoFocus
-          margin="dense"
-          label="Texto de la nota"
-          type="text"
-          fullWidth
-          value={editingNote?.text || ""}
-          onChange={handleEditInputChange}
-          variant="outlined"
-          multiline
-          rows={4}
-        />
-        <Box display="flex" justifyContent="flex-end" gap={1}>
-          <Button onClick={handleCloseEditDialog} color="error">
-            Cancelar
-          </Button>
-          <Button
-            onClick={saveEditedNote}
-            variant="contained"
-            sx={{ backgroundColor: "#F57C00", color: "#fff", "&:hover": { backgroundColor: "#ef6c00" } }}
-          >
-            Guardar
-          </Button>
-        </Box>
+            <TextField
+              autoFocus
+              margin="dense"
+              label="Texto de la nota"
+              type="text"
+              fullWidth
+              value={editingNote?.text || ""}
+              onChange={handleEditInputChange}
+              variant="outlined"
+              multiline
+              rows={4}
+            />
+            <Box display="flex" justifyContent="flex-end" gap={1}>
+              <Button onClick={handleCloseEditDialog} color="error">
+                Cancelar
+              </Button>
+              <Button
+                onClick={saveEditedNote}
+                variant="contained"
+                sx={{
+                  backgroundColor: "#F57C00",
+                  color: "#fff",
+                  "&:hover": { backgroundColor: "#ef6c00" },
+                }}
+              >
+                Guardar
+              </Button>
+            </Box>
           </Box>
         </DialogContent>
       </Dialog>
@@ -322,7 +365,11 @@ const Profile: React.FC = () => {
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
-        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: "100%" }}>
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
           {snackbar.message}
         </Alert>
       </Snackbar>
