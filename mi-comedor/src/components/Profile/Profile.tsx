@@ -218,7 +218,12 @@ const Profile: React.FC = () => {
       </Box>
 
       <Box mt={2} className="notas-list-container">
-        <Typography variant="h6" gutterBottom fontWeight="bold">
+        <Typography
+          variant="h6"
+          gutterBottom
+          fontWeight="bold"
+          sx={{ paddingLeft: "20px" }}
+        >
           Mis anotaciones
         </Typography>
 
