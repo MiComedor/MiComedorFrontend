@@ -282,25 +282,33 @@ const Profile: React.FC = () => {
       <Dialog open={openEditDialog} onClose={handleCloseEditDialog} fullWidth maxWidth="sm">
         <DialogTitle>Editar nota</DialogTitle>
         <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Texto de la nota"
-            type="text"
-            fullWidth
-            value={editingNote?.text || ""}
-            onChange={handleEditInputChange}
-            variant="outlined"
-            multiline
-            rows={4}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseEditDialog}>Cancelar</Button>
-          <Button onClick={saveEditedNote} variant="contained" color="primary">
+          <Box display="flex" flexDirection="column" gap={2}>
+        <TextField
+          autoFocus
+          margin="dense"
+          label="Texto de la nota"
+          type="text"
+          fullWidth
+          value={editingNote?.text || ""}
+          onChange={handleEditInputChange}
+          variant="outlined"
+          multiline
+          rows={4}
+        />
+        <Box display="flex" justifyContent="flex-end" gap={1}>
+          <Button onClick={handleCloseEditDialog} color="error">
+            Cancelar
+          </Button>
+          <Button
+            onClick={saveEditedNote}
+            variant="contained"
+            sx={{ backgroundColor: "#F57C00", color: "#fff", "&:hover": { backgroundColor: "#ef6c00" } }}
+          >
             Guardar
           </Button>
-        </DialogActions>
+        </Box>
+          </Box>
+        </DialogContent>
       </Dialog>
 
       <Snackbar
