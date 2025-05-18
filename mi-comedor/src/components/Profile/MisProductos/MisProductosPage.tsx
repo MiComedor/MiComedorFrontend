@@ -1,4 +1,5 @@
-import React, {  useState } from "react";import {
+import React, { useState, useEffect } from "react";
+import {
   Box,
   Button,
   Table,
@@ -10,7 +11,6 @@ import React, {  useState } from "react";import {
   Paper,
   Stack,
   IconButton,
-  InputAdornment,
   MenuItem,
 } from "@mui/material";
 import { Formik, Form, Field, FieldProps, FormikHelpers } from "formik";
@@ -21,30 +21,27 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-
 import TextField from "@mui/material/TextField";
 import "./MisProductosPage.css";
 
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { es } from "date-fns/locale";
+// Servicios y tipos
+import UnitOfMeasurementService from "../../../services/unitOfMeasurement.service";
+import { unitOfMeasurement } from "../../../types/unitOfMeasurement";
 
 const initialValues = {
   fecha: "",
-  tipoRacion: "",
+  tipoProducto: "",
   dni: "",
   precio: "",
+  unitOfMeasurement_id: "",
 };
-const unidadesDeMedida = [
-  { id: 1, name: "Kilogramos", abbreviation: "kg" },
-  { id: 2, name: "Litros", abbreviation: "L" },
-  { id: 3, name: "Unidad", abbreviation: "u" },
-];
+
 const validationSchema = Yup.object({
   fecha: Yup.string()
     .required("Campo obligatorio")
     .test("is-valid-date", "Fecha inválida", (value) => !!value),
 
-  tipoRacion: Yup.string()
+  tipoProducto: Yup.string()
     .matches(/^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/, "Solo letras")
     .required("Campo obligatorio"),
 
@@ -56,30 +53,40 @@ const validationSchema = Yup.object({
     .typeError("Debe ser un número")
     .positive("Debe ser un número positivo")
     .required("Campo obligatorio"),
+
+  unitOfMeasurement_id: Yup.string().required("Campo obligatorio"),
 });
 
 const MisProductosPage: React.FC = () => {
-  const [raciones, setRaciones] = useState<(typeof initialValues)[]>([]);
+  const [productos, setProductos] = useState<(typeof initialValues)[]>([]);
+  const [unidades, setUnidades] = useState<unitOfMeasurement[]>([]);
+
+  useEffect(() => {
+    UnitOfMeasurementService.listar()
+      .then(setUnidades)
+      .catch((error) =>
+        console.error("Error al cargar unidades de medida:", error)
+      );
+  }, []);
 
   const onSubmit = (
     values: typeof initialValues,
     actions: FormikHelpers<typeof initialValues>
   ) => {
-    setRaciones((prev) => [...prev, values]);
+    setProductos((prev) => [...prev, values]);
     actions.resetForm();
     actions.setSubmitting(false);
   };
 
   const handleDelete = (index: number) => {
-    const nuevasRaciones = raciones.filter((_, i) => i !== index);
-    setRaciones(nuevasRaciones);
+    const nuevasProductos = productos.filter((_, i) => i !== index);
+    setProductos(nuevasProductos);
   };
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box sx={{ padding: 4 }}>
         <Stack spacing={5}>
-          {/* Formulario */}
           <div className="formulario-productos">
             <Formik
               initialValues={initialValues}
@@ -95,90 +102,50 @@ const MisProductosPage: React.FC = () => {
                     alignItems="flex-end"
                   >
                     <div className="form-group-productos">
-                      <label className="titulo-arriba-form">
-                      Descripción
+                      <label htmlFor="unitOfMeasurement_id" className="titulo-arriba-form">
+                        Unidad de medida
                       </label>
-                      <Field name="descripcion">
-                      {({ field }: FieldProps) => (
-                        <TextField
-                        {...field}
-                        className="form-input"
-                        error={
-                          touched.descripcion && Boolean(errors.descripcion)
-                        }
-                        helperText={touched.descripcion && errors.descripcion}
-                        inputProps={{
-                          onKeyDown: (e) => {
-                          if (/[0-9]/.test(e.key)) {
-                            e.preventDefault();
-                          }
-                          },
-                        }}
-                        />
-                      )}
+                      <Field name="unitOfMeasurement_id">
+                        {({ field, meta }: FieldProps) => (
+                          <TextField
+                            {...field}
+                            id="unitOfMeasurement_id"
+                            select
+                            fullWidth
+                            className="form-input"
+                            error={Boolean(meta.touched && meta.error)}
+                            helperText={meta.touched && meta.error}
+                            size="small"
+                          >
+                            <MenuItem value="">Seleccione una unidad...</MenuItem>
+                            {Array.isArray(unidades) && unidades.length > 0 ? (
+                              unidades.map((unidad: unitOfMeasurement) => (
+                                <MenuItem
+                                  key={unidad.idUnitOfMeasurement}
+                                  value={unidad.idUnitOfMeasurement}
+                                >
+                                  {unidad.name}
+                                </MenuItem>
+                              ))
+                            ) : (
+                              <MenuItem value="" disabled>
+                                No hay unidades disponibles
+                              </MenuItem>
+                            )}
+                          </TextField>
+                        )}
                       </Field>
                     </div>
 
                     <div className="form-group-productos">
-                      <label className="titulo-arriba-form">
-                      Cantidad
-                      </label>
-                      <Field name="cantidad">
-                      {({ field }: FieldProps) => (
-                        <TextField
-                        {...field}
-                        className="form-input"
-                        error={
-                          touched.cantidad && Boolean(errors.cantidad)
-                        }
-                        helperText={touched.cantidad && errors.cantidad}
-                        inputProps={{
-                          onKeyDown: (e) => {
-                          if (!/[0-9]/.test(e.key) && e.key !== "Backspace" && e.key !== "Tab") {
-                            e.preventDefault();
-                          }
-                          },
-                        }}
-                        />
-                      )}
-                      </Field>
-                    </div>
-
-                  <div className="form-group-productos">
-                  <label className="titulo-arriba-form">Unidad de medida</label>
-                  <Field name="unitOfMeasurement_id">
-                    {({ field, meta }: FieldProps) => (
-                      <TextField
-                        {...field}
-                        select
-                        className="form-input"
-                        error={meta.touched && Boolean(meta.error)}
-                        helperText={meta.touched && meta.error}
-                      >
-                        {unidadesDeMedida.map((unidad) => (
-                          <MenuItem key={unidad.id} value={unidad.id}>
-                            {unidad.name} ({unidad.abbreviation})
-                          </MenuItem>
-                        ))}
-                      </TextField>
-                    )}
-                  </Field>
-                </div>
-
-                    
-                    <div className="form-group-productos">
-                      <label className="titulo-arriba-form">
-                        Tipo de producto
-                      </label>
-                      <Field name="tipoRacion">
+                      <label className="titulo-arriba-form">Tipo de producto</label>
+                      <Field name="tipoProducto">
                         {({ field }: FieldProps) => (
                           <TextField
                             {...field}
                             className="form-input"
-                            error={
-                              touched.tipoRacion && Boolean(errors.tipoRacion)
-                            }
-                            helperText={touched.tipoRacion && errors.tipoRacion}
+                            error={touched.tipoProducto && Boolean(errors.tipoProducto)}
+                            helperText={touched.tipoProducto && errors.tipoProducto}
                             inputProps={{
                               onKeyDown: (e) => {
                                 if (/[0-9]/.test(e.key)) {
@@ -186,18 +153,13 @@ const MisProductosPage: React.FC = () => {
                                 }
                               },
                             }}
+                            size="small"
                           />
                         )}
                       </Field>
                     </div>
 
-                    
-                    <IconButton
-                      className="boton-verde"
-                      onClick={() => {
-                        /*onAdd();*/
-                      }}
-                    >
+                    <IconButton className="boton-verde">
                       <AddIcon sx={{ fontSize: 42 }} />
                     </IconButton>
                   </Stack>
@@ -212,38 +174,25 @@ const MisProductosPage: React.FC = () => {
               <Table size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell>
-                      <em>Imagen</em>
-                    </TableCell>
-                    <TableCell>
-                      <em>Descripción</em>
-                    </TableCell>
-                    <TableCell>
-                      <em>Cantidad</em>
-                    </TableCell>
-                    <TableCell>
-                      <em>Fecha de vencimiento</em>
-                    </TableCell>
-                    <TableCell>
-                      <em>Acciones</em>
-                    </TableCell>
+                    <TableCell><em>Imagen</em></TableCell>
+                    <TableCell><em>Descripción</em></TableCell>
+                    <TableCell><em>Cantidad</em></TableCell>
+                    <TableCell><em>Fecha de vencimiento</em></TableCell>
+                    <TableCell><em>Acciones</em></TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {raciones.map((racion, index) => (
+                  {productos.map((productos, index) => (
                     <TableRow key={index}>
-                      <TableCell>{racion.fecha}</TableCell>
-                      <TableCell>{racion.tipoRacion}</TableCell>
-                      <TableCell>{racion.dni}</TableCell>
-                      <TableCell>S/ {racion.precio}</TableCell>
+                      <TableCell>{productos.fecha}</TableCell>
+                      <TableCell>{productos.tipoProductos}</TableCell>
+                      <TableCell>{productos.dni}</TableCell>
+                      <TableCell>S/ {productos.precio}</TableCell>
                       <TableCell>
                         <IconButton color="primary">
                           <EditIcon />
                         </IconButton>
-                        <IconButton
-                          color="error"
-                          onClick={() => handleDelete(index)}
-                        >
+                        <IconButton color="error" onClick={() => handleDelete(index)}>
                           <DeleteIcon />
                         </IconButton>
                       </TableCell>
