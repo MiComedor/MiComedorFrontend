@@ -52,8 +52,20 @@
   margin-top: 20px;
 }
 
-
 .table-container-raciones .MuiPaper-root {
   width: 1200px;
   max-width: 1500px;
+}
+
+.form-input .MuiInputBase-root {
+  width: 275px;
+}
+
+.color-select-categoria {
+  position: sticky;
+  top: -8px;
+  background-color: #F57C00;
+  padding: 4px 10px;
+  font-weight: bold;
+  color: white;
 }

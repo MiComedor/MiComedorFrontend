@@ -12,3 +12,10 @@ export default interface Ration {
     idBeneficiary: number;
   };
 }
+
+/* const initialRationValues = {
+  date: "",
+  nameRationType: "",
+  beneficiary: null,
+  price: "",
+};*/

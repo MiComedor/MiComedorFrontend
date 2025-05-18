@@ -27,27 +27,33 @@ import "./RacionesPage.css";
 import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
 import RationByUserId from "../../../types/rationByUserId";
 import RationService from "../../../services/ration.service";
+import Autocomplete from "@mui/material/Autocomplete";
+import BeneficiaryByUserId from "../../../types/BeneficiaryByUserId";
+import beneficiaryService from "../../../services/beneficiary.service";
+import RationType from "../../../types/TypeRation";
+import RationTypeService from "../../../services/RationType.service";
+import Ration from "../../../types/ration.type";
 
-const initialRationValues = {
+const initialRationValues: Ration = {
   date: "",
-  nameRationType: "",
-  dniBenefeciary: "",
-  price: "",
+  price: 0,
+  users: undefined,
+  rationType: undefined,
+  beneficiary: undefined,
 };
 
 const validationSchema = Yup.object({
-  date: Yup.string()
-    .required("Campo obligatorio")
-    .test("is-valid-date", "Fecha inválida", (value) => !!value),
-
-  nameRationType: Yup.string()
-    .matches(/^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/, "Solo letras")
+  date: Yup.string().required("Campo obligatorio"),
+  rationType: Yup.object()
+    .shape({
+      idRationType: Yup.number().required("Campo obligatorio"),
+    })
     .required("Campo obligatorio"),
-
-  dniBenefeciary: Yup.string()
-    .matches(/^[0-9]{8}$/, "DNI inválido: solo 8 dígitos")
+  beneficiary: Yup.object()
+    .shape({
+      idBeneficiary: Yup.number().required("Campo obligatorio"),
+    })
     .required("Campo obligatorio"),
-
   price: Yup.number()
     .typeError("Debe ser un número")
     .positive("Debe ser un número positivo")
@@ -56,21 +62,45 @@ const validationSchema = Yup.object({
 
 const RegistroRaciones: React.FC = () => {
   const [raciones, setRaciones] = useState<RationByUserId[]>([]);
+  const [beneficiarios, setBeneficiarios] = useState<
+    (BeneficiaryByUserId & { firstLetter: string })[]
+  >([]);
+  const [tipoRacion, setTipoRacion] = useState<RationType[]>([]);
 
-  const getRaciones = async () => {
+  const getRaciones = () => {
     const userStr = localStorage.getItem("user");
     const user = userStr ? JSON.parse(userStr) : null;
     if (!user) return;
 
-    try {
-      const raciones = await RationService.buscarRacionPorUserId(user.idUser);
-      setRaciones(raciones);
-    } catch (error) {
-      console.error("❌ Error al obtener raciones:", error);
-    }
+    RationService.buscarRacionPorUserId(user.idUser).then((racionesList) => {
+      const listaRaciones = racionesList.map((r) => ({
+        idRation: r.idRation,
+        date: r.date,
+        nameRationType: r.nameRationType,
+        dniBenefeciary: r.dniBenefeciary,
+        price: r.price,
+      })).reverse();
+      setRaciones(listaRaciones);
+    });
+
+    beneficiaryService.buscarBeneficiaryPorUserId(user.idUser).then((data) => {
+      const beneficiariosConLetra = data.map((b) => ({
+        ...b,
+        firstLetter: b.fullnameBenefeciary.charAt(0).toUpperCase(),
+      }));
+      setBeneficiarios(beneficiariosConLetra);
+    });
+
+    RationTypeService.listarRacion().then((tipoRacion) => {
+      const listaTipoRaciones = tipoRacion.map((r) => ({
+        idRationType: r.idRationType,
+        nameRationType: r.nameRationType,
+      }));
+      setTipoRacion(listaTipoRaciones);
+    });
   };
 
-  const saveRaciones = async (
+  const saveRacion = async (
     values: typeof initialRationValues,
     actions: FormikHelpers<typeof initialRationValues>
   ) => {
@@ -82,12 +112,14 @@ const RegistroRaciones: React.FC = () => {
       await RationService.insertarRacion({
         date: values.date,
         price: Number(values.price),
-        users: { idUser: user.idUser },
-        beneficiary: {
-          idBeneficiary: Number(values.dniBenefeciary), // ← Este debe ser el ID real del beneficiario
+        users: {
+          idUser: user.idUser,
         },
         rationType: {
-          idRationType: 1, // ← Aquí debes obtener el ID del tipo de ración, no el nombre
+          idRationType: values.rationType!.idRationType,
+        },
+        beneficiary: {
+          idBeneficiary: values.beneficiary!.idBeneficiary,
         },
       });
 
@@ -111,7 +143,7 @@ const RegistroRaciones: React.FC = () => {
             <Formik
               initialValues={initialRationValues}
               validationSchema={validationSchema}
-              onSubmit={saveRaciones}
+              onSubmit={saveRacion}
             >
               {({ errors, touched }) => (
                 <Form>
@@ -150,25 +182,34 @@ const RegistroRaciones: React.FC = () => {
                       <label className="titulo-arriba-form">
                         Tipo de ración
                       </label>
-                      <Field name="tipoRacion">
-                        {({ field }: FieldProps) => (
-                          <TextField
-                            {...field}
-                            className="form-input"
-                            error={
-                              touched.nameRationType &&
-                              Boolean(errors.nameRationType)
+                      <Field name="rationType">
+                        {({ form, field, meta }: FieldProps) => (
+                          <Autocomplete
+                            disablePortal // ✅ evita portal que mueve el DOM fuera del flujo
+                            options={tipoRacion}
+                            getOptionLabel={(option) => option.nameRationType}
+                            isOptionEqualToValue={(option, value) =>
+                              option.idRationType === value?.idRationType
                             }
-                            helperText={
-                              touched.nameRationType && errors.nameRationType
-                            }
-                            inputProps={{
-                              onKeyDown: (e) => {
-                                if (/[0-9]/.test(e.key)) {
-                                  e.preventDefault();
-                                }
-                              },
+                            value={field.value || null}
+                            onChange={(_, newValue) => {
+                              form.setFieldValue("rationType", newValue);
                             }}
+                            onClose={() => {
+                              if (
+                                document.activeElement instanceof HTMLElement
+                              ) {
+                                document.activeElement.blur();
+                              }
+                            }}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                className="form-input"
+                                error={meta.touched && Boolean(meta.error)}
+                                helperText={meta.touched && meta.error}
+                              />
+                            )}
                           />
                         )}
                       </Field>
@@ -176,28 +217,41 @@ const RegistroRaciones: React.FC = () => {
 
                     <div className="form-group-raciones">
                       <label className="titulo-arriba-form">DNI</label>
-                      <Field name="dni">
-                        {({ field, meta }: FieldProps) => (
-                          <TextField
-                            {...field}
-                            id="dniBenefeciary"
-                            className="form-input"
-                            error={meta.touched && Boolean(meta.error)}
-                            helperText={meta.touched && meta.error}
-                            inputProps={{
-                              inputMode: "numeric",
-                              pattern: "[0-9]*",
-                              maxLength: 8,
-                              onKeyDown: (e) => {
-                                if (
-                                  !/[0-9]/.test(e.key) &&
-                                  e.key !== "Backspace" &&
-                                  e.key !== "Tab"
-                                ) {
-                                  e.preventDefault();
-                                }
-                              },
+                      <Field name="beneficiary" className="form-input">
+                        {({ form, field, meta }: FieldProps) => (
+                          <Autocomplete
+                            options={beneficiarios.sort((a, b) =>
+                              a.firstLetter.localeCompare(b.firstLetter)
+                            )}
+                            groupBy={(option) => option.firstLetter}
+                            getOptionLabel={(option) =>
+                              `${option.fullnameBenefeciary} / ${option.dniBenefeciary}`
+                            }
+                            isOptionEqualToValue={(option, value) =>
+                              option.idBeneficiary === value?.idBeneficiary
+                            }
+                            value={field.value || null}
+                            onChange={(_, newValue) => {
+                              form.setFieldValue("beneficiary", newValue);
                             }}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                className="form-input"
+                                error={meta.touched && Boolean(meta.error)}
+                                helperText={meta.touched && meta.error}
+                              />
+                            )}
+                            renderGroup={(params) => (
+                              <li key={params.key}>
+                                <div className="color-select-categoria">
+                                  {params.group}
+                                </div>
+                                <ul style={{ padding: 0 }}>
+                                  {params.children}
+                                </ul>
+                              </li>
+                            )}
                           />
                         )}
                       </Field>
@@ -207,7 +261,7 @@ const RegistroRaciones: React.FC = () => {
                       <label className="titulo-arriba-form">
                         Precio por ración
                       </label>
-                      <Field name="precio" className="boton-verde">
+                      <Field name="price" className="boton-verde">
                         {({ field }: FieldProps) => (
                           <TextField
                             {...field}
@@ -254,12 +308,7 @@ const RegistroRaciones: React.FC = () => {
                       </Field>
                     </div>
 
-                    <IconButton
-                      className="boton-verde"
-                      onClick={() => {
-                        /*onAdd();*/
-                      }}
-                    >
+                    <IconButton type="submit" className="boton-verde">
                       <AddIcon sx={{ fontSize: 42 }} />
                     </IconButton>
                   </Stack>

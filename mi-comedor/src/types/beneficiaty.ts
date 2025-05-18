@@ -4,4 +4,7 @@ export default interface Beneficiary {
   fullnameBenefeciary: string;
   ageBeneficiary: number;
   observationsBeneficiary: string;
+  users?: {
+    idUser: number;
+  };
 }
