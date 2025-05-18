@@ -11,6 +11,7 @@ import React, {  useState } from "react";import {
   Stack,
   IconButton,
   InputAdornment,
+  MenuItem,
 } from "@mui/material";
 import { Formik, Form, Field, FieldProps, FormikHelpers } from "formik";
 import * as Yup from "yup";
@@ -20,11 +21,12 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import dayjs from "dayjs";
+
 import TextField from "@mui/material/TextField";
 import "./MisProductosPage.css";
 
-import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { es } from "date-fns/locale";
 
 const initialValues = {
   fecha: "",
@@ -32,7 +34,11 @@ const initialValues = {
   dni: "",
   precio: "",
 };
-
+const unidadesDeMedida = [
+  { id: 1, name: "Kilogramos", abbreviation: "kg" },
+  { id: 2, name: "Litros", abbreviation: "L" },
+  { id: 3, name: "Unidad", abbreviation: "u" },
+];
 const validationSchema = Yup.object({
   fecha: Yup.string()
     .required("Campo obligatorio")
@@ -90,79 +96,76 @@ const MisProductosPage: React.FC = () => {
                   >
                     <div className="form-group-productos">
                       <label className="titulo-arriba-form">
-                        Descripción
+                      Descripción
                       </label>
-                      <Field name="tipoRacion">
-                        {({ field }: FieldProps) => (
-                          <TextField
-                            {...field}
-                            className="form-input"
-                            error={
-                              touched.tipoRacion && Boolean(errors.tipoRacion)
-                            }
-                            helperText={touched.tipoRacion && errors.tipoRacion}
-                            inputProps={{
-                              onKeyDown: (e) => {
-                                if (/[0-9]/.test(e.key)) {
-                                  e.preventDefault();
-                                }
-                              },
-                            }}
-                          />
-                        )}
+                      <Field name="descripcion">
+                      {({ field }: FieldProps) => (
+                        <TextField
+                        {...field}
+                        className="form-input"
+                        error={
+                          touched.descripcion && Boolean(errors.descripcion)
+                        }
+                        helperText={touched.descripcion && errors.descripcion}
+                        inputProps={{
+                          onKeyDown: (e) => {
+                          if (/[0-9]/.test(e.key)) {
+                            e.preventDefault();
+                          }
+                          },
+                        }}
+                        />
+                      )}
                       </Field>
                     </div>
 
                     <div className="form-group-productos">
                       <label className="titulo-arriba-form">
-                        Cantidad
+                      Cantidad
                       </label>
-                      <Field name="tipoRacion">
-                        {({ field }: FieldProps) => (
-                          <TextField
-                            {...field}
-                            className="form-input"
-                            error={
-                              touched.tipoRacion && Boolean(errors.tipoRacion)
-                            }
-                            helperText={touched.tipoRacion && errors.tipoRacion}
-                            inputProps={{
-                              onKeyDown: (e) => {
-                                if (/[0-9]/.test(e.key)) {
-                                  e.preventDefault();
-                                }
-                              },
-                            }}
-                          />
-                        )}
+                      <Field name="cantidad">
+                      {({ field }: FieldProps) => (
+                        <TextField
+                        {...field}
+                        className="form-input"
+                        error={
+                          touched.cantidad && Boolean(errors.cantidad)
+                        }
+                        helperText={touched.cantidad && errors.cantidad}
+                        inputProps={{
+                          onKeyDown: (e) => {
+                          if (!/[0-9]/.test(e.key) && e.key !== "Backspace" && e.key !== "Tab") {
+                            e.preventDefault();
+                          }
+                          },
+                        }}
+                        />
+                      )}
                       </Field>
                     </div>
 
                   <div className="form-group-productos">
-                      <label className="titulo-arriba-form">
-                        Unidad de medida
-                      </label>
-                      <Field name="tipoRacion">
-                        {({ field }: FieldProps) => (
-                          <TextField
-                            {...field}
-                            className="form-input"
-                            error={
-                              touched.tipoRacion && Boolean(errors.tipoRacion)
-                            }
-                            helperText={touched.tipoRacion && errors.tipoRacion}
-                            inputProps={{
-                              onKeyDown: (e) => {
-                                if (/[0-9]/.test(e.key)) {
-                                  e.preventDefault();
-                                }
-                              },
-                            }}
-                          />
-                        )}
-                      </Field>
-                    </div>
+                  <label className="titulo-arriba-form">Unidad de medida</label>
+                  <Field name="unitOfMeasurement_id">
+                    {({ field, meta }: FieldProps) => (
+                      <TextField
+                        {...field}
+                        select
+                        className="form-input"
+                        error={meta.touched && Boolean(meta.error)}
+                        helperText={meta.touched && meta.error}
+                      >
+                        {unidadesDeMedida.map((unidad) => (
+                          <MenuItem key={unidad.id} value={unidad.id}>
+                            {unidad.name} ({unidad.abbreviation})
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    )}
+                  </Field>
+                </div>
 
+                    
                     <div className="form-group-productos">
                       <label className="titulo-arriba-form">
                         Tipo de producto
