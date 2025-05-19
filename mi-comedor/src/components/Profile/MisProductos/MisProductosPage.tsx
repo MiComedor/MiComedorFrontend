@@ -98,6 +98,7 @@ const MisProductosPage: React.FC = () => {
   const onSubmit = async (
   values: typeof initialValues,
   actions: FormikHelpers<typeof initialValues>
+  
 ) => {
   try {
     const payload = {
@@ -110,6 +111,8 @@ const MisProductosPage: React.FC = () => {
     await ProductService.insertar(payload);
     alert("Producto guardado exitosamente");
     actions.resetForm();
+    const productosActualizados = await ProductService.listar();
+    setProductos(productosActualizados.reverse());
   } catch (error) {
     console.error("Error al guardar el producto", error);
   }
