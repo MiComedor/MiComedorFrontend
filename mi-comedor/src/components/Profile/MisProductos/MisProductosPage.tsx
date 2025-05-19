@@ -38,12 +38,15 @@ import { ProductType } from "../../../types/product.type";
 import ProductTypeService from "../../../services/productType.service";
 
 
-const initialValues = {
-  fecha: "",
+const USER_ID = 1;
+
+const initialValues: Product = {
   descriptionProduct: "",
-  amountProduct: "",
+  amountProduct: 0,
   productType_id: "",
   unitOfMeasurement_id: "",
+  expirationDate: "",
+  user_id: USER_ID,
 };
 
 const validationSchema = Yup.object({
