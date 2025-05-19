@@ -31,8 +31,9 @@ import Autocomplete from "@mui/material/Autocomplete";
 import BeneficiaryByUserId from "../../../types/BeneficiaryByUserId";
 import beneficiaryService from "../../../services/beneficiary.service";
 import RationType from "../../../types/TypeRation";
-import RationTypeService from "../../../services/RationType.service";
 import Ration from "../../../types/ration.type";
+import EditRationDialog from "./EditRationDialog";
+import RationTypeService from "../../../services/rationType.service";
 
 const initialRationValues: Ration = {
   date: "",
@@ -66,6 +67,29 @@ const RegistroRaciones: React.FC = () => {
     (BeneficiaryByUserId & { firstLetter: string })[]
   >([]);
   const [tipoRacion, setTipoRacion] = useState<RationType[]>([]);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editing, setEditing] = useState<Ration | null>(null);
+
+  const handleOpenEdit = (racion: RationByUserId) => {
+    const fullRation: Ration = {
+      idRation: racion.idRation,
+      date: racion.date,
+      price: racion.price,
+      rationType: tipoRacion.find(
+        (r) => r.nameRationType === racion.nameRationType
+      ),
+      beneficiary: beneficiarios.find(
+        (b) => b.dniBenefeciary === racion.dniBenefeciary
+      ),
+    };
+    setEditing(fullRation);
+    setDialogOpen(true);
+  };
+
+  const handleClose = () => {
+    setDialogOpen(false);
+    setEditing(null);
+  };
 
   const getRaciones = () => {
     const userStr = localStorage.getItem("user");
@@ -73,13 +97,15 @@ const RegistroRaciones: React.FC = () => {
     if (!user) return;
 
     RationService.buscarRacionPorUserId(user.idUser).then((racionesList) => {
-      const listaRaciones = racionesList.map((r) => ({
-        idRation: r.idRation,
-        date: r.date,
-        nameRationType: r.nameRationType,
-        dniBenefeciary: r.dniBenefeciary,
-        price: r.price,
-      })).reverse();
+      const listaRaciones = racionesList
+        .map((r) => ({
+          idRation: r.idRation,
+          date: r.date,
+          nameRationType: r.nameRationType,
+          dniBenefeciary: r.dniBenefeciary,
+          price: r.price,
+        }))
+        .reverse();
       setRaciones(listaRaciones);
     });
 
@@ -127,6 +153,28 @@ const RegistroRaciones: React.FC = () => {
       getRaciones();
     } catch (error) {
       console.error("❌ Error al guardar ración:", error);
+    }
+  };
+
+  const editRaciones = async (values: typeof initialRationValues) => {
+    const userStr = localStorage.getItem("user");
+    const user = userStr ? JSON.parse(userStr) : null;
+    if (!user || !values.rationType || !values.beneficiary) return;
+
+    try {
+      await RationService.actualizarRacion({
+        idRation: values.idRation,
+        date: values.date,
+        price: Number(values.price),
+        users: { idUser: user.idUser },
+        rationType: { idRationType: values.rationType.idRationType },
+        beneficiary: { idBeneficiary: values.beneficiary.idBeneficiary },
+      });
+
+      getRaciones();
+      handleClose();
+    } catch (error) {
+      console.error("❌ Error al actualizar ración:", error);
     }
   };
 
@@ -185,7 +233,7 @@ const RegistroRaciones: React.FC = () => {
                       <Field name="rationType">
                         {({ form, field, meta }: FieldProps) => (
                           <Autocomplete
-                            disablePortal // ✅ evita portal que mueve el DOM fuera del flujo
+                            disablePortal
                             options={tipoRacion}
                             getOptionLabel={(option) => option.nameRationType}
                             isOptionEqualToValue={(option, value) =>
@@ -351,7 +399,7 @@ const RegistroRaciones: React.FC = () => {
                       <TableCell>S/ {racion.price.toFixed(2)}</TableCell>
                       <TableCell>
                         <IconButton color="primary">
-                          <EditIcon />
+                          <EditIcon onClick={() => handleOpenEdit(racion)} />
                         </IconButton>
                         <IconButton color="error">
                           <DeleteIcon />
@@ -375,6 +423,16 @@ const RegistroRaciones: React.FC = () => {
               REGRESAR AL MENÚ
             </Button>
           </Box>
+          {editing && (
+            <EditRationDialog
+              open={dialogOpen}
+              onClose={handleClose}
+              data={editing}
+              onSubmit={editRaciones}
+              rationTypes={tipoRacion}
+              beneficiaries={beneficiarios}
+            />
+          )}
         </Stack>
       </Box>
     </LocalizationProvider>
