@@ -1,6 +1,6 @@
 export default interface Ration {
   idRation?: number;
-  date: string; 
+  date: string;
   price: number;
   users?: {
     idUser: number;
@@ -10,5 +10,6 @@ export default interface Ration {
   };
   beneficiary?: {
     idBeneficiary: number;
+    fullnameBenefeciary?: string;
   };
 }

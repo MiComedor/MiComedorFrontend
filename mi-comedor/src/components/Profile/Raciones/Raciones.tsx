@@ -34,6 +34,7 @@ import RationType from "../../../types/TypeRation";
 import Ration from "../../../types/ration.type";
 import EditRationDialog from "./EditRationDialog";
 import RationTypeService from "../../../services/rationType.service";
+import DeleteRacionesDialog from "./DeleteRacionesDialog";
 
 const initialRationValues: Ration = {
   date: "",
@@ -69,6 +70,23 @@ const RegistroRaciones: React.FC = () => {
   const [tipoRacion, setTipoRacion] = useState<RationType[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Ration | null>(null);
+  const [deleting, setDeleting] = useState<Ration | null>(null);
+
+  const handleOpenDelete = (racion: RationByUserId) => {
+    const fullRation: Ration = {
+      idRation: racion.idRation,
+      date: racion.date,
+      price: racion.price,
+      rationType: tipoRacion.find(
+        (r) => r.nameRationType === racion.nameRationType
+      ),
+      beneficiary: beneficiarios.find(
+        (b) => b.dniBenefeciary === racion.dniBenefeciary
+      ),
+    };
+    setDeleting(fullRation);
+    setDialogOpen(true);
+  };
 
   const handleOpenEdit = (racion: RationByUserId) => {
     const fullRation: Ration = {
@@ -175,6 +193,19 @@ const RegistroRaciones: React.FC = () => {
       handleClose();
     } catch (error) {
       console.error("❌ Error al actualizar ración:", error);
+    }
+  };
+
+  const deleteRaciones = async (values: Ration) => {
+    try {
+      if (!values.idRation) return;
+
+      await RationService.eliminarRacion(values.idRation);
+
+      getRaciones(); // Actualiza la tabla
+      handleClose(); // Cierra el diálogo
+    } catch (error) {
+      console.error("❌ Error al eliminar ración:", error);
     }
   };
 
@@ -378,7 +409,7 @@ const RegistroRaciones: React.FC = () => {
                       <em>Tipo de ración</em>
                     </TableCell>
                     <TableCell>
-                      <em>DNI</em>
+                      <em>DNI / Nombre de beneficiario</em>
                     </TableCell>
                     <TableCell>
                       <em>Precio por ración</em>
@@ -395,13 +426,21 @@ const RegistroRaciones: React.FC = () => {
                         {dayjs(racion.date).format("DD/MM/YYYY")}
                       </TableCell>
                       <TableCell>{racion.nameRationType}</TableCell>
-                      <TableCell>{racion.dniBenefeciary}</TableCell>
+                      <TableCell>
+                        {racion.dniBenefeciary} /{" "}
+                        {beneficiarios.find(
+                          (b) => b.dniBenefeciary === racion.dniBenefeciary
+                        )?.fullnameBenefeciary || "Desconocido"}
+                      </TableCell>
                       <TableCell>S/ {racion.price.toFixed(2)}</TableCell>
                       <TableCell>
                         <IconButton color="primary">
                           <EditIcon onClick={() => handleOpenEdit(racion)} />
                         </IconButton>
-                        <IconButton color="error">
+                        <IconButton
+                          color="error"
+                          onClick={() => handleOpenDelete(racion)}
+                        >
                           <DeleteIcon />
                         </IconButton>
                       </TableCell>
@@ -429,6 +468,16 @@ const RegistroRaciones: React.FC = () => {
               onClose={handleClose}
               data={editing}
               onSubmit={editRaciones}
+              rationTypes={tipoRacion}
+              beneficiaries={beneficiarios}
+            />
+          )}
+          {deleting && (
+            <DeleteRacionesDialog
+              open={dialogOpen}
+              onClose={handleClose}
+              data={deleting}
+              onSubmit={deleteRaciones}
               rationTypes={tipoRacion}
               beneficiaries={beneficiarios}
             />
