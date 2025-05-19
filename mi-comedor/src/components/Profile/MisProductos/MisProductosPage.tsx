@@ -15,7 +15,6 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
 
 } from "@mui/material";
 import { Formik, Form, Field, FieldProps, FormikHelpers } from "formik";
@@ -35,6 +34,9 @@ import "./MisProductosPage.css";
 // Servicios y tipos
 import { unitOfMeasurement } from "../../../types/unitOfMeasurement";
 import unitOfMeasurementService from "../../../services/unitOfMeasurement.service";
+import { ProductType } from "../../../types/product.type";
+import ProductTypeService from "../../../services/productType.service";
+
 
 const initialValues = {
   fecha: "",
@@ -65,18 +67,22 @@ const validationSchema = Yup.object({
 
 const MisProductosPage: React.FC = () => {
   const [productos, setProductos] = useState<(typeof initialValues)[]>([]);
+  const [tiposProducto, setTiposProducto] = useState<ProductType[]>([]);
   const [unidades, setUnidades] = useState<unitOfMeasurement[]>([]);
   const [openTipoDialog, setOpenTipoDialog] = useState(false);
-const [tipoSeleccionado, setTipoSeleccionado] = useState("");
-const [fechaVencimiento, setFechaVencimiento] = useState<Dayjs | null>(null);
-
+  const [tipoSeleccionado, setTipoSeleccionado] = useState("");
+  const [fechaVencimiento, setFechaVencimiento] = useState<Dayjs | null>(null);
 
   useEffect(() => {
-    unitOfMeasurementService.listar()
+    unitOfMeasurementService
+      .listar()
       .then(setUnidades)
-      .catch((error: unknown) => {
-        console.error("Error al cargar unidades de medida:", error);
-      });
+      .catch((error: unknown) => console.error("Error al cargar unidades de medida:", error));
+
+    ProductTypeService
+      .listar()
+      .then(setTiposProducto)
+      .catch((error: unknown) => console.error("Error al cargar tipos de producto:", error));
   }, []);
 
   const onSubmit = (
@@ -231,52 +237,51 @@ const [fechaVencimiento, setFechaVencimiento] = useState<Dayjs | null>(null);
                               helperText={meta.touched && meta.error}
                             />
 
-                            <Dialog open={openTipoDialog} onClose={() => setOpenTipoDialog(false)} PaperProps={{
-                              style: { backgroundColor: "#f57c00", padding: "20px" },
-                            }}>
+                            <Dialog
+                              open={openTipoDialog}
+                              onClose={() => setOpenTipoDialog(false)}
+                              PaperProps={{
+                                style: { backgroundColor: "#f57c00", padding: "20px" },
+                              }}
+                            >
                               <DialogTitle style={{ color: "white", fontWeight: "bold" }}>
                                 Selecciona el tipo de producto
                               </DialogTitle>
 
                               <DialogContent>
                                 <Stack spacing={2}>
-                                  <Box display="flex" alignItems="center">
-                                    <input
-                                      type="checkbox"
-                                      id="no-perecible"
-                                      checked={tipoSeleccionado === "No perecible"}
-                                      onChange={() => setTipoSeleccionado("No perecible")}
-                                      style={{ width: 20, height: 20, marginRight: 10 }}
-                                    />
-                                    <label htmlFor="no-perecible" style={{ color: "white", fontWeight: "bold" }}>
-                                      NO PERECIBLE
-                                    </label>
-                                  </Box>
+                                  {tiposProducto.map((tipo) => (
+                                    <Box key={tipo.idProductType} display="flex" alignItems="center">
+                                      <input
+                                        type="checkbox"
+                                        id={`tipo-${tipo.idProductType}`}
+                                        checked={tipoSeleccionado === tipo.nameProductType}
+                                        onChange={() => setTipoSeleccionado(tipo.nameProductType)}
+                                        style={{ width: 20, height: 20, marginRight: 10 }}
+                                      />
+                                      <label
+                                        htmlFor={`tipo-${tipo.idProductType}`}
+                                        style={{ color: "white", fontWeight: "bold" }}
+                                      >
+                                        {tipo.nameProductType.toUpperCase()}
+                                      </label>
+                                    </Box>
+                                  ))}
 
-                                  <Box display="flex" alignItems="center">
-                                    <input
-                                      type="checkbox"
-                                      id="perecible"
-                                      checked={tipoSeleccionado === "Perecible"}
-                                      onChange={() => setTipoSeleccionado("Perecible")}
-                                      style={{ width: 20, height: 20, marginRight: 10 }}
-                                    />
-                                    <label htmlFor="perecible" style={{ color: "white", fontWeight: "bold" }}>
-                                      PERECIBLE
-                                    </label>
-                                  </Box>
                                   {tipoSeleccionado === "Perecible" && (
-                                    <Box display="flex" alignItems="flex-end" gap={2} mt={2}>
+                                    <Box display="flex" alignItems="flex-end" gap={2}>
                                       <StaticDatePicker
                                         value={fechaVencimiento}
                                         onChange={(newDate) => setFechaVencimiento(newDate)}
                                         displayStaticWrapperAs="desktop"
                                         slots={{ actionBar: () => null }}
                                       />
-
                                       <IconButton
                                         onClick={() => {
-                                          form.setFieldValue("productType_id", tipoSeleccionado === "Perecible" ? 1 : 2);
+                                          const tipo = tiposProducto.find(t => t.nameProductType === tipoSeleccionado);
+                                          if (tipo) {
+                                            form.setFieldValue("productType_id", tipo.idProductType);
+                                          }
                                           if (tipoSeleccionado === "Perecible" && fechaVencimiento) {
                                             form.setFieldValue("expirationDate", fechaVencimiento.format("YYYY-MM-DD"));
                                           } else {
@@ -298,8 +303,6 @@ const [fechaVencimiento, setFechaVencimiento] = useState<Dayjs | null>(null);
                                   )}
                                 </Stack>
                               </DialogContent>
-                              <DialogActions>
-                              </DialogActions>
                             </Dialog>
                           </>
                         )}
