@@ -38,6 +38,7 @@ import { ProductType } from "../../../types/product.type";
 import ProductTypeService from "../../../services/productType.service";
 import { Product, ProductListResponse } from "../../../types/product";
 import ProductService from "../../../services/product.service";
+import { getImageForDescription } from "./productImages";
 
 const userStr = localStorage.getItem("user");
 const user = userStr ? JSON.parse(userStr) : null;
@@ -352,6 +353,7 @@ const MisProductosPage: React.FC = () => {
               <Table size="small">
                 <TableHead>
                   <TableRow>
+                    <TableCell><em>Imagen</em></TableCell>
                     <TableCell><em>Descripción</em></TableCell>
                     <TableCell><em>Cantidad</em></TableCell>
                     <TableCell><em>Fecha de vencimiento</em></TableCell>
@@ -360,9 +362,23 @@ const MisProductosPage: React.FC = () => {
                 </TableHead>
                 <TableBody>
                   {productos.map((prod) => (
-                    <TableRow key={prod.idProduct}>
+                    <TableRow key={prod.idProduct}
+                    sx={{backgroundColor: prod.amountProduct <= 5 ? "#f8d7da" : "transparent",
+                    }}
+                    >
+                      <TableCell>
+                        <img
+                          src={getImageForDescription(prod.descriptionProduct)}
+                          alt={prod.descriptionProduct}
+                          width={80}
+                          height={80}
+                          style={{ objectFit: "contain" }}
+                        />
+                      </TableCell>
                       <TableCell>{prod.descriptionProduct}</TableCell>
-                      <TableCell>{`${prod.amountProduct} ${prod.unitOfMeasurementAbbreviation}`}</TableCell>
+                      <TableCell sx={{ color: prod.amountProduct <= 5 ? "#b71c1c" : "inherit" }}>
+                        {`${prod.amountProduct} ${prod.unitOfMeasurementAbbreviation}`}
+                      </TableCell>
                       <TableCell>{prod.expirationDate || "—"}</TableCell>
                       <TableCell>
                         <IconButton color="primary">
