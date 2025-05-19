@@ -12,27 +12,35 @@ import {
   Stack,
   IconButton,
   MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+
 } from "@mui/material";
 import { Formik, Form, Field, FieldProps, FormikHelpers } from "formik";
 import * as Yup from "yup";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
+import CheckIcon from "@mui/icons-material/Check";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { StaticDatePicker } from "@mui/x-date-pickers/StaticDatePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs, { Dayjs } from "dayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import TextField from "@mui/material/TextField";
 import "./MisProductosPage.css";
 
 // Servicios y tipos
-import UnitOfMeasurementService from "../../../services/unitOfMeasurement.service";
 import { unitOfMeasurement } from "../../../types/unitOfMeasurement";
+import unitOfMeasurementService from "../../../services/unitOfMeasurement.service";
 
 const initialValues = {
   fecha: "",
-  tipoProducto: "",
-  dni: "",
-  precio: "",
+  descriptionProduct: "",
+  amountProduct: "",
+  productType_id: "",
   unitOfMeasurement_id: "",
 };
 
@@ -41,32 +49,34 @@ const validationSchema = Yup.object({
     .required("Campo obligatorio")
     .test("is-valid-date", "Fecha inválida", (value) => !!value),
 
-  tipoProducto: Yup.string()
+  descriptionProduct: Yup.string()
+    .max(50, "Máximo 50 caracteres")
     .matches(/^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/, "Solo letras")
     .required("Campo obligatorio"),
 
-  dni: Yup.string()
-    .matches(/^[0-9]{8}$/, "DNI inválido: solo 8 dígitos")
-    .required("Campo obligatorio"),
-
-  precio: Yup.number()
+  amountProduct: Yup.number()
     .typeError("Debe ser un número")
     .positive("Debe ser un número positivo")
     .required("Campo obligatorio"),
 
   unitOfMeasurement_id: Yup.string().required("Campo obligatorio"),
+  productType_id: Yup.string().required("Campo obligatorio"),
 });
 
 const MisProductosPage: React.FC = () => {
   const [productos, setProductos] = useState<(typeof initialValues)[]>([]);
   const [unidades, setUnidades] = useState<unitOfMeasurement[]>([]);
+  const [openTipoDialog, setOpenTipoDialog] = useState(false);
+const [tipoSeleccionado, setTipoSeleccionado] = useState("");
+const [fechaVencimiento, setFechaVencimiento] = useState<Dayjs | null>(null);
+
 
   useEffect(() => {
-    UnitOfMeasurementService.listar()
+    unitOfMeasurementService.listar()
       .then(setUnidades)
-      .catch((error) =>
-        console.error("Error al cargar unidades de medida:", error)
-      );
+      .catch((error: unknown) => {
+        console.error("Error al cargar unidades de medida:", error);
+      });
   }, []);
 
   const onSubmit = (
@@ -102,6 +112,67 @@ const MisProductosPage: React.FC = () => {
                     alignItems="flex-end"
                   >
                     <div className="form-group-productos">
+                      <label className="titulo-arriba-form">Descripción</label>
+                      <Field name="descriptionProduct">
+                        {({ field }: FieldProps) => (
+                          <TextField
+                            {...field}
+                            className="form-input"
+                            error={
+                              touched.descriptionProduct &&
+                              Boolean(errors.descriptionProduct)
+                            }
+                            helperText={
+                              touched.descriptionProduct &&
+                              errors.descriptionProduct
+                            }
+                            inputProps={{
+                              maxLength: 50,
+                              onKeyDown: (e) => {
+                                if (/[0-9]/.test(e.key)) {
+                                  e.preventDefault();
+                                }
+                              },
+                            }}
+                            size="small"
+                          />
+                        )}
+                      </Field>
+                    </div>
+
+                    <div className="form-group-productos">
+                      <label className="titulo-arriba-form">Cantidad</label>
+                      <Field name="amountProduct">
+                        {({ field }: FieldProps) => (
+                          <TextField
+                            {...field}
+                            className="form-input"
+                            error={
+                              touched.amountProduct &&
+                              Boolean(errors.amountProduct)
+                            }
+                            helperText={
+                              touched.amountProduct && errors.amountProduct
+                            }
+                            inputProps={{
+                              maxLength: 10,
+                              onKeyDown: (e) => {
+                                if (
+                                  !/[0-9.]/.test(e.key) &&
+                                  e.key !== "Backspace" &&
+                                  e.key !== "Tab"
+                                ) {
+                                  e.preventDefault();
+                                }
+                              },
+                            }}
+                            size="small"
+                          />
+                        )}
+                      </Field>
+                    </div>
+
+                    <div className="form-group-productos">
                       <label htmlFor="unitOfMeasurement_id" className="titulo-arriba-form">
                         Unidad de medida
                       </label>
@@ -118,7 +189,7 @@ const MisProductosPage: React.FC = () => {
                             size="small"
                           >
                             <MenuItem value="">Seleccione una unidad...</MenuItem>
-                            {Array.isArray(unidades) && unidades.length > 0 ? (
+                            {unidades.length > 0 ? (
                               unidades.map((unidad: unitOfMeasurement) => (
                                 <MenuItem
                                   key={unidad.idUnitOfMeasurement}
@@ -138,28 +209,107 @@ const MisProductosPage: React.FC = () => {
                     </div>
 
                     <div className="form-group-productos">
-                      <label className="titulo-arriba-form">Tipo de producto</label>
-                      <Field name="tipoProducto">
-                        {({ field }: FieldProps) => (
-                          <TextField
-                            {...field}
-                            className="form-input"
-                            error={touched.tipoProducto && Boolean(errors.tipoProducto)}
-                            helperText={touched.tipoProducto && errors.tipoProducto}
-                            inputProps={{
-                              onKeyDown: (e) => {
-                                if (/[0-9]/.test(e.key)) {
-                                  e.preventDefault();
-                                }
-                              },
-                            }}
-                            size="small"
-                          />
+                      <label htmlFor="productType_id" className="titulo-arriba-form">
+                        Tipo de producto
+                      </label>
+                      <Field name="productType_id">
+                        {({ field, form, meta }: FieldProps) => (
+                          <>
+                            <TextField
+                              {...field}
+                              id="productType_id"
+                              fullWidth
+                              className="form-input"
+                              size="small"
+                              onClick={() => setOpenTipoDialog(true)}
+                              value={tipoSeleccionado}
+                              placeholder="Seleccionar tipo"
+                              InputProps={{
+                                readOnly: true,
+                              }}
+                              error={Boolean(meta.touched && meta.error)}
+                              helperText={meta.touched && meta.error}
+                            />
+
+                            <Dialog open={openTipoDialog} onClose={() => setOpenTipoDialog(false)} PaperProps={{
+                              style: { backgroundColor: "#f57c00", padding: "20px" },
+                            }}>
+                              <DialogTitle style={{ color: "white", fontWeight: "bold" }}>
+                                Selecciona el tipo de producto
+                              </DialogTitle>
+
+                              <DialogContent>
+                                <Stack spacing={2}>
+                                  <Box display="flex" alignItems="center">
+                                    <input
+                                      type="checkbox"
+                                      id="no-perecible"
+                                      checked={tipoSeleccionado === "No perecible"}
+                                      onChange={() => setTipoSeleccionado("No perecible")}
+                                      style={{ width: 20, height: 20, marginRight: 10 }}
+                                    />
+                                    <label htmlFor="no-perecible" style={{ color: "white", fontWeight: "bold" }}>
+                                      NO PERECIBLE
+                                    </label>
+                                  </Box>
+
+                                  <Box display="flex" alignItems="center">
+                                    <input
+                                      type="checkbox"
+                                      id="perecible"
+                                      checked={tipoSeleccionado === "Perecible"}
+                                      onChange={() => setTipoSeleccionado("Perecible")}
+                                      style={{ width: 20, height: 20, marginRight: 10 }}
+                                    />
+                                    <label htmlFor="perecible" style={{ color: "white", fontWeight: "bold" }}>
+                                      PERECIBLE
+                                    </label>
+                                  </Box>
+                                  {tipoSeleccionado === "Perecible" && (
+                                    <Box display="flex" alignItems="flex-end" gap={2} mt={2}>
+                                      <StaticDatePicker
+                                        value={fechaVencimiento}
+                                        onChange={(newDate) => setFechaVencimiento(newDate)}
+                                        displayStaticWrapperAs="desktop"
+                                        slots={{ actionBar: () => null }}
+                                      />
+
+                                      <IconButton
+                                        onClick={() => {
+                                          form.setFieldValue("productType_id", tipoSeleccionado === "Perecible" ? 1 : 2);
+                                          if (tipoSeleccionado === "Perecible" && fechaVencimiento) {
+                                            form.setFieldValue("expirationDate", fechaVencimiento.format("YYYY-MM-DD"));
+                                          } else {
+                                            form.setFieldValue("expirationDate", "");
+                                          }
+                                          setOpenTipoDialog(false);
+                                        }}
+                                        sx={{
+                                          backgroundColor: "#4caf50",
+                                          color: "white",
+                                          width: 60,
+                                          height: 60,
+                                          "&:hover": { backgroundColor: "#43a047" },
+                                        }}
+                                      >
+                                        <CheckIcon sx={{ fontSize: 36 }} />
+                                      </IconButton>
+                                    </Box>
+                                  )}
+                                </Stack>
+                              </DialogContent>
+                              <DialogActions>
+                              </DialogActions>
+                            </Dialog>
+                          </>
                         )}
                       </Field>
                     </div>
 
-                    <IconButton className="boton-verde">
+                
+
+
+                    <IconButton className="boton-verde" type="submit">
                       <AddIcon sx={{ fontSize: 42 }} />
                     </IconButton>
                   </Stack>
@@ -174,20 +324,22 @@ const MisProductosPage: React.FC = () => {
               <Table size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell><em>Imagen</em></TableCell>
+                    <TableCell><em>Fecha</em></TableCell>
                     <TableCell><em>Descripción</em></TableCell>
                     <TableCell><em>Cantidad</em></TableCell>
-                    <TableCell><em>Fecha de vencimiento</em></TableCell>
+                    <TableCell><em>Unidad</em></TableCell>
+                    <TableCell><em>Tipo</em></TableCell>
                     <TableCell><em>Acciones</em></TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {productos.map((productos, index) => (
+                  {productos.map((prod, index) => (
                     <TableRow key={index}>
-                      <TableCell>{productos.fecha}</TableCell>
-                      <TableCell>{productos.tipoProductos}</TableCell>
-                      <TableCell>{productos.dni}</TableCell>
-                      <TableCell>S/ {productos.precio}</TableCell>
+                      <TableCell>{prod.fecha}</TableCell>
+                      <TableCell>{prod.descriptionProduct}</TableCell>
+                      <TableCell>{prod.amountProduct}</TableCell>
+                      <TableCell>{prod.unitOfMeasurement_id}</TableCell>
+                      <TableCell>{prod.productType_id}</TableCell>
                       <TableCell>
                         <IconButton color="primary">
                           <EditIcon />
