@@ -36,15 +36,15 @@ import { unitOfMeasurement } from "../../../types/unitOfMeasurement";
 import unitOfMeasurementService from "../../../services/unitOfMeasurement.service";
 import { ProductType } from "../../../types/product.type";
 import ProductTypeService from "../../../services/productType.service";
-
+import { Product } from "../../../types/product";
 
 const USER_ID = 1;
 
 const initialValues: Product = {
   descriptionProduct: "",
   amountProduct: 0,
-  productType_id: "",
-  unitOfMeasurement_id: "",
+  productType_id: 0,
+  unitOfMeasurement_id: 0,
   expirationDate: "",
   user_id: USER_ID,
 };
@@ -88,19 +88,28 @@ const MisProductosPage: React.FC = () => {
       .catch((error: unknown) => console.error("Error al cargar tipos de producto:", error));
   }, []);
 
-  const onSubmit = (
+  const onSubmit = async (
     values: typeof initialValues,
     actions: FormikHelpers<typeof initialValues>
   ) => {
-    setProductos((prev) => [...prev, values]);
-    actions.resetForm();
-    actions.setSubmitting(false);
+    try {
+      const payload = {
+        descriptionProduct: values.descriptionProduct,
+        amountProduct: parseFloat(values.amountProduct.toString()),
+        productType_id: values.productType_id,
+        unitOfMeasurement_id: values.unitOfMeasurement_id,
+        expirationDate: values.expirationDate || "", // puede venir "" si no es perecible
+        user_id: 1, // o el ID real del usuario logueado
+      };
+
+      await ProductService.insertar(payload);
+      alert("Producto guardado exitosamente");
+      actions.resetForm();
+    } catch (error) {
+      console.error("Error al guardar el producto", error);
+    }
   };
 
-  const handleDelete = (index: number) => {
-    const nuevasProductos = productos.filter((_, i) => i !== index);
-    setProductos(nuevasProductos);
-  };
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
