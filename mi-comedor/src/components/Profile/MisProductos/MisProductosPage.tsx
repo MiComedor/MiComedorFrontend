@@ -36,9 +36,12 @@ import { unitOfMeasurement } from "../../../types/unitOfMeasurement";
 import unitOfMeasurementService from "../../../services/unitOfMeasurement.service";
 import { ProductType } from "../../../types/product.type";
 import ProductTypeService from "../../../services/productType.service";
-import { Product } from "../../../types/product";
+import { Product, ProductListResponse } from "../../../types/product";
+import ProductService from "../../../services/product.service";
 
-const USER_ID = 1;
+const userStr = localStorage.getItem("user");
+const user = userStr ? JSON.parse(userStr) : null;
+const USER_ID = user?.idUser;
 
 const initialValues: Product = {
   descriptionProduct: "",
@@ -47,34 +50,31 @@ const initialValues: Product = {
   unitOfMeasurement_id: 0,
   expirationDate: "",
   user_id: USER_ID,
+  productTypeName: undefined,
+  unitOfMeasurementAbbreviation: undefined
 };
 
 const validationSchema = Yup.object({
-  fecha: Yup.string()
-    .required("Campo obligatorio")
-    .test("is-valid-date", "Fecha inválida", (value) => !!value),
-
   descriptionProduct: Yup.string()
     .max(50, "Máximo 50 caracteres")
     .matches(/^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/, "Solo letras")
     .required("Campo obligatorio"),
-
   amountProduct: Yup.number()
     .typeError("Debe ser un número")
     .positive("Debe ser un número positivo")
     .required("Campo obligatorio"),
-
-  unitOfMeasurement_id: Yup.string().required("Campo obligatorio"),
-  productType_id: Yup.string().required("Campo obligatorio"),
+  unitOfMeasurement_id: Yup.number().required("Campo obligatorio"),
+  productType_id: Yup.number().required("Campo obligatorio"),
 });
 
+
 const MisProductosPage: React.FC = () => {
-  const [productos, setProductos] = useState<(typeof initialValues)[]>([]);
+  const [productos, setProductos] = useState<ProductListResponse[]>([]);
   const [tiposProducto, setTiposProducto] = useState<ProductType[]>([]);
   const [unidades, setUnidades] = useState<unitOfMeasurement[]>([]);
   const [openTipoDialog, setOpenTipoDialog] = useState(false);
   const [tipoSeleccionado, setTipoSeleccionado] = useState("");
-  const [fechaVencimiento, setFechaVencimiento] = useState<Dayjs | null>(null);
+  const [expirationDate, setexpirationDate] = useState<Dayjs | null>(null);
 
   useEffect(() => {
     unitOfMeasurementService
@@ -86,30 +86,38 @@ const MisProductosPage: React.FC = () => {
       .listar()
       .then(setTiposProducto)
       .catch((error: unknown) => console.error("Error al cargar tipos de producto:", error));
+
+    ProductService.listar()
+      .then(setProductos)
+      .catch((error) =>
+      console.error("❌ Error al listar productos:", error)
+    );
   }, []);
 
   const onSubmit = async (
-    values: typeof initialValues,
-    actions: FormikHelpers<typeof initialValues>
-  ) => {
-    try {
-      const payload = {
-        descriptionProduct: values.descriptionProduct,
-        amountProduct: parseFloat(values.amountProduct.toString()),
-        productType_id: values.productType_id,
-        unitOfMeasurement_id: values.unitOfMeasurement_id,
-        expirationDate: values.expirationDate || "", // puede venir "" si no es perecible
-        user_id: 1, // o el ID real del usuario logueado
-      };
+  values: typeof initialValues,
+  actions: FormikHelpers<typeof initialValues>
+) => {
+  try {
+    const payload = {
+      ...values,
+      user_id: USER_ID,
+      amountProduct: parseFloat(values.amountProduct.toString()),
+      expirationDate: values.expirationDate || "",
+    };
 
-      await ProductService.insertar(payload);
-      alert("Producto guardado exitosamente");
-      actions.resetForm();
-    } catch (error) {
-      console.error("Error al guardar el producto", error);
-    }
-  };
+    await ProductService.insertar(payload);
+    alert("Producto guardado exitosamente");
+    actions.resetForm();
+  } catch (error) {
+    console.error("Error al guardar el producto", error);
+  }
+};
 
+
+  function handleDelete(index: number): void {
+    setProductos((prevProductos) => prevProductos.filter((_, i) => i !== index));
+  }
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -129,6 +137,7 @@ const MisProductosPage: React.FC = () => {
                     justifyContent="center"
                     alignItems="flex-end"
                   >
+
                     <div className="form-group-productos">
                       <label className="titulo-arriba-form">Descripción</label>
                       <Field name="descriptionProduct">
@@ -265,10 +274,13 @@ const MisProductosPage: React.FC = () => {
                                   {tiposProducto.map((tipo) => (
                                     <Box key={tipo.idProductType} display="flex" alignItems="center">
                                       <input
-                                        type="checkbox"
+                                        type="radio"
                                         id={`tipo-${tipo.idProductType}`}
                                         checked={tipoSeleccionado === tipo.nameProductType}
-                                        onChange={() => setTipoSeleccionado(tipo.nameProductType)}
+                                        onChange={() => {
+                                          setTipoSeleccionado(tipo.nameProductType);
+                                          form.setFieldValue("productType_id", tipo.idProductType);
+                                        }}
                                         style={{ width: 20, height: 20, marginRight: 10 }}
                                       />
                                       <label
@@ -283,8 +295,8 @@ const MisProductosPage: React.FC = () => {
                                   {tipoSeleccionado === "Perecible" && (
                                     <Box display="flex" alignItems="flex-end" gap={2}>
                                       <StaticDatePicker
-                                        value={fechaVencimiento}
-                                        onChange={(newDate) => setFechaVencimiento(newDate)}
+                                        value={expirationDate}
+                                        onChange={(newDate) => setexpirationDate(newDate)}
                                         displayStaticWrapperAs="desktop"
                                         slots={{ actionBar: () => null }}
                                       />
@@ -294,8 +306,8 @@ const MisProductosPage: React.FC = () => {
                                           if (tipo) {
                                             form.setFieldValue("productType_id", tipo.idProductType);
                                           }
-                                          if (tipoSeleccionado === "Perecible" && fechaVencimiento) {
-                                            form.setFieldValue("expirationDate", fechaVencimiento.format("YYYY-MM-DD"));
+                                          if (expirationDate) {
+                                            form.setFieldValue("expirationDate", expirationDate.format("YYYY-MM-DD"));
                                           } else {
                                             form.setFieldValue("expirationDate", "");
                                           }
@@ -319,6 +331,7 @@ const MisProductosPage: React.FC = () => {
                           </>
                         )}
                       </Field>
+
                     </div>
 
                 
@@ -339,27 +352,23 @@ const MisProductosPage: React.FC = () => {
               <Table size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell><em>Fecha</em></TableCell>
                     <TableCell><em>Descripción</em></TableCell>
                     <TableCell><em>Cantidad</em></TableCell>
-                    <TableCell><em>Unidad</em></TableCell>
-                    <TableCell><em>Tipo</em></TableCell>
+                    <TableCell><em>Fecha de vencimiento</em></TableCell>
                     <TableCell><em>Acciones</em></TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {productos.map((prod, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{prod.fecha}</TableCell>
+                  {productos.map((prod) => (
+                    <TableRow key={prod.idProduct}>
                       <TableCell>{prod.descriptionProduct}</TableCell>
-                      <TableCell>{prod.amountProduct}</TableCell>
-                      <TableCell>{prod.unitOfMeasurement_id}</TableCell>
-                      <TableCell>{prod.productType_id}</TableCell>
+                      <TableCell>{`${prod.amountProduct} ${prod.unitOfMeasurementAbbreviation}`}</TableCell>
+                      <TableCell>{prod.expirationDate || "—"}</TableCell>
                       <TableCell>
                         <IconButton color="primary">
                           <EditIcon />
                         </IconButton>
-                        <IconButton color="error" onClick={() => handleDelete(index)}>
+                        <IconButton color="error" onClick={() => handleDelete(prod.idProduct)}>
                           <DeleteIcon />
                         </IconButton>
                       </TableCell>
