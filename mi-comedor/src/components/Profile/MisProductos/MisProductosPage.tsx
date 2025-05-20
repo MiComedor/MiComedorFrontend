@@ -16,6 +16,7 @@ import {
   DialogTitle,
   DialogContent,
   TablePagination,
+  Alert,
 
 } from "@mui/material";
 import { Formik, Form, Field, FieldProps, FormikHelpers } from "formik";
@@ -76,7 +77,8 @@ const MisProductosPage: React.FC = () => {
   const [expirationDate, setexpirationDate] = useState<Dayjs | null>(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  
+  const [mensajeExito, setMensajeExito] = useState<string | null>(null);
+  setTimeout(() => setMensajeExito(null), 5000);
 
   useEffect(() => {
     unitOfMeasurementService
@@ -126,8 +128,9 @@ const MisProductosPage: React.FC = () => {
 
   
     await ProductService.insertar(payload);
-      alert("Producto guardado exitosamente");
+      setMensajeExito("✅ Producto guardado exitosamente");
       actions.resetForm();
+      setTipoSeleccionado(""); 
 
       const productosActualizados = await ProductService.listar();
       const productosOrdenados = productosActualizados.sort(
@@ -316,42 +319,48 @@ const MisProductosPage: React.FC = () => {
                                       >
                                         {tipo.nameProductType.toUpperCase()}
                                       </label>
-                                    </Box>
+                                    </Box>  
                                   ))}
 
-                                  {tipoSeleccionado === "Perecible" && (
-                                    <Box display="flex" alignItems="flex-end" gap={2}>
-                                      <StaticDatePicker
-                                        value={expirationDate}
-                                        onChange={(newDate) => setexpirationDate(newDate)}
-                                        displayStaticWrapperAs="desktop"
-                                        slots={{ actionBar: () => null }}
-                                      />
-                                      <IconButton
-                                        onClick={() => {
-                                          const tipo = tiposProducto.find(t => t.nameProductType === tipoSeleccionado);
-                                          if (tipo) {
-                                            form.setFieldValue("productType_id", tipo.idProductType);
-                                          }
-                                          if (expirationDate) {
-                                            form.setFieldValue("expirationDate", expirationDate.format("YYYY-MM-DD"));
-                                          } else {
-                                            form.setFieldValue("expirationDate", "");
-                                          }
-                                          setOpenTipoDialog(false);
-                                        }}
-                                        sx={{
-                                          backgroundColor: "#4caf50",
-                                          color: "white",
-                                          width: 60,
-                                          height: 60,
-                                          "&:hover": { backgroundColor: "#43a047" },
-                                        }}
-                                      >
-                                        <CheckIcon sx={{ fontSize: 36 }} />
-                                      </IconButton>
+                                  {tipoSeleccionado && (
+                                    <Box display="flex" flexDirection="column" gap={2}>
+                                      {tipoSeleccionado === "Perecible" && (
+                                        <StaticDatePicker
+                                          value={expirationDate}
+                                          onChange={(newDate) => setexpirationDate(newDate)}
+                                          displayStaticWrapperAs="desktop"
+                                          slots={{ actionBar: () => null }}
+                                        />
+                                      )}
+
+                                      <Box display="flex" justifyContent="flex-end">
+                                        <IconButton
+                                          onClick={() => {
+                                            const tipo = tiposProducto.find(t => t.nameProductType === tipoSeleccionado);
+                                            if (tipo) {
+                                              form.setFieldValue("productType_id", tipo.idProductType);
+                                            }
+                                            if (tipoSeleccionado === "Perecible" && expirationDate) {
+                                              form.setFieldValue("expirationDate", expirationDate.format("YYYY-MM-DD"));
+                                            } else {
+                                              form.setFieldValue("expirationDate", "");
+                                            }
+                                            setOpenTipoDialog(false);
+                                          }}
+                                          sx={{
+                                            backgroundColor: "#4caf50",
+                                            color: "white",
+                                            width: 60,
+                                            height: 60,
+                                            "&:hover": { backgroundColor: "#43a047" },
+                                          }}
+                                        >
+                                          <CheckIcon sx={{ fontSize: 36 }} />
+                                        </IconButton>
+                                      </Box>
                                     </Box>
                                   )}
+
                                 </Stack>
                               </DialogContent>
                             </Dialog>
@@ -372,6 +381,14 @@ const MisProductosPage: React.FC = () => {
               )}
             </Formik>
           </div>
+
+          {/* Mensajes de error y éxito */}
+          {mensajeExito && (
+            <Alert severity="success" sx={{ fontWeight: 'bold' }}>
+              {mensajeExito}
+            </Alert>
+          )}
+          
 
           {/* Tabla */}
           <Box className="table-container-productos">
