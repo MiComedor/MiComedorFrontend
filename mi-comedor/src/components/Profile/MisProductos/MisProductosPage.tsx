@@ -41,6 +41,8 @@ import ProductTypeService from "../../../services/productType.service";
 import ProductService from "../../../services/product.service";
 import { getImageForDescription } from "./ProductImages";
 import { ProductListResponse } from "../../../types/product";
+import EditProductDialog from "./EditProductDialog";
+import DeleteProductDialog from "./DeleteProductsDialog";
 
 const userStr = localStorage.getItem("user");
 const user = userStr ? JSON.parse(userStr) : null;
@@ -79,6 +81,9 @@ const MisProductosPage: React.FC = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [mensajeExito, setMensajeExito] = useState<string | null>(null);
   setTimeout(() => setMensajeExito(null), 5000);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [productoSeleccionado, setProductoSeleccionado] = useState<ProductListResponse | null>(null);
 
   useEffect(() => {
     unitOfMeasurementService
@@ -144,10 +149,13 @@ const MisProductosPage: React.FC = () => {
 
 };
 
-
-  function handleDelete(index: number): void {
-    setProductos((prevProductos) => prevProductos.filter((_, i) => i !== index));
-  }
+  const handleOpenEdit = (id: number) => {
+    const producto = productos.find((prod) => prod.idProduct === id);
+    if (producto) {
+      setProductoSeleccionado(producto);
+      setOpenEditDialog(true);
+    }
+  };
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -264,6 +272,7 @@ const MisProductosPage: React.FC = () => {
                         )}
                       </Field>
                     </div>
+                    
 
                     <div className="form-group-productos">
                       <label htmlFor="productType_id" className="titulo-arriba-form">
@@ -341,7 +350,7 @@ const MisProductosPage: React.FC = () => {
                                               form.setFieldValue("productType_id", tipo.idProductType);
                                             }
                                             if (tipoSeleccionado === "Perecible" && expirationDate) {
-                                              form.setFieldValue("expirationDate", expirationDate.format("YYYY-MM-DD"));
+                                              form.setFieldValue("expirationDate", expirationDate.format("DD-MM-YYYY"));
                                             } else {
                                               form.setFieldValue("expirationDate", "");
                                             }
@@ -424,12 +433,16 @@ const MisProductosPage: React.FC = () => {
                       <TableCell sx={{ color: prod.amountProduct <= 5 ? "#b71c1c" : "inherit" }}>
                         {`${prod.amountProduct} ${prod.unitOfMeasurementAbbreviation}`}
                       </TableCell>
-                      <TableCell>{prod.expirationDate || "—"}</TableCell>
+                      <TableCell>
+                        {prod.expirationDate
+                          ? dayjs(prod.expirationDate).format("DD-MM-YYYY")
+                          : "—"}
+                      </TableCell>
                       <TableCell>
                         <IconButton color="primary">
-                          <EditIcon />
+                          <EditIcon onClick={() => handleOpenEdit(productoSeleccionado.idProduct)} />
                         </IconButton>
-                        <IconButton color="error" onClick={() => handleDelete(prod.idProduct)}>
+                        <IconButton color="error" onClick={() =>handleDelete(productoSeleccionado.idProduct)}>
                           <DeleteIcon />
                         </IconButton>
                       </TableCell>
@@ -437,6 +450,31 @@ const MisProductosPage: React.FC = () => {
                   ))}
                 </TableBody>
               </Table>
+              {productoSeleccionado && (
+                <>
+                  <EditProductDialog
+                    open={openEditDialog}
+                    onClose={() => setOpenEditDialog(false)}
+                    producto={productoSeleccionado}
+                    onUpdated={async () => {
+                      const productosActualizados = await ProductService.listar();
+                      const productosOrdenados = productosActualizados.sort((a, b) => b.idProduct - a.idProduct);
+                      setProductos(productosOrdenados);
+                    }}
+                  />
+
+                  <DeleteProductDialog
+                    open={openDeleteDialog}
+                    onClose={() => setOpenDeleteDialog(false)}
+                    producto={productoSeleccionado}
+                    onDeleted={async () => {
+                      const productosActualizados = await ProductService.listar();
+                      const productosOrdenados = productosActualizados.sort((a, b) => b.idProduct - a.idProduct);
+                      setProductos(productosOrdenados);
+                    }}
+                  />
+                </>
+              )}
               <TablePagination
                 rowsPerPageOptions={[5, 10, 25]}
                 component="div"
