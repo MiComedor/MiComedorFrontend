@@ -341,7 +341,7 @@ const MisProductosPage: React.FC = () => {
                                               form.setFieldValue("productType_id", tipo.idProductType);
                                             }
                                             if (tipoSeleccionado === "Perecible" && expirationDate) {
-                                              form.setFieldValue("expirationDate", expirationDate.format("YYYY-MM-DD"));
+                                              form.setFieldValue("expirationDate", expirationDate.format("DD-MM-YYYY"));
                                             } else {
                                               form.setFieldValue("expirationDate", "");
                                             }
@@ -424,7 +424,11 @@ const MisProductosPage: React.FC = () => {
                       <TableCell sx={{ color: prod.amountProduct <= 5 ? "#b71c1c" : "inherit" }}>
                         {`${prod.amountProduct} ${prod.unitOfMeasurementAbbreviation}`}
                       </TableCell>
-                      <TableCell>{prod.expirationDate || "—"}</TableCell>
+                      <TableCell>
+                        {prod.expirationDate
+                          ? dayjs(prod.expirationDate).format("DD-MM-YYYY")
+                          : "—"}
+                      </TableCell>
                       <TableCell>
                         <IconButton color="primary">
                           <EditIcon />
