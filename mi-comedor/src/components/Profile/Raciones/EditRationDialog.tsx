@@ -13,7 +13,6 @@ import Autocomplete from "@mui/material/Autocomplete";
 import Ration from "../../../types/ration.type";
 import RationType from "../../../types/TypeRation";
 import BeneficiaryByUserId from "../../../types/BeneficiaryByUserId";
-import "./EdidRacionesDialog.css";
 
 type FormRationValues = {
   date: string;

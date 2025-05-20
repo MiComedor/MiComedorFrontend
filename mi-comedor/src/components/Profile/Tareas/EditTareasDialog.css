@@ -1,0 +1,55 @@
+/*encabezado*/
+.titulo-dialog-editar-tarea {
+    background-color: #e4faa4;
+}
+
+/*formulario*/
+.dialog-content-tarea {
+    background-color: #e4faa4;
+}
+
+.titulo-arriba-form-tarea {
+    margin-bottom: 0px;
+    font-weight: bold;
+    font-size: 20px;
+    color: black;
+}
+
+.textfield-tarea {
+    background-color: #aee0ff !important;
+    border-radius: 16px !important;
+    margin: 12px 0 !important;
+}
+
+.textfield-tarea .MuiOutlinedInput-root {
+    border-radius: 16px !important;
+    background-color: #aee0ff !important;
+    border: 2px solid #000 !important;
+}
+
+.textfield-tarea .MuiOutlinedInput-notchedOutline {
+    border: none !important;
+}
+
+/*botones*/
+.dialog-actions-tarea {
+    background-color: #e4faa4;
+    display: flex;
+}
+
+.dialog-actions-tarea .MuiButton-root {
+    font-weight: bold;
+    border-radius: 21px;
+    min-width: 100px;
+    font-size: 20px;
+}
+
+.dialog-actions-tarea .MuiButton-root:first-child {
+    background-color: #ff4444;
+    color: white;
+}
+
+.dialog-actions-tarea .MuiButton-root:last-child {
+    background-color: #2b90f5;
+    color: white;
+}

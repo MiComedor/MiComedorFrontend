@@ -12,7 +12,7 @@ import {
   Stack,
   IconButton,
 } from "@mui/material";
-import { Formik, Form, Field, FieldProps } from "formik";
+import { Formik, Form, Field, FieldProps, FormikHelpers } from "formik";
 import * as Yup from "yup";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import AddIcon from "@mui/icons-material/Add";
@@ -32,6 +32,8 @@ import TaskOfCoordinatioService from "../../../services/TaskOfCoordinatio.servic
 import TypeTaskService from "../../../services/TypeTask.service";
 import TaskCoordination from "../../../types/taskCoordination";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
+import EditTareasDialog from "./EditTareasDialog";
+import "./Tareas.css"
 
 const initialTaskCoordinationValues: TaskCoordination = {
   fullname: "",
@@ -39,34 +41,71 @@ const initialTaskCoordinationValues: TaskCoordination = {
   dateTask: "",
   timeTask: "",
 };
-const today = dayjs();
-const todayStartOfTheDay = today.startOf("day");
 
 const validationSchema = Yup.object({
-  date: Yup.string().required("Campo obligatorio"),
-  rationType: Yup.object()
+  fullname: Yup.string().required("Campo obligatorio"),
+  typeOfTask: Yup.object()
     .shape({
-      idRationType: Yup.number().required("Campo obligatorio"),
+      idTypeOfTask: Yup.number().required(),
     })
+    .nullable()
     .required("Campo obligatorio"),
-  beneficiary: Yup.object()
-    .shape({
-      idBeneficiary: Yup.number().required("Campo obligatorio"),
-    })
-    .required("Campo obligatorio"),
-  price: Yup.number()
-    .typeError("Debe ser un número")
-    .positive("Debe ser un número positivo")
-    .required("Campo obligatorio"),
+  dateTask: Yup.string().required("Campo obligatorio"),
+  timeTask: Yup.string().required("Campo obligatorio"),
 });
 
 const RegistroTareas: React.FC = () => {
   const [tareas, setTareas] = useState<TaskCoordinationByUserId[]>([]);
   const [tipoTarea, setTipoTarea] = useState<TypeOfTask[]>([]);
+  const [dialogOpenEdit, setDialogOpenEdit] = useState(false);
+  const [editing, setEditing] = useState<TaskCoordination | null>(null);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
+  const handleOpenEdit = (tarea: TaskCoordinationByUserId) => {
+    const tipoSeleccionado = tipoTarea.find(
+      (t) => t.nameTypeTask === tarea.nameTypeTask
+    );
+    const fullTarea: TaskCoordination = {
+      idTaskCoordination: tarea.idTaskCoordination,
+      fullname: tarea.fullname,
+      dateTask: tarea.dateTask,
+      timeTask: tarea.timeTask,
+      typeOfTask: tipoSeleccionado?.idTypeOfTask
+        ? { idTypeOfTask: tipoSeleccionado.idTypeOfTask }
+        : undefined
+    };
+
+    setEditing(fullTarea);
+    setDialogOpenEdit(true);
+  };
+
+  const handleCloseEdit = () => {
+    setDialogOpenEdit(false);
+    setEditing(null);
+  };
+  const editTareas = async (values: typeof initialTaskCoordinationValues) => {
+    const userStr = localStorage.getItem("user");
+    const user = userStr ? JSON.parse(userStr) : null;
+    if (!user || !values.typeOfTask) return;
+
+    try {
+      await TaskOfCoordinatioService.actualizarTarea({
+        idTaskCoordination: values.idTaskCoordination,
+        fullname: values.fullname,
+        dateTask: values.dateTask,
+        timeTask: values.timeTask,
+        users: { idUser: user.idUser },
+        typeOfTask: { idTypeOfTask: values.typeOfTask.idTypeOfTask },
+      });
+
+      getTareas();
+      handleCloseEdit();
+    } catch (error) {
+      console.error("❌ Error al actualizar ración:", error);
+    }
+  };
   const getTareas = () => {
     const userStr = localStorage.getItem("user");
     const user = userStr ? JSON.parse(userStr) : null;
@@ -96,6 +135,34 @@ const RegistroTareas: React.FC = () => {
     });
   };
 
+  const saveTarea = async (
+    values: typeof initialTaskCoordinationValues,
+    actions: FormikHelpers<typeof initialTaskCoordinationValues>
+  ) => {
+    const userStr = localStorage.getItem("user");
+    const user = userStr ? JSON.parse(userStr) : null;
+    if (!user) return;
+
+    try {
+      await TaskOfCoordinatioService.insertarTarea({
+        fullname: values.fullname,
+        dateTask: values.dateTask,
+        timeTask: values.timeTask,
+        users: {
+          idUser: user.idUser,
+        },
+        typeOfTask: {
+          idTypeOfTask: values.typeOfTask!.idTypeOfTask,
+        },
+      });
+
+      actions.resetForm();
+      getTareas();
+    } catch (error) {
+      console.error("❌ Error al guardar ración:", error);
+    }
+  };
+
   useEffect(() => {
     getTareas();
   }, []);
@@ -109,7 +176,7 @@ const RegistroTareas: React.FC = () => {
             <Formik
               initialValues={initialTaskCoordinationValues}
               validationSchema={validationSchema}
-              onSubmit={() => {}}
+              onSubmit={saveTarea}
             >
               {({ errors, touched }) => (
                 <Form>
@@ -117,16 +184,16 @@ const RegistroTareas: React.FC = () => {
                     direction={isMobile ? "column" : "row"}
                     spacing={2}
                     justifyContent="center"
-                    alignItems={isMobile ? "center" : "flex-end"} 
+                    alignItems={isMobile ? "center" : "flex-end"}
                     sx={{ width: "100%" }}
                     flexWrap={isMobile ? "wrap" : "nowrap"}
                   >
                     <div className="form-group-tareas">
                       <label className="titulo-arriba-form">Responsable</label>
-                      <Field name="fullname" className="boton-verde">
+                      <Field name="fullname">
                         {({ field }: FieldProps) => (
                           <TextField
-                          fullWidth
+                            fullWidth
                             {...field}
                             className="form-input"
                             error={touched.fullname && Boolean(errors.fullname)}
@@ -183,7 +250,7 @@ const RegistroTareas: React.FC = () => {
                             onChange={(date) =>
                               form.setFieldValue(
                                 "dateTask",
-                                date?.format("YYYY-MM-DD")
+                                date ? date.format("YYYY-MM-DD") : ""
                               )
                             }
                             slotProps={{
@@ -193,7 +260,6 @@ const RegistroTareas: React.FC = () => {
                                 helperText: meta.touched && meta.error,
                                 sx: {
                                   border: "2.5px solid black",
-                                  
                                 },
                               },
                             }}
@@ -205,14 +271,24 @@ const RegistroTareas: React.FC = () => {
                     <div className="form-group-tareas">
                       <label className="titulo-arriba-form">Hora</label>
                       <Field name="timeTask">
-                        {({ form, field, meta }: FieldProps) => (
+                        {({ field, form, meta }: FieldProps) => (
                           <TimePicker
+                            name="startTime"
                             enableAccessibleFieldDOMStructure={false}
-                            value={field.value || todayStartOfTheDay}
+                            value={
+                              field.value &&
+                              dayjs(field.value, "HH:mm:ss").isValid()
+                                ? dayjs(field.value, "HH:mm:ss")
+                                : null
+                            }
                             onChange={(newValue) => {
-                              form.setFieldValue(field.name, newValue);
+                              if (newValue) {
+                                form.setFieldValue(
+                                  field.name,
+                                  dayjs(newValue).format("HH:mm:ss")
+                                );
+                              }
                             }}
-                            disablePast
                             slots={{ textField: TextField }}
                             slotProps={{
                               textField: {
@@ -274,7 +350,10 @@ const RegistroTareas: React.FC = () => {
                   </div>
 
                   <Stack direction="row" spacing={1} mt={1}>
-                    <IconButton color="primary" onClick={() => {}}>
+                    <IconButton
+                      color="primary"
+                      onClick={() => handleOpenEdit(tarea)}
+                    >
                       <EditIcon />
                     </IconButton>
                     <IconButton color="error" onClick={() => {}}>
@@ -320,7 +399,7 @@ const RegistroTareas: React.FC = () => {
                         </TableCell>
                         <TableCell>
                           <IconButton color="primary">
-                            <EditIcon onClick={() => {}} />
+                            <EditIcon onClick={() => handleOpenEdit(tarea)} />
                           </IconButton>
                           <IconButton color="error" onClick={() => {}}>
                             <DeleteIcon />
@@ -344,6 +423,15 @@ const RegistroTareas: React.FC = () => {
               REGRESAR AL MENÚ
             </Button>
           </Box>
+          {editing && (
+            <EditTareasDialog
+              open={dialogOpenEdit}
+              onClose={handleCloseEdit}
+              data={editing}
+              onSubmit={editTareas}
+              typesTasks={tipoTarea}
+            />
+          )}
         </Stack>
       </Box>
     </LocalizationProvider>
