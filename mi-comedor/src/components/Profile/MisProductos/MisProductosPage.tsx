@@ -15,6 +15,7 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  TablePagination,
 
 } from "@mui/material";
 import { Formik, Form, Field, FieldProps, FormikHelpers } from "formik";
@@ -73,6 +74,8 @@ const MisProductosPage: React.FC = () => {
   const [openTipoDialog, setOpenTipoDialog] = useState(false);
   const [tipoSeleccionado, setTipoSeleccionado] = useState("");
   const [expirationDate, setexpirationDate] = useState<Dayjs | null>(null);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
   
 
   useEffect(() => {
@@ -95,6 +98,16 @@ const MisProductosPage: React.FC = () => {
     })
     .catch((error) => console.error("❌ Error al listar productos:", error));
   }, []);
+
+  
+  const handleChangePage = (_event: unknown, newPage: number) => {
+      setPage(newPage);
+    };
+
+  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+      setRowsPerPage(parseInt(event.target.value, 10));
+      setPage(0); // Reinicia la página
+};
 
   const onSubmit = async (
   values: typeof initialValues,
@@ -374,7 +387,9 @@ const MisProductosPage: React.FC = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {productos.map((prod) => (
+                  {productos
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((prod) => (
                     <TableRow key={prod.idProduct}
                     sx={{backgroundColor: prod.amountProduct <= 5 ? "#f8d7da" : "transparent",
                     }}
@@ -405,7 +420,21 @@ const MisProductosPage: React.FC = () => {
                   ))}
                 </TableBody>
               </Table>
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 25]}
+                component="div"
+                count={productos.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                labelRowsPerPage="Filas por página"
+                labelDisplayedRows={({ from, to, count }) =>
+                  `Mostrando del ${from} al ${to} de ${count !== -1 ? count : `más de ${to}`} productos`
+                }
+              />
             </TableContainer>
+        
           </Box>
 
           {/* Botón de regresar */}
