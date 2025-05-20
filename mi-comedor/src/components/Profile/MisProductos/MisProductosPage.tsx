@@ -36,23 +36,20 @@ import { unitOfMeasurement } from "../../../types/unitOfMeasurement";
 import unitOfMeasurementService from "../../../services/unitOfMeasurement.service";
 import { ProductType } from "../../../types/product.type";
 import ProductTypeService from "../../../services/productType.service";
-import { Product, ProductListResponse } from "../../../types/product";
 import ProductService from "../../../services/product.service";
-import { getImageForDescription } from "./productImages";
+import { getImageForDescription } from "./ProductImages";
+import { ProductListResponse } from "../../../types/product";
 
 const userStr = localStorage.getItem("user");
 const user = userStr ? JSON.parse(userStr) : null;
 const USER_ID = user?.idUser;
 
-const initialValues: Product = {
+const initialValues = {
   descriptionProduct: "",
-  amountProduct: 0,
-  productType_id: 0,
-  unitOfMeasurement_id: 0,
+  amountProduct: "",
+  productType_id: "",
+  unitOfMeasurement_id: "",
   expirationDate: "",
-  user_id: USER_ID,
-  productTypeName: undefined,
-  unitOfMeasurementAbbreviation: undefined
 };
 
 const validationSchema = Yup.object({
@@ -76,6 +73,7 @@ const MisProductosPage: React.FC = () => {
   const [openTipoDialog, setOpenTipoDialog] = useState(false);
   const [tipoSeleccionado, setTipoSeleccionado] = useState("");
   const [expirationDate, setexpirationDate] = useState<Dayjs | null>(null);
+  
 
   useEffect(() => {
     unitOfMeasurementService
@@ -89,10 +87,13 @@ const MisProductosPage: React.FC = () => {
       .catch((error: unknown) => console.error("Error al cargar tipos de producto:", error));
 
     ProductService.listar()
-      .then(setProductos)
-      .catch((error) =>
-      console.error("❌ Error al listar productos:", error)
-    );
+    .then((productos) => {
+      const productosOrdenados = productos.sort(
+        (a, b) => b.idProduct - a.idProduct
+      );
+      setProductos(productosOrdenados);
+    })
+    .catch((error) => console.error("❌ Error al listar productos:", error));
   }, []);
 
   const onSubmit = async (
@@ -105,17 +106,26 @@ const MisProductosPage: React.FC = () => {
       ...values,
       user_id: USER_ID,
       amountProduct: parseFloat(values.amountProduct.toString()),
+      unitOfMeasurement_id: Number(values.unitOfMeasurement_id),
+      productType_id: Number(values.productType_id),
       expirationDate: values.expirationDate || "",
     };
 
+  
     await ProductService.insertar(payload);
-    alert("Producto guardado exitosamente");
-    actions.resetForm();
-    const productosActualizados = await ProductService.listar();
-    setProductos(productosActualizados.reverse());
+      alert("Producto guardado exitosamente");
+      actions.resetForm();
+
+      const productosActualizados = await ProductService.listar();
+      const productosOrdenados = productosActualizados.sort(
+        (a, b) => b.idProduct - a.idProduct
+      );
+      setProductos(productosOrdenados);
+
   } catch (error) {
     console.error("Error al guardar el producto", error);
   }
+
 };
 
 
