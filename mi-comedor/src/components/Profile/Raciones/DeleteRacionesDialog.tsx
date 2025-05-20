@@ -10,6 +10,7 @@ import {
 import Ration from "../../../types/ration.type";
 import RationType from "../../../types/TypeRation";
 import BeneficiaryByUserId from "../../../types/BeneficiaryByUserId";
+import "./DeleteRacionesDialog.css";
 
 type DeleteRacionesDialogProps = {
   open: boolean;
@@ -26,38 +27,30 @@ const DeleteRacionesDialog: React.FC<DeleteRacionesDialogProps> = ({
   data,
   onSubmit,
 }) => {
-  const handleDelete = () => {
-    onSubmit(data); // Llama al método deleteRaciones con los datos de la ración
-  };
+  const handleDelete = () => onSubmit(data);
 
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      aria-labelledby="delete-ration-title"
-      aria-describedby="delete-ration-description"
-    >
-      <DialogTitle id="delete-ration-title">
-        {" "}
-        ¿ Deseas eliminar esta ración ?{" "}
+    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
+      <DialogTitle className="dialog-title">
+        ¿Deseas eliminar esta ración?
       </DialogTitle>
-      <DialogContent>
-        <DialogContentText id="delete-ration-description">
-          Esta acción no se puede deshacer. ¿Estás seguro que deseas eliminar la
-          ración del <strong>{data?.date}</strong> para el beneficiario{" "}
-          <strong>{}</strong> con precio{" "}
-          <strong>S/ {data?.price?.toFixed(2)}</strong>?
+      
+      <DialogContent className="dialog-content">
+        <DialogContentText className="dialog-content">
+          Esta acción no se puede deshacer.
         </DialogContentText>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>Cancelar</Button>
+
+      <DialogActions className="dialog-actions">
+        <Button onClick={onClose} className="btn-cancel" variant="contained">
+          ✖
+        </Button>
         <Button
           onClick={handleDelete}
-          color="error"
+          className="btn-confirm"
           variant="contained"
-          autoFocus
         >
-          Eliminar
+          ✔
         </Button>
       </DialogActions>
     </Dialog>
