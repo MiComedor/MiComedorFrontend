@@ -20,7 +20,7 @@ class RationService {
     );
     return response.data;
   };
-
+   
   eliminarRacion = async (id: number): Promise<void> => {
     await api.delete(`${API_URL}/${id}`);
   };

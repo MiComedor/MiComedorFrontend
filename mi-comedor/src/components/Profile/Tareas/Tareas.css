@@ -1,0 +1,50 @@
+.form-input-fecha-tarea {
+    width: 100% !important;
+    max-width: 100% !important;
+    background-color: #AEE0FF;
+    border-radius: 8px;
+    padding: 8px;
+    border: 3px solid black;
+    box-sizing: border-box;
+}
+
+.form-input-fecha-tarea input {
+    width: 100% !important;
+}
+
+.form-input-tarea {
+    background-color: #AEE0FF !;
+    border-radius: 8px;
+    padding: 8px;
+    border: 3px solid black;
+    max-width: 275px;
+    width: 100%;
+}
+
+.form-group-tareas {
+    display: flex;
+    flex-direction: column;
+    min-width: 100px;
+}
+
+.table-container-tareas {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+
+.table-container-tareas .MuiPaper-root {
+    width: 1200px;
+    max-width: 1500px;
+}
+
+@media (max-width: 600px) {
+    .form-group-tareas {
+        width: 100%;
+    }
+
+    .form-input {
+        width: 100%;
+    }
+}
