@@ -33,7 +33,8 @@ import TypeTaskService from "../../../services/TypeTask.service";
 import TaskCoordination from "../../../types/taskCoordination";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import EditTareasDialog from "./EditTareasDialog";
-import "./Tareas.css"
+import "./Tareas.css";
+import DeleteTareasDialog from "./DeleteTareasDialog";
 
 const initialTaskCoordinationValues: TaskCoordination = {
   fullname: "",
@@ -59,7 +60,8 @@ const RegistroTareas: React.FC = () => {
   const [tipoTarea, setTipoTarea] = useState<TypeOfTask[]>([]);
   const [dialogOpenEdit, setDialogOpenEdit] = useState(false);
   const [editing, setEditing] = useState<TaskCoordination | null>(null);
-
+  const [dialogOpenDelete, setDialogOpenDelete] = useState(false);
+  const [deleting, setDeleting] = useState<TaskCoordination | null>(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -74,7 +76,7 @@ const RegistroTareas: React.FC = () => {
       timeTask: tarea.timeTask,
       typeOfTask: tipoSeleccionado?.idTypeOfTask
         ? { idTypeOfTask: tipoSeleccionado.idTypeOfTask }
-        : undefined
+        : undefined,
     };
 
     setEditing(fullTarea);
@@ -85,6 +87,24 @@ const RegistroTareas: React.FC = () => {
     setDialogOpenEdit(false);
     setEditing(null);
   };
+
+  const handleCloseDelete = () => {
+    setDialogOpenDelete(false);
+    setDeleting(null);
+  };
+
+  const handleOpenDelete = (tarea: TaskCoordinationByUserId) => {
+    const fullTarea: TaskCoordination = {
+      idTaskCoordination: tarea.idTaskCoordination,
+      fullname: tarea.fullname,
+      dateTask: tarea.dateTask,
+      timeTask: tarea.timeTask,
+    };
+
+    setDeleting(fullTarea);
+    setDialogOpenDelete(true);
+  };
+
   const editTareas = async (values: typeof initialTaskCoordinationValues) => {
     const userStr = localStorage.getItem("user");
     const user = userStr ? JSON.parse(userStr) : null;
@@ -160,6 +180,18 @@ const RegistroTareas: React.FC = () => {
       getTareas();
     } catch (error) {
       console.error("❌ Error al guardar ración:", error);
+    }
+  };
+  const deleteTareas = async (values: TaskCoordination) => {
+    try {
+      if (!values.idTaskCoordination) return;
+
+      await TaskOfCoordinatioService.eliminarTarea(values.idTaskCoordination);
+
+      getTareas();
+      handleCloseDelete();
+    } catch (error) {
+      console.error("❌ Error al eliminar ración:", error);
     }
   };
 
@@ -356,7 +388,10 @@ const RegistroTareas: React.FC = () => {
                     >
                       <EditIcon />
                     </IconButton>
-                    <IconButton color="error" onClick={() => {}}>
+                    <IconButton
+                      color="error"
+                      onClick={() => handleOpenDelete(tarea)}
+                    >
                       <DeleteIcon />
                     </IconButton>
                   </Stack>
@@ -401,7 +436,10 @@ const RegistroTareas: React.FC = () => {
                           <IconButton color="primary">
                             <EditIcon onClick={() => handleOpenEdit(tarea)} />
                           </IconButton>
-                          <IconButton color="error" onClick={() => {}}>
+                          <IconButton
+                            color="error"
+                            onClick={() => handleOpenDelete(tarea)}
+                          >
                             <DeleteIcon />
                           </IconButton>
                         </TableCell>
@@ -430,6 +468,15 @@ const RegistroTareas: React.FC = () => {
               data={editing}
               onSubmit={editTareas}
               typesTasks={tipoTarea}
+            />
+          )}
+          {deleting && (
+            <DeleteTareasDialog
+              open={dialogOpenDelete}
+              onClose={handleCloseDelete}
+              data={deleting}
+              onSubmit={deleteTareas}
+              rationTypes={tipoTarea}
             />
           )}
         </Stack>

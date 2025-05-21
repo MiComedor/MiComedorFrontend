@@ -1,4 +1,4 @@
-/*import * as React from "react";
+import * as React from "react";
 import {
   Dialog,
   DialogActions,
@@ -7,21 +7,19 @@ import {
   DialogTitle,
   Button,
 } from "@mui/material";
-import Ration from "../../../types/ration.type";
-import RationType from "../../../types/TypeRation";
-import BeneficiaryByUserId from "../../../types/BeneficiaryByUserId";
-import "./DeleteRacionesDialog.css";
+import TaskCoordination from "../../../types/taskCoordination";
+import TypeOfTask from "../../../types/TypeTask";
+import "./DeleteTareaDialog.css"
 
-type DeleteRacionesDialogProps = {
+type DeleteTareasDialogProps = {
   open: boolean;
   onClose: () => void;
-  data: Ration;
-  onSubmit: (values: Ration) => Promise<void>;
-  rationTypes: RationType[];
-  beneficiaries: (BeneficiaryByUserId & { firstLetter: string })[];
+  data: TaskCoordination;
+  onSubmit: (values: TaskCoordination) => Promise<void>;
+  rationTypes: TypeOfTask[];
 };
 
-const DeleteRacionesDialog: React.FC<DeleteRacionesDialogProps> = ({
+const DeleteTareasDialog: React.FC<DeleteTareasDialogProps> = ({
   open,
   onClose,
   data,
@@ -31,23 +29,23 @@ const DeleteRacionesDialog: React.FC<DeleteRacionesDialogProps> = ({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle className="dialog-title">
-        ¿Deseas eliminar esta ración?
+      <DialogTitle className="dialog-title-tarea">
+        ¿Deseas eliminar esta tarea?
       </DialogTitle>
       
-      <DialogContent className="dialog-content">
-        <DialogContentText className="dialog-content">
+      <DialogContent className="dialog-content-tarea">
+        <DialogContentText className="dialog-content-tarea">
           Esta acción no se puede deshacer.
         </DialogContentText>
       </DialogContent>
 
-      <DialogActions className="dialog-actions">
-        <Button onClick={onClose} className="btn-cancel" variant="contained">
+      <DialogActions className="dialog-actions-tarea">
+        <Button onClick={onClose} className="btn-cancel-tarea" variant="contained">
           ✖
         </Button>
         <Button
           onClick={handleDelete}
-          className="btn-confirm"
+          className="btn-confirm-tarea"
           variant="contained"
         >
           ✔
@@ -57,5 +55,4 @@ const DeleteRacionesDialog: React.FC<DeleteRacionesDialogProps> = ({
   );
 };
 
-export default DeleteRacionesDialog;
-*/
+export default DeleteTareasDialog;

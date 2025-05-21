@@ -1,0 +1,31 @@
+.dialog-title-tarea {
+    font-size: 27px !important;
+    font-weight: bold !important;
+    color: #D32F2F;
+    background-color: #FBE9E7;
+    text-align: center;
+}
+
+.dialog-content-tarea {
+    background-color: #FBE9E7;
+    text-align: center;
+    font-size: 18px !important;
+}
+
+.dialog-actions-tarea {
+    display: flex;
+    justify-content: center !important;
+    align-items: center;
+    gap: 24px;
+    background-color: #FBE9E7;
+    padding: 16px;
+}
+
+.btn-cancel-tarea {
+    background-color: #757575 !important;
+}
+
+.btn-confirm-tarea {
+    background-color: #D32F2F !important;
+
+}
