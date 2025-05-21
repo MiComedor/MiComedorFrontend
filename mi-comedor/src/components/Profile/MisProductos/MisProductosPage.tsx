@@ -78,7 +78,13 @@ const MisProductosPage: React.FC = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [mensajeExito, setMensajeExito] = useState<string | null>(null);
-  setTimeout(() => setMensajeExito(null), 5000);
+
+  useEffect(() => {
+  if (mensajeExito) {
+    const timer = setTimeout(() => setMensajeExito(null), 5000);
+    return () => clearTimeout(timer);
+  }
+}, [mensajeExito]);
   
   useEffect(() => {
     unitOfMeasurementService
@@ -339,7 +345,7 @@ const MisProductosPage: React.FC = () => {
                                               form.setFieldValue("productType_id", tipo.idProductType);
                                             }
                                             if (tipoSeleccionado === "Perecible" && expirationDate) {
-                                              form.setFieldValue("expirationDate", expirationDate.format("DD-MM-YYYY"));
+                                              form.setFieldValue("expirationDate", expirationDate.format("YYYY-MM-DD"));
                                             } else {
                                               form.setFieldValue("expirationDate", "");
                                             }
