@@ -118,6 +118,7 @@ const RegistroRaciones: React.FC = () => {
     setDialogOpenDelete(false);
     setDeleting(null);
   };
+  
   const getRaciones = () => {
     const userStr = localStorage.getItem("user");
     const user = userStr ? JSON.parse(userStr) : null;

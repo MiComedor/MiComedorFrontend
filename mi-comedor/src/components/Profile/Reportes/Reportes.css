@@ -1,0 +1,19 @@
+.MuiTab-root.custom-tabs-reportes {
+    color: gray;
+    border-radius: 8px;
+    min-width: 100px;
+}
+
+.MuiTab-root.custom-tabs-reportes.Mui-selected {
+    background-color: #F57C00 !important;
+    color: white !important;
+    font-weight: bold !important;
+}
+
+.MuiTabs-indicator {
+    background-color: transparent !important;
+}
+
+.titulo-Reportes {
+    font-weight: bold !important;
+}
