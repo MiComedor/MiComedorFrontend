@@ -437,7 +437,7 @@ const MisProductosPage: React.FC = () => {
                         <IconButton color="primary">
                           <EditIcon />
                         </IconButton>
-                        <IconButton>
+                        <IconButton color="error">
                           <DeleteIcon />
                         </IconButton>
                       </TableCell>
