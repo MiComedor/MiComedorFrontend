@@ -8,11 +8,12 @@ class ProductService {
     await api.post(API_URL, product);
   };
 
-  listar = async (): Promise<ProductListResponse[]> => {
-    const response = await api.get<ProductListResponse[]>(API_URL);
+  listarPorUsuario = async (usuarioId: number): Promise<ProductListResponse[]> => {
+    const response = await api.get<ProductListResponse[]>(`${API_URL}/productoPorUsuario/${usuarioId}`);
     return response.data;
   };
 
+  
   eliminar = async (id: number): Promise<void> => {
     await api.delete(`${API_URL}/${id}`);
   };

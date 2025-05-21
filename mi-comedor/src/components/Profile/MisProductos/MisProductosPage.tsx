@@ -97,14 +97,14 @@ const MisProductosPage: React.FC = () => {
       .then(setTiposProducto)
       .catch((error: unknown) => console.error("Error al cargar tipos de producto:", error));
 
-    ProductService.listar()
-    .then((productos) => {
+    ProductService.listarPorUsuario(USER_ID)
+      .then((productos) => {
       const productosOrdenados = productos.sort(
         (a, b) => b.idProduct - a.idProduct
       );
       setProductos(productosOrdenados);
-    })
-    .catch((error) => console.error("❌ Error al listar productos:", error));
+      })
+      .catch((error) => console.error("❌ Error al listar productos:", error));
   }, []);
 
   
@@ -138,7 +138,7 @@ const MisProductosPage: React.FC = () => {
       actions.resetForm();
       setTipoSeleccionado(""); 
 
-      const productosActualizados = await ProductService.listar();
+      const productosActualizados = await ProductService.listarPorUsuario(USER_ID);
       const productosOrdenados = productosActualizados.sort(
         (a, b) => b.idProduct - a.idProduct
       );
