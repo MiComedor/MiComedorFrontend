@@ -2,17 +2,18 @@
     width: 100%;
     max-width: 800px;
     margin: 0 auto;
-    padding: 20px;
-    padding-bottom: 0px;
+    padding-top: 20px;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 35px;
+    gap: 33px;
     text-align: center;
 }
 
 .card-button {
     background-color: #F57C00 !important;
     border: 3.5px solid black;
+    min-width: 120px;
+    flex: 0 0 auto;
 }
 
 .card-action {
@@ -56,3 +57,34 @@
     margin: 0 auto;
 }
 
+@media screen and (max-width: 600px) {
+    .profile-container {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 20px !important;
+    }
+
+    .card-button {
+        min-width: 250px !important;
+        max-width: 300px !important;
+        width: 100% !important;
+        padding: 0 !important;
+    }
+
+    .card-action {
+        padding: 10px !important;
+    }
+
+    .card-image {
+        width: 180px !important;
+        height: 170px !important;
+        margin-top: 10px !important;
+    }
+
+    .card-title-modules {
+        font-size: 23px !important;
+        margin-top: 6px !important;
+    }
+}

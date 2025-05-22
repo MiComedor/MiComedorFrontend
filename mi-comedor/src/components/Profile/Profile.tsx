@@ -373,7 +373,7 @@ const Profile: React.FC = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </>
+      </>
   );
 };
 

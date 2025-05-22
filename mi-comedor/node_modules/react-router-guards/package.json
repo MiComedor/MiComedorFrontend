@@ -1,0 +1,74 @@
+{
+  "name": "react-router-guards",
+  "version": "1.0.2",
+  "description": "Guard middleware for React Router navigation",
+  "author": "Josh Pensky <joshuapensky@gmail.com>",
+  "keywords": [
+    "react",
+    "router",
+    "guards",
+    "guard",
+    "loading",
+    "error",
+    "middleware"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/upstatement/react-router-guards.git"
+  },
+  "bugs": {
+    "url": "https://github.com/upstatement/react-router-guards/issues"
+  },
+  "homepage": "https://github.com/upstatement/react-router-guards#readme",
+  "files": [
+    "dist/"
+  ],
+  "main": "dist/index.js",
+  "module": "dist/index.es.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "rollup -c --environment PRODUCTION",
+    "prepublishOnly": "npm run build",
+    "start": "rollup -c -w",
+    "test": "jest"
+  },
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-router": ">=5.0.0",
+    "react-router-dom": ">=5.0.0"
+  },
+  "dependencies": {
+    "tiny-invariant": "^1.0.4"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.4.3",
+    "@babel/plugin-proposal-class-properties": "^7.4.0",
+    "@babel/polyfill": "^7.4.4",
+    "@babel/preset-env": "^7.4.3",
+    "@babel/preset-react": "^7.0.0",
+    "@types/enzyme": "^3.10.1",
+    "@types/jest": "^24.0.15",
+    "@types/react": "^16.8.17",
+    "@types/react-dom": "^16.8.4",
+    "@types/react-router-dom": "^4.3.3",
+    "babel-jest": "^24.8.0",
+    "babel-plugin-dev-expression": "^0.2.1",
+    "enzyme": "^3.10.0",
+    "enzyme-adapter-react-16": "^1.14.0",
+    "jest": "^24.8.0",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "rollup": "^1.11.3",
+    "rollup-plugin-babel": "^4.3.2",
+    "rollup-plugin-cleanup": "^3.1.1",
+    "rollup-plugin-filesize": "^6.0.1",
+    "rollup-plugin-node-resolve": "^4.2.3",
+    "rollup-plugin-peer-deps-external": "^2.2.0",
+    "rollup-plugin-terser": "^4.0.4",
+    "rollup-plugin-typescript2": "^0.21.1",
+    "ts-jest": "^24.0.2",
+    "tslib": "^1.9.3",
+    "typescript": "^3.5.2"
+  }
+}

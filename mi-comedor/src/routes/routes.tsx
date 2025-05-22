@@ -1,5 +1,7 @@
 import React from "react";
-import {Routes, Route} from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
+import GuestOnly from "../routes/guards/GuestOnly";
+import RequireAuth from "../routes/guards/RequireAuth";
 
 import WelcomePage from "../pages/WelcomePage";
 import Profile from "../components/Profile/Profile";
@@ -17,15 +19,17 @@ const AppRoutes: React.FC = () => {
     <Routes>
       <Route path="/" element={<WelcomePage />} />
       <Route path="/welcome" element={<WelcomePage />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
-      <Route path="/profile" element={<Profile />} />
-      <Route path="/mis-productos" element={<MisProductosPage />} />
-      <Route path="/raciones" element={<RacionesPage />} />
-      <Route path="/beneficiarios" element={<BeneficiariosPage />} />
-      <Route path="/reporte" element={<ReportePage />} />
-      <Route path="/presupuesto" element={<PresupuestoPage />} />
-      <Route path="/tareas" element={<TareasPage />} />
+
+      <Route path="/login" element={<GuestOnly><LoginPage /></GuestOnly>} />
+      <Route path="/register" element={<GuestOnly><RegisterPage /></GuestOnly>} />
+
+      <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
+      <Route path="/mis-productos" element={<RequireAuth><MisProductosPage /></RequireAuth>} />
+      <Route path="/raciones" element={<RequireAuth><RacionesPage /></RequireAuth>} />
+      <Route path="/beneficiarios" element={<RequireAuth><BeneficiariosPage /></RequireAuth>} />
+      <Route path="/reporte" element={<RequireAuth><ReportePage /></RequireAuth>} />
+      <Route path="/presupuesto" element={<RequireAuth><PresupuestoPage /></RequireAuth>} />
+      <Route path="/tareas" element={<RequireAuth><TareasPage /></RequireAuth>} />
     </Routes>
   );
 };
