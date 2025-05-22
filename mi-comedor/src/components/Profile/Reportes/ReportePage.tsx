@@ -16,6 +16,20 @@ import BudgetByDay from "../../../types/BudgetByDay";
 import ProductsByDay from "../../../types/ProductsByDay";
 import ProductService from "../../../services/product.service";
 import BeneficiaryByDay from "../../../types/BeneficiaryByDay";
+import { Button } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { PieChart } from "@mui/x-charts/PieChart";
+import { RationByWeek } from "../../../types/RationByWeek";
+import { BugdetByWeek } from "../../../types/BudgetByWeek";
+import { ProductsByWeek } from "../../../types/ProductsByWeek";
+import { BarChart } from "@mui/x-charts/BarChart";
+import FoodBankOutlinedIcon from "@mui/icons-material/FoodBankOutlined";
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import MoneyOffIcon from "@mui/icons-material/MoneyOff";
+import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
+import GroupsIcon from "@mui/icons-material/Groups";
+import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
 
 const ReportePage: React.FC = () => {
   const [value, setValue] = useState("diarioReportes");
@@ -23,9 +37,22 @@ const ReportePage: React.FC = () => {
   const [presupuestoPorDia, setPresupuestoPorDia] =
     useState<BudgetByDay | null>(null);
   const [productosPorDia, setProductosPorDia] = useState<ProductsByDay[]>([]);
+  const [productosPorSemana, setProductosPorSemana] = useState<
+    ProductsByWeek[]
+  >([]);
   const [beneficiariosPorDia, setBeneficiariosPorDia] = useState<
     BeneficiaryByDay[]
   >([]);
+
+  const [beneficiariosChartData, setBeneficiariosChartData] = useState<
+    { label: string; value: number }[]
+  >([]);
+
+  const [presupuestoPorSemana, setPresupuestoPorSemana] = useState<
+    BugdetByWeek[]
+  >([]);
+
+  const navigate = useNavigate();
 
   const today = new Date();
   const diaDeHoy = new Intl.DateTimeFormat("es-PE", {
@@ -38,7 +65,14 @@ const ReportePage: React.FC = () => {
   const handleChange = (_event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
   };
+  interface PieData extends RationByWeek {
+    id: number;
+    value: number;
+    label: string;
+  }
+  const [chartData, setChartData] = useState<PieData[]>([]);
 
+  /*------------------DIARIO-------------------------*/
   const getRacionesPorDia = () => {
     const userStr = localStorage.getItem("user");
     const user = userStr ? JSON.parse(userStr) : null;
@@ -110,11 +144,97 @@ const ReportePage: React.FC = () => {
     );
   };
 
+  /*------------------SEMANAL-------------------------*/
+
+  const getRacionesPorSemana = () => {
+    const userStr = localStorage.getItem("user");
+    const user = userStr ? JSON.parse(userStr) : null;
+    if (!user) return;
+
+    RationService.racionesPorSemana(user.idUser)
+      .then((response: RationByWeek[]) => {
+        const pieData: PieData[] = response
+          .filter((item) => item.totalRaciones > 0)
+          .map((item, index) => ({
+            ...item,
+            id: index,
+            value: item.totalRaciones,
+            label: `${item.dia} ${item.fecha}`,
+          }));
+
+        setChartData(pieData);
+        console.log("✅ Datos listos para el gráfico:", pieData);
+      })
+      .catch((err) => {
+        console.error("Error al obtener raciones:", err);
+      });
+  };
+
+  const getPresupuestoPorSemana = () => {
+    const userStr = localStorage.getItem("user");
+    const user = userStr ? JSON.parse(userStr) : null;
+    if (!user) return;
+
+    BudgetService.presupuestoPorSemana(user.idUser).then((budgetList) => {
+      const listaPresupuesto = budgetList.map((r) => ({
+        fecha: r.fecha,
+        dia: r.dia,
+        fechasDiaMes: r.fechasDiaMes,
+        ingresosPorDia: r.ingresosPorDia,
+        egresosPorDia: r.egresosPorDia,
+        saldoPorDia: r.saldoPorDia,
+      }));
+      setPresupuestoPorSemana(listaPresupuesto);
+    });
+  };
+
+  const getProductosPorSemana = () => {
+    const userStr = localStorage.getItem("user");
+    const user = userStr ? JSON.parse(userStr) : null;
+    if (!user) return;
+
+    ProductService.obtenerProductosAvencerSemanal(user.idUser).then(
+      (productsList) => {
+        const listaProductos = productsList.map((r) => ({
+          descripcionProducto: r.descripcionProducto,
+          diaVencimientos: r.diaVencimientos,
+          fechaVencimiento: r.fechaVencimiento,
+        }));
+        setProductosPorSemana(listaProductos);
+      }
+    );
+  };
+
+  const getBeneficiariosPorSemana = () => {
+    const userStr = localStorage.getItem("user");
+    const user = userStr ? JSON.parse(userStr) : null;
+    if (!user) return;
+
+    RationService.BeneficiariosPorSemana(user.idUser).then(
+      (beneficiariosPorDiaList) => {
+        const chartData = beneficiariosPorDiaList
+          .filter((r) => r.totalBeneficiarios > 0)
+          .map((r) => ({
+            label: `${r.dia} ${r.fecha}`,
+            value: r.totalBeneficiarios,
+          }));
+
+        setBeneficiariosChartData(chartData);
+      }
+    );
+  };
+
+  /*-----------------------------------------------------*/
+
   useEffect(() => {
     getRacionesPorDia();
     getPresupuestoPorDia();
     getProductosPorDia();
     getBeneficiariosPorDia();
+    getRacionesPorSemana();
+    getPresupuestoPorSemana();
+    getProductosPorSemana();
+    getBeneficiariosPorSemana();
   }, []);
 
   return (
@@ -126,7 +246,11 @@ const ReportePage: React.FC = () => {
     >
       <Box sx={{ width: "100%" }}>
         <TabContext value={value}>
-          <TabList onChange={handleChange} aria-label="lab API tabs example">
+          <TabList
+            onChange={handleChange}
+            aria-label="lab API tabs example"
+            sx={{ justifyContent: "center", display: "flex" }}
+          >
             <Tab
               value="diarioReportes"
               label="Diario"
@@ -148,43 +272,131 @@ const ReportePage: React.FC = () => {
                 sx={{ flexWrap: "wrap" }}
               >
                 {/* RACIONES */}
-                <Card sx={{ minWidth: 200, flexGrow: 1 }}>
+                <Card
+                  sx={{
+                    minWidth: 250,
+                    flexGrow: 1,
+                    backgroundColor: "#f9f9f9",
+                    boxShadow: 3,
+                    borderRadius: 3,
+                  }}
+                >
                   <CardContent>
-                    <Typography variant="h6" className="titulo-Reportes">
-                      Raciones
-                    </Typography>
+                    {/* Encabezado */}
+                    <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+                      <Typography
+                        variant="h6"
+                        className="titulo-Reportes"
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
+                        <FoodBankOutlinedIcon
+                          sx={{ color: "#F57C00", fontSize: 28 }}
+                        />
+                        Raciones
+                      </Typography>
+                    </Box>
+
+                    {/* Fecha */}
                     <Typography
                       variant="body1"
-                      sx={{ mb: 2, fontWeight: "bold" }}
+                      sx={{
+                        mb: 2,
+                        fontWeight: "bold",
+                        fontStyle: "italic",
+                        fontSize: 15,
+                        textAlign: "center",
+                      }}
                     >
                       Día de hoy: {diaDeHoy}
                     </Typography>
-                    <Typography variant="body2">
-                      Total: {racionPorDia?.totalRacionPorDia ?? "Sin datos"}
-                    </Typography>
+
+                    {/* Resultado */}
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        flexDirection: "column",
+                        mt: 2,
+                      }}
+                    >
+                      <FoodBankOutlinedIcon
+                        sx={{ color: "#F57C00", fontSize: 60, mb: 1 }}
+                      />
+                      <Typography
+                        variant="h4"
+                        sx={{
+                          fontWeight: "bold",
+                          color: "#333",
+                          textAlign: "center",
+                        }}
+                      >
+                        {racionPorDia?.totalRacionPorDia ?? "Sin datos"}{" "}
+                        raciones
+                      </Typography>
+                    </Box>
                   </CardContent>
                 </Card>
 
                 {/* PRESUPUESTO */}
-                <Card sx={{ minWidth: 200, flexGrow: 1 }}>
+                <Card
+                  sx={{
+                    minWidth: 250,
+                    flexGrow: 1,
+                    backgroundColor: "#f9f9f9",
+                    boxShadow: 3,
+                    borderRadius: 3,
+                    p: 1,
+                  }}
+                >
                   <CardContent>
-                    <Typography variant="h6" className="titulo-Reportes">
+                    <Typography
+                      variant="h6"
+                      className="titulo-Reportes"
+                      align="center"
+                      sx={{ mb: 2 }}
+                    >
                       Ingresos y egresos
                     </Typography>
+
                     {presupuestoPorDia ? (
-                      <>
-                        <Typography variant="body2">
-                          Ingresos: {presupuestoPorDia.ingresosHoy}
-                        </Typography>
-                        <Typography variant="body2">
-                          Egresos: {presupuestoPorDia.egresosHoy}
-                        </Typography>
-                        <Typography variant="body2">
-                          Saldo final: {presupuestoPorDia.saldoFinal}
-                        </Typography>
-                      </>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          gap: 1.5,
+                        }}
+                      >
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                          <AttachMoneyIcon
+                            sx={{ color: "green", fontSize: 30, mr: 1 }}
+                          />
+                          <Typography fontSize={18} fontWeight="bold">
+                            Ingresos: S/ {presupuestoPorDia.ingresosHoy}
+                          </Typography>
+                        </Box>
+
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                          <MoneyOffIcon
+                            sx={{ color: "red", fontSize: 30, mr: 1 }}
+                          />
+                          <Typography fontSize={18} fontWeight="bold">
+                            Egresos: S/ {presupuestoPorDia.egresosHoy}
+                          </Typography>
+                        </Box>
+
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                          <AccountBalanceIcon
+                            sx={{ color: "#F57C00", fontSize: 30, mr: 1 }}
+                          />
+                          <Typography fontSize={18} fontWeight="bold">
+                            Saldo final: S/ {presupuestoPorDia.saldoFinal}
+                          </Typography>
+                        </Box>
+                      </Box>
                     ) : (
-                      <Typography variant="body2">
+                      <Typography variant="body2" align="center">
                         No hay datos disponibles.
                       </Typography>
                     )}
@@ -192,22 +404,76 @@ const ReportePage: React.FC = () => {
                 </Card>
 
                 {/* PRODUCTOS */}
-                <Card sx={{ minWidth: 200, flexGrow: 1 }}>
+                <Card
+                  sx={{
+                    minWidth: 250,
+                    flexGrow: 1,
+                    backgroundColor: "#f5f5f5",
+                    boxShadow: 3,
+                    borderRadius: 3,
+                    p: 1,
+                  }}
+                >
                   <CardContent>
-                    <Typography variant="h6" className="titulo-Reportes">
-                      Productos prontos a vencer
-                    </Typography>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        mb: 2,
+                        gap: 1,
+                      }}
+                    >
+                      <WarningAmberOutlinedIcon
+                        sx={{ color: "#F57C00", fontSize: 28 }}
+                      />
+                      <Typography variant="h6" className="titulo-Reportes">
+                        Productos prontos a vencer
+                      </Typography>
+                    </Box>
+
                     {productosPorDia.length > 0 ? (
-                      productosPorDia.map((producto, index) => (
-                        <Typography variant="body2" key={index}>
-                          {producto.descripcionProducto} - vence el{" "}
-                          {new Date(
-                            producto.expirationDate
-                          ).toLocaleDateString()}
-                        </Typography>
-                      ))
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 1,
+                          alignItems: "center",
+                        }}
+                      >
+                        {productosPorDia.map((producto, index) => (
+                          <Box
+                            key={index}
+                            sx={{
+                              backgroundColor: "#fff",
+                              padding: "8px 12px",
+                              borderRadius: "8px",
+                              boxShadow: 1,
+                              width: "100%",
+                              textAlign: "center",
+                            }}
+                          >
+                            <Typography variant="body2" fontWeight="bold">
+                              {producto.descripcionProducto}
+                            </Typography>
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
+                              Vence:{" "}
+                              {new Date(
+                                producto.expirationDate
+                              ).toLocaleDateString("es-PE")}
+                            </Typography>
+                          </Box>
+                        ))}
+                      </Box>
                     ) : (
-                      <Typography variant="body2">
+                      <Typography
+                        variant="body2"
+                        align="center"
+                        sx={{ mt: 2, fontStyle: "italic", color: "gray" }}
+                      >
                         No hay productos por vencer.
                       </Typography>
                     )}
@@ -215,22 +481,51 @@ const ReportePage: React.FC = () => {
                 </Card>
 
                 {/* BENEFICIARIOS  */}
-                <Card sx={{ minWidth: 200, flexGrow: 1 }}>
+                <Card
+                  sx={{
+                    minWidth: 250,
+                    flexGrow: 1,
+                    backgroundColor: "#f5f5f5",
+                    borderRadius: 3,
+                    boxShadow: 3,
+                    p: 1,
+                  }}
+                >
                   <CardContent>
-                    <Typography variant="h6" className="titulo-Reportes">
-                      Beneficiarios atendidos
-                    </Typography>
-                    {beneficiariosPorDia.length > 0 ? (
-                      beneficiariosPorDia.map((b, index) => (
-                        <Typography variant="body2" key={index}>
-                          Total atendidos: {b.beneficiariosPorDia}
-                        </Typography>
-                      ))
-                    ) : (
-                      <Typography variant="body2">
-                        No hay beneficiarios registrados hoy.
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        mb: 2,
+                        gap: 1,
+                      }}
+                    >
+                      <Typography variant="h6" className="titulo-Reportes">
+                        Beneficiarios atendidos
                       </Typography>
-                    )}
+                    </Box>
+
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        gap: 1,
+                        mt: 2,
+                        padding: 3,
+                      }}
+                    >
+                      <GroupsIcon sx={{ color: "#F57C00", fontSize: 70 }} />
+                      <Typography
+                        variant="h5"
+                        sx={{ fontWeight: "bold", color: "#333", fontSize: 26 }}
+                      >
+                        {beneficiariosPorDia.length > 0
+                          ? `${beneficiariosPorDia[0].beneficiariosPorDia} beneficiarios`
+                          : "Sin datos"}
+                      </Typography>
+                    </Box>
                   </CardContent>
                 </Card>
               </Stack>
@@ -245,54 +540,247 @@ const ReportePage: React.FC = () => {
                 useFlexGap
                 sx={{ flexWrap: "wrap" }}
               >
-                {/* Tarjetas semanales */}
-                <Card sx={{ minWidth: 200, flexGrow: 1 }}>
+                {/********************************* Tarjetas semanales **************************/}
+                <Card
+                  sx={{
+                    minWidth: 250,
+                    flexGrow: 1,
+                    bgcolor: "#f5f5f5",
+                    borderRadius: 3,
+                    boxShadow: 2,
+                    p: 2,
+                  }}
+                >
                   <CardContent>
-                    <Typography variant="h6" className="titulo-Reportes">
+                    <Typography
+                      variant="h6"
+                      className="titulo-Reportes"
+                      sx={{ mb: 1 }}
+                    >
                       Raciones por días
                     </Typography>
-                    <Typography variant="body2">
-                      Descripción del contenido
-                    </Typography>
+
+                    {chartData.length === 0 ? (
+                      <Typography variant="body2" color="text.secondary">
+                        No hay datos disponibles para esta semana.
+                      </Typography>
+                    ) : (
+                      <PieChart
+                        series={[
+                          {
+                            data: chartData,
+                            highlightScope: { highlight: "item" },
+                            faded: { additionalRadius: -5, color: "gray" },
+                            arcLabel: (item) => `${item.value}`,
+                          },
+                        ]}
+                        height={300}
+                        width={300}
+                      />
+                    )}
                   </CardContent>
                 </Card>
 
-                <Card sx={{ minWidth: 200, flexGrow: 1 }}>
+                <Card
+                  sx={{
+                    minWidth: 250,
+                    flexGrow: 1,
+                    bgcolor: "#f9f9f9",
+                    borderRadius: 3,
+                    boxShadow: 3,
+                  }}
+                >
                   <CardContent>
-                    <Typography variant="h6" className="titulo-Reportes">
+                    <Typography
+                      variant="h6"
+                      className="titulo-Reportes"
+                      sx={{ mb: 2 }}
+                    >
                       Ingresos y egresos de la semana
                     </Typography>
-                    <Typography variant="body2">
-                      Descripción del contenido
-                    </Typography>
+
+                    {presupuestoPorSemana.filter(
+                      (p) =>
+                        p.ingresosPorDia !== 0 ||
+                        p.egresosPorDia !== 0 ||
+                        p.saldoPorDia !== 0
+                    ).length > 0 ? (
+                      presupuestoPorSemana
+                        .filter(
+                          (p) =>
+                            p.ingresosPorDia !== 0 ||
+                            p.egresosPorDia !== 0 ||
+                            p.saldoPorDia !== 0
+                        )
+                        .map((p, index) => (
+                          <Box
+                            key={index}
+                            sx={{
+                              backgroundColor: "#fff",
+                              borderRadius: 2,
+                              p: 2,
+                              mb: 1,
+                              boxShadow: 1,
+                            }}
+                          >
+                            <Typography
+                              variant="subtitle2"
+                              sx={{ color: "#555", mb: 1 }}
+                            >
+                              {p.dia} ({p.fecha})
+                            </Typography>
+
+                            <Typography
+                              variant="body2"
+                              sx={{ color: "green", fontWeight: 500 }}
+                            >
+                              Ingresos: S/ {p.ingresosPorDia}
+                            </Typography>
+                            <Typography
+                              variant="body2"
+                              sx={{ color: "red", fontWeight: 500 }}
+                            >
+                              Egresos: S/ {p.egresosPorDia}
+                            </Typography>
+                            <Typography
+                              variant="body2"
+                              sx={{ color: "#F57C00", fontWeight: "bold" }}
+                            >
+                              Saldo: S/ {p.saldoPorDia}
+                            </Typography>
+                          </Box>
+                        ))
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">
+                        No hay datos disponibles para esta semana.
+                      </Typography>
+                    )}
                   </CardContent>
                 </Card>
 
-                <Card sx={{ minWidth: 200, flexGrow: 1 }}>
+                <Card
+                  sx={{
+                    minWidth: 250,
+                    flexGrow: 1,
+                    bgcolor: "#f9f9f9",
+                    borderRadius: 3,
+                    boxShadow: 3,
+                  }}
+                >
                   <CardContent>
-                    <Typography variant="h6" className="titulo-Reportes">
+                    <Typography
+                      variant="h6"
+                      className="titulo-Reportes"
+                      sx={{ mb: 2 }}
+                    >
                       Productos prontos a vencer
                     </Typography>
-                    <Typography variant="body2">
-                      Descripción del contenido
-                    </Typography>
+
+                    {productosPorSemana.length > 0 ? (
+                      productosPorSemana.map((producto, index) => (
+                        <Box
+                          key={index}
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 1.5,
+                            backgroundColor: "#fff",
+                            borderRadius: 2,
+                            p: 2,
+                            mb: 1,
+                            boxShadow: 1,
+                          }}
+                        >
+                          <WarningAmberOutlinedIcon sx={{ color: "#f57c00" }} />
+                          <Box>
+                            <Typography
+                              variant="body1"
+                              sx={{ fontWeight: 500 }}
+                            >
+                              {producto.descripcionProducto}
+                            </Typography>
+                            <Typography
+                              variant="caption"
+                              sx={{ color: "#f57c00", fontStyle: "italic" }}
+                            >
+                              Vence: {producto.diaVencimientos},{" "}
+                              {producto.fechaVencimiento}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      ))
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">
+                        No hay productos por vencer esta semana.
+                      </Typography>
+                    )}
                   </CardContent>
                 </Card>
 
-                <Card sx={{ minWidth: 200, flexGrow: 1 }}>
+                <Card
+                  sx={{
+                    minWidth: 250,
+                    flexGrow: 1,
+                    bgcolor: "#f5f5f5", // Fondo gris claro
+                    borderRadius: 3,
+                    boxShadow: 2,
+                    p: 2,
+                  }}
+                >
                   <CardContent>
-                    <Typography variant="h6" className="titulo-Reportes">
+                    <Typography
+                      variant="h6"
+                      className="titulo-Reportes"
+                      sx={{ mb: 1 }}
+                    >
                       Beneficiarios atendidos por días
                     </Typography>
-                    <Typography variant="body2">
-                      Descripción del contenido
-                    </Typography>
+
+                    {beneficiariosChartData.length > 0 ? (
+                      <BarChart
+                        height={300}
+                        xAxis={[
+                          {
+                            data: beneficiariosChartData.map((d) => d.label),
+                            scaleType: "band",
+                          },
+                        ]}
+                        series={[
+                          {
+                            data: beneficiariosChartData.map((d) => d.value),
+                            label: "Beneficiarios",
+                            color: "#F57C00",
+                          },
+                        ]}
+                        barLabel="value"
+                        sx={{
+                          "& .MuiChartsLegend-root": {
+                            fontSize: 16,
+                          },
+                        }}
+                      />
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">
+                        No hay datos registrados esta semana.
+                      </Typography>
+                    )}
                   </CardContent>
                 </Card>
               </Stack>
             </Box>
           </TabPanel>
         </TabContext>
+        <Box sx={{ display: "flex", justifyContent: "flex-start", pl: 4 }}>
+          <Button
+            variant="contained"
+            color="warning"
+            startIcon={<ArrowBackIcon />}
+            sx={{ fontWeight: "bold" }}
+            onClick={() => navigate("/profile")}
+          >
+            REGRESAR AL MENÚ
+          </Button>
+        </Box>
       </Box>
     </Stack>
   );

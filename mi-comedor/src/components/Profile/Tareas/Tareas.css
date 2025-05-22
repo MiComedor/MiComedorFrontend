@@ -40,11 +40,16 @@
 }
 
 @media (max-width: 600px) {
-    .form-group-tareas {
-        width: 100%;
+    .formulario-tareas {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
     }
 
-    .form-input {
+    .form-group-tareas {
         width: 100%;
+        max-width: 300px;
+
     }
 }

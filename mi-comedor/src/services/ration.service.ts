@@ -45,7 +45,7 @@ class RationService {
 
   racionesPorSemana = async (id: number): Promise<RationByWeek[]> => {
     const response = await api.get<RationByWeek[]>(
-      `${API_URL}/reporteTotalRacionesBeneficiariosSemana/${id}`
+      `${API_URL}/reporteRacionesSemanalesDiario/${id}`
     );
     return response.data;
   };

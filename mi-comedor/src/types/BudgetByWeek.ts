@@ -1,4 +1,4 @@
-export default interface BugdetByWeek {
+export interface BugdetByWeek {
   fecha: string;
   dia: string;
   fechasDiaMes: string;

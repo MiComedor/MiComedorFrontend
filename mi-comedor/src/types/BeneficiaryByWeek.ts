@@ -3,3 +3,4 @@ export default interface BeneficiaryByWeek {
   fecha: string;
   totalBeneficiarios: number;
 }
+ 
