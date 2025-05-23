@@ -10,8 +10,8 @@ export interface Product {
 }
 
 export interface ProductListResponse {
-  productType_id: string;
-  unitOfMeasurement_id: string;
+  productType_id: number;               // ← CORREGIDO
+  unitOfMeasurement_id: number;         // ← CORREGIDO
   idProduct: number;
   descriptionProduct: string;
   amountProduct: number;
@@ -20,3 +20,5 @@ export interface ProductListResponse {
   expirationDate: string | null;
   user_id: number;
 }
+
+

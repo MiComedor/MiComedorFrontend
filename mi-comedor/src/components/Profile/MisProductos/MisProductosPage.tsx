@@ -102,13 +102,20 @@ const MisProductosPage: React.FC = () => {
       .catch((error: unknown) => console.error("Error al cargar tipos de producto:", error));
 
     ProductService.listarPorUsuario(USER_ID)
-      .then((productos) => {
-      const productosOrdenados = productos.sort(
+    .then((productos) => {
+      const productosConIDs = productos.map((p) => ({
+        ...p,
+        unitOfMeasurement_id: unidades.find(u => u.abbreviation === p.unitOfMeasurementAbbreviation)?.idUnitOfMeasurement ?? p.unitOfMeasurement_id,
+        productType_id: tiposProducto.find(t => t.nameProductType === p.productTypeName)?.idProductType ?? p.productType_id
+      }));
+
+      const productosOrdenados = productosConIDs.sort(
         (a, b) => b.idProduct - a.idProduct
       );
+
       setProductos(productosOrdenados);
-      })
-      .catch((error) => console.error("❌ Error al listar productos:", error));
+    })
+
   }, []);
 
   
@@ -472,21 +479,22 @@ const MisProductosPage: React.FC = () => {
               />
             </TableContainer>
 
-            {productoAEditar !== null && (
+            {productoAEditar && unidades.length > 0 && tiposProducto.length > 0 && (
               <EditProductDialog
+                open={true}
                 producto={productoAEditar}
                 onClose={() => setProductoAEditar(null)}
+                unidades={unidades}
+                tipos={tiposProducto}
                 onSuccess={async () => {
                   const productosActualizados = await ProductService.listarPorUsuario(USER_ID);
                   setProductos(productosActualizados.sort((a, b) => b.idProduct - a.idProduct));
                   setMensajeExito("✅ Producto actualizado exitosamente");
                   setProductoAEditar(null);
                 }}
-                open={true}                    // ✅ El diálogo se muestra
-                unidades={unidades}           // ✅ Unidades cargadas desde el estado
-                tipos={tiposProducto}         // ✅ Tipos cargados desde el estado
               />
             )}
+
 
 
             {productoAEliminar && (
