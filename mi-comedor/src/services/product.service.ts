@@ -1,4 +1,4 @@
-import axios from "axios";
+
 import api from "../axiosInstance";
 import { Product, ProductListResponse } from "../types/product";
 import ProductsByDay from "../types/ProductsByDay";
