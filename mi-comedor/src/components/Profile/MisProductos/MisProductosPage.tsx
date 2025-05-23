@@ -188,6 +188,7 @@ const MisProductosPage: React.FC = () => {
                       <Field name="descriptionProduct">
                         {({ field }: FieldProps) => (
                           <TextField
+                          
                             {...field}
                             className="form-input"
                             error={
@@ -443,7 +444,7 @@ const MisProductosPage: React.FC = () => {
                       <TableCell>
                         {prod.expirationDate
                           ? dayjs(prod.expirationDate).format("DD-MM-YYYY")
-                          : "—"}
+                          : "Sin fecha de vencimiento"}
                       </TableCell>
                       <TableCell>
                         <IconButton
