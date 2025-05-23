@@ -15,11 +15,16 @@ import { ProductType } from "../../../types/product.type";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { MobileDatePicker } from "@mui/x-date-pickers";
-import dayjs from "dayjs";
-import "dayjs/locale/es";
-import CloseIcon from "@mui/icons-material/Close";
+import ClearIcon from "@mui/icons-material/Clear";
 import CheckIcon from "@mui/icons-material/Check";
 import ProductService from "../../../services/product.service";
+import dayjs from "dayjs";
+import "dayjs/locale/es";
+import "./EditProductDialog.css";
+
+
+
+
 
 type FormProductoValues = {
   descriptionProduct: string;
@@ -57,21 +62,21 @@ export default function EditProductDialog({
   onSuccess,
 }: Props) {
   const unidadSeleccionada = unidades.find(
-    (u) => u.idUnitOfMeasurement === Number(producto.unitOfMeasurement_id)
-  );
+  (u) => u.idUnitOfMeasurement === Number(producto.unitOfMeasurement_id)
+);
 
-  const tipoSeleccionado = tipos.find(
-    (t) => t.idProductType === Number(producto.productType_id)
-  );
+const tipoSeleccionado = tipos.find(
+  (t) => t.idProductType === Number(producto.productType_id)
+);
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth>
-      <DialogTitle sx={{ fontWeight: "bold", fontSize: 22, backgroundColor: "#E4FAA4" }}>
-        Editar producto
+    <Dialog open={open} onClose={onClose} fullWidth >
+      <DialogTitle sx={{ fontWeight: "bold", fontSize: 24 }}>
+        Editar Producto
       </DialogTitle>
 
       <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
-        <Formik<FormProductoValues>
+        <Formik<FormProductoValues >
           enableReinitialize
           initialValues={{
             descriptionProduct: producto.descriptionProduct,
@@ -98,18 +103,23 @@ export default function EditProductDialog({
         >
           {({ values, touched, errors, setFieldValue }) => (
             <Form>
-              <DialogContent sx={{ backgroundColor: "#E4FAA4", pb: 1 }}>
+              <DialogContent>
                 <TextField
                   label="Descripción"
                   name="descriptionProduct"
                   fullWidth
                   margin="dense"
                   value={values.descriptionProduct}
-                  onChange={(e) => setFieldValue("descriptionProduct", e.target.value)}
-                  error={touched.descriptionProduct && Boolean(errors.descriptionProduct)}
-                  helperText={touched.descriptionProduct && errors.descriptionProduct}
-                  sx={{ borderRadius: 3, backgroundColor: "white" }}
-                  InputProps={{ style: { borderRadius: 15 } }}
+                  onChange={(e) =>
+                    setFieldValue("descriptionProduct", e.target.value)
+                  }
+                  error={
+                    touched.descriptionProduct &&
+                    Boolean(errors.descriptionProduct)
+                  }
+                  helperText={
+                    touched.descriptionProduct && errors.descriptionProduct
+                  }
                 />
 
                 <TextField
@@ -119,10 +129,40 @@ export default function EditProductDialog({
                   margin="dense"
                   value={values.amountProduct}
                   onChange={(e) => setFieldValue("amountProduct", e.target.value)}
-                  error={touched.amountProduct && Boolean(errors.amountProduct)}
+                  error={
+                    touched.amountProduct && Boolean(errors.amountProduct)
+                  }
                   helperText={touched.amountProduct && errors.amountProduct}
-                  sx={{ borderRadius: 3, backgroundColor: "white" }}
-                  InputProps={{ style: { borderRadius: 15 } }}
+                />
+
+                <Autocomplete
+                  options={unidades}
+                  getOptionLabel={(opt) => opt.name}
+                  isOptionEqualToValue={(opt, val) =>
+                    opt.idUnitOfMeasurement === val?.idUnitOfMeasurement
+                  }
+                  value={values.unitOfMeasurement}
+                  onChange={(_, value) =>
+                    setFieldValue("unitOfMeasurement", value)
+                  }
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Unidad de medida"
+                      margin="dense"
+                      fullWidth
+                      error={
+                        touched.unitOfMeasurement &&
+                        Boolean(errors.unitOfMeasurement)
+                      }
+                      helperText={
+                        touched.unitOfMeasurement &&
+                        typeof errors.unitOfMeasurement === "string"
+                          ? errors.unitOfMeasurement
+                          : ""
+                      }
+                    />
+                  )}
                 />
 
                 <Autocomplete
@@ -132,28 +172,37 @@ export default function EditProductDialog({
                     opt.idProductType === val?.idProductType
                   }
                   value={values.productType}
-                  onChange={(_, value) => setFieldValue("productType", value)}
+                  onChange={(_, value) =>
+                    setFieldValue("productType", value)
+                  }
                   renderInput={(params) => (
                     <TextField
                       {...params}
                       label="Tipo de producto"
                       margin="dense"
                       fullWidth
-                      error={touched.productType && Boolean(errors.productType)}
-                      helperText={touched.productType && errors.productType}
-                      sx={{ backgroundColor: "white" }}
-                      InputProps={{
-                        ...params.InputProps,
-                        style: { borderRadius: 15 },
-                      }}
+                      error={
+                        touched.productType && Boolean(errors.productType)
+                      }
+                      helperText={
+                        touched.productType &&
+                        typeof errors.productType === "string"
+                          ? errors.productType
+                          : ""
+                      }
                     />
                   )}
                 />
 
-                {values.productType?.nameProductType.toLowerCase() === "perecible" && (
+                {values.productType?.nameProductType.toLowerCase() ===
+                  "perecible" && (
                   <MobileDatePicker
                     label="Fecha de vencimiento"
-                    value={values.expirationDate ? dayjs(values.expirationDate) : null}
+                    value={
+                      values.expirationDate
+                        ? dayjs(values.expirationDate)
+                        : null
+                    }
                     onChange={(newDate) =>
                       setFieldValue(
                         "expirationDate",
@@ -164,57 +213,23 @@ export default function EditProductDialog({
                       textField: {
                         margin: "dense",
                         fullWidth: true,
-                        sx: { backgroundColor: "white" },
-                        InputProps: { style: { borderRadius: 15 } },
                       },
                     }}
                   />
                 )}
               </DialogContent>
 
-              <DialogActions
-                sx={{
-                  backgroundColor: "#E4FAA4",
-                  justifyContent: "center",
-                  gap: 4,
-                  pb: 2,
-                }}
-              >
-                <Button
-                  onClick={onClose}
-                  variant="contained"
-                  sx={{
-                    backgroundColor: "#FF0000",
-                    color: "white",
-                    width: 60,
-                    height: 60,
-                    minWidth: "unset",
-                    borderRadius: 1,
-                    "&:hover": {
-                      backgroundColor: "#cc0000",
-                    },
-                  }}
-                >
-                  <CloseIcon sx={{ fontSize: 36 }} />
+              
+
+              <DialogActions className="edit-actions">
+                <Button onClick={onClose} className="edit-button cancel">
+                  <ClearIcon  sx={{ fontSize: 36 }}  />
                 </Button>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  sx={{
-                    backgroundColor: "#1976D2",
-                    color: "white",
-                    width: 60,
-                    height: 60,
-                    minWidth: "unset",
-                    borderRadius: 1,
-                    "&:hover": {
-                      backgroundColor: "#155a9c",
-                    },
-                  }}
-                >
-                  <CheckIcon sx={{ fontSize: 36 }} />
+                <Button type="submit" className="edit-button save">
+                  <CheckIcon  sx={{ fontSize: 36 }}/>
                 </Button>
               </DialogActions>
+
             </Form>
           )}
         </Formik>

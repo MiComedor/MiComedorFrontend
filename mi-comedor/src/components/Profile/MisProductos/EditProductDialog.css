@@ -1,0 +1,64 @@
+/* Estilo general del diálogo */
+.edit-dialog-content {
+  background-color: #E4FAA4;
+  padding: 20px;
+}
+
+/* Contenedor de botones de acción */
+.edit-actions {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+/* Botones */
+.edit-button {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  min-width: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.edit-button.cancel {
+  background-color: #FF0000;
+  color: #fff;
+}
+
+.edit-button.save {
+  background-color: #1976D2;
+  color: #fff;
+}
+
+/* Responsive para móviles pequeños */
+@media (max-width: 480px) {
+  .MuiDialog-paper {
+    margin: 8px !important;
+    width: calc(100% - 16px);
+  }
+
+  .edit-dialog-content {
+    padding: 16px;
+  }
+
+  .edit-button {
+    width: 56px;
+    height: 56px;
+  }
+
+  .MuiDialogTitle-root {
+    font-size: 20px;
+    text-align: center;
+  }
+
+  .MuiTextField-root {
+    width: 100% !important;
+  }
+}

@@ -176,10 +176,11 @@ const MisProductosPage: React.FC = () => {
               {({ errors, touched }) => (
                 <Form>
                   <Stack
-                    direction="row"
+                    direction={{ xs: "column", sm: "row" }} // columna en pantallas chicas
                     spacing={2}
                     justifyContent="center"
-                    alignItems="flex-end"
+                    alignItems="stretch"
+                    sx={{ width: "100%" }}
                   >
 
                     <div className="form-group-productos">
