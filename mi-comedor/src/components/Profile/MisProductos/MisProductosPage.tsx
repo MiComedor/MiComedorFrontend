@@ -41,7 +41,8 @@ import ProductTypeService from "../../../services/productType.service";
 import ProductService from "../../../services/product.service";
 import { getImageForDescription } from "./ProductImages";
 import { ProductListResponse } from "../../../types/product";
-
+import DeleteProductsDialog from "./DeleteProductsDialog";
+import EditProductDialog from "./EditProductDialog";
 const userStr = localStorage.getItem("user");
 const user = userStr ? JSON.parse(userStr) : null;
 const USER_ID = user?.idUser;
@@ -78,6 +79,9 @@ const MisProductosPage: React.FC = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [mensajeExito, setMensajeExito] = useState<string | null>(null);
+  const [productoAEditar, setProductoAEditar] = useState<ProductListResponse | null>(null);
+  const [productoAEliminar, setProductoAEliminar] = useState<ProductListResponse | null>(null);
+
 
   useEffect(() => {
   if (mensajeExito) {
@@ -434,13 +438,20 @@ const MisProductosPage: React.FC = () => {
                           : "—"}
                       </TableCell>
                       <TableCell>
-                        <IconButton color="primary">
+                        <IconButton
+                          color="primary"
+                          onClick={() => setProductoAEditar(prod)}
+                        >
                           <EditIcon />
                         </IconButton>
-                        <IconButton color="error">
+                        <IconButton
+                          color="error"
+                          onClick={() => setProductoAEliminar(prod)}
+                        >
                           <DeleteIcon />
                         </IconButton>
                       </TableCell>
+
                     </TableRow>
                   ))}
                 </TableBody>
@@ -460,7 +471,37 @@ const MisProductosPage: React.FC = () => {
                 }
               />
             </TableContainer>
-        
+
+            {productoAEditar !== null && (
+              <EditProductDialog
+                producto={productoAEditar}
+                onClose={() => setProductoAEditar(null)}
+                onSuccess={async () => {
+                  const productosActualizados = await ProductService.listarPorUsuario(USER_ID);
+                  setProductos(productosActualizados.sort((a, b) => b.idProduct - a.idProduct));
+                  setMensajeExito("✅ Producto actualizado exitosamente");
+                  setProductoAEditar(null);
+                }}
+                open={true}                    // ✅ El diálogo se muestra
+                unidades={unidades}           // ✅ Unidades cargadas desde el estado
+                tipos={tiposProducto}         // ✅ Tipos cargados desde el estado
+              />
+            )}
+
+
+            {productoAEliminar && (
+              <DeleteProductsDialog
+                producto={productoAEliminar}
+                onClose={() => setProductoAEliminar(null)}
+                onDeleted={async () => {
+                  const productosActualizados = await ProductService.listarPorUsuario(USER_ID);
+                  setProductos(productosActualizados.sort((a, b) => b.idProduct - a.idProduct));
+                  setProductoAEliminar(null);
+                  setMensajeExito("🗑️ Producto eliminado exitosamente");
+                }}
+              />
+            )}
+
           </Box>
 
           {/* Botón de regresar */}

@@ -1,3 +1,4 @@
+import axios from "axios";
 import api from "../axiosInstance";
 import { Product, ProductListResponse } from "../types/product";
 import ProductsByDay from "../types/ProductsByDay";
@@ -23,11 +24,12 @@ class ProductService {
     await api.delete(`${API_URL}/${id}`);
   };
 
-  actualizar = async (product: Product): Promise<void> => {
-    await api.put(API_URL, product);
-  };
+  async actualizar(id: number, data: any) {
+  return api.put(`${API_URL}/${id}`, data);
+}
 
-  obtenerPorId = async (id: number): Promise<ProductListResponse> => {
+
+  obtenerPorId = async function (id: number): Promise<ProductListResponse> {
     const response = await api.get<ProductListResponse>(`${API_URL}/${id}`);
     return response.data;
   };

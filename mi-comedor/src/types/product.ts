@@ -10,6 +10,8 @@ export interface Product {
 }
 
 export interface ProductListResponse {
+  productType_id: string;
+  unitOfMeasurement_id: string;
   idProduct: number;
   descriptionProduct: string;
   amountProduct: number;
