@@ -515,16 +515,17 @@ const MisProductosPage: React.FC = () => {
           </Box>
 
           {/* Botón de regresar */}
-          <Box>
-            <Button
-              variant="contained"
-              color="warning"
-              startIcon={<ArrowBackIcon />}
-              sx={{ fontWeight: "bold" }}
-            >
-              REGRESAR AL MENÚ
-            </Button>
-          </Box>
+            <Box sx={{ pt: 4 }}>
+              <Button
+                variant="contained"
+                color="warning"
+                startIcon={<ArrowBackIcon />}
+                sx={{ fontWeight: "bold" }}
+                href="/profile"
+                >
+                  REGRESAR AL MENÚ
+              </Button>
+            </Box>
         </Stack>
       </Box>
     </LocalizationProvider>

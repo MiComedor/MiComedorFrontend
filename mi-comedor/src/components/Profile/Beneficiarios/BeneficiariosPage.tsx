@@ -15,6 +15,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import CheckIcon from "@mui/icons-material/Check";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import BeneficiaryService from "../../../services/beneficiary.service";
@@ -337,8 +338,23 @@ const BeneficiariosPage: React.FC = () => {
               </Button>
             </Stack>
           </Box>
+
+          
         ))}
       </Stack>
+
+      {/* Botón de regresar */}
+                <Box sx={{ pt: 4 }}>
+                  <Button
+                    variant="contained"
+                    color="warning"
+                    startIcon={<ArrowBackIcon />}
+                    sx={{ fontWeight: "bold" }}
+                    href="/profile"
+                  >
+                    REGRESAR AL MENÚ
+                  </Button>
+                </Box>
 
       {/* DIÁLOGOS DE EDITAR / ELIMINAR */}
       {beneficiarioAEditar && (
