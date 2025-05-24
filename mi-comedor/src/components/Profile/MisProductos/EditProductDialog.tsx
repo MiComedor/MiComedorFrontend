@@ -273,36 +273,38 @@ const tipoSeleccionado = tipos.find(
           )}
           </DialogContent>
 
-          <DialogActions sx={{ justifyContent: "center", gap: 2, mt: 1 }}>
-          <Button
-            onClick={onClose}
-            sx={{
-            backgroundColor: "red",
-            color: "white",
-            minWidth: 40,
-            width: 40,
-            height: 40,
-            borderRadius: 1,
-            "&:hover": { backgroundColor: "#b71c1c" },
-            }}
-          >
-            <ClearIcon sx={{ fontSize: 24 }} />
-          </Button>
-          <Button
-            type="submit"
-            sx={{
-            backgroundColor: "#1976D2",
-            color: "white",
-            minWidth: 40,
-            width: 40,
-            height: 40,
-            borderRadius: 1,
-            "&:hover": { backgroundColor: "#0d47a1" },
-            }}
-          >
-            <CheckIcon sx={{ fontSize: 24 }} />
-          </Button>
-          </DialogActions>
+            <DialogActions sx={{ justifyContent: "center", gap: 4, mt: 1, pb: 3 }}>
+              <Button
+              onClick={onClose}
+              sx={{
+              backgroundColor: "red",
+              color: "white",
+              minWidth: 48,
+              width: 48,
+              height: 48,
+              borderRadius: 1,
+              mx: 1.5,
+              "&:hover": { backgroundColor: "#b71c1c" },
+              }}
+              >
+              <ClearIcon sx={{ fontSize: 32 }} />
+              </Button>
+              <Button
+              type="submit"
+              sx={{
+              backgroundColor: "#1976D2",
+              color: "white",
+              minWidth: 48,
+              width: 48,
+              height: 48,
+              borderRadius: 1,
+              mx: 1.5,
+              "&:hover": { backgroundColor: "#0d47a1" },
+              }}
+              >
+              <CheckIcon sx={{ fontSize: 32 }} />
+              </Button>
+            </DialogActions>
         </Form>
         )}
       </Formik>
