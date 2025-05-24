@@ -26,9 +26,13 @@ import DeleteBeneficiariosDialog from "./DeleteBeneficariosDialog";
 
 const validationSchema = Yup.object({
   fullnameBenefeciary: Yup.string().required("Campo obligatorio"),
-  dniBenefeciary: Yup.string().required("Campo obligatorio"),
+  dniBenefeciary: Yup.string()
+    .required("Campo obligatorio")
+    .matches(/^\d{8}$/, "Debe tener exactamente 8 dígitos numéricos")
+    .matches(/^[0-9]+$/, "Solo se permiten números"),
   ageBeneficiary: Yup.number()
     .typeError("Debe ser un número")
+    .integer("Debe ser un número entero")
     .positive("Debe ser positivo")
     .required("Campo obligatorio"),
   observationsBeneficiary: Yup.string(),
@@ -217,25 +221,70 @@ const BeneficiariosPage: React.FC = () => {
                   ].map(({ name, label, type }) => (
                     <Box key={name}>
                       <label className="titulo-arriba-form">{label}</label>
-                      <TextField
-                        name={name}
-                        variant="outlined"
-                        fullWidth
-                        required
-                        type={type || "text"}
-                        value={(values as any)[name]}
-                        onChange={handleChange}
-                        error={touched[name as keyof FormValues] && Boolean(errors[name as keyof FormValues])}
-                        helperText={touched[name as keyof FormValues] && errors[name as keyof FormValues]}
-                        InputProps={{
-                          sx: {
-                            backgroundColor: "#fff",
-                            borderRadius: "15px",
-                            boxShadow: "2px 2px 5px rgba(0,0,0,0.1)",
-                            border: "none",
-                          },
-                        }}
-                      />
+                      {name === "dniBenefeciary" ? (
+                  <TextField
+                    name={name}
+                    variant="outlined"
+                    fullWidth
+                    required
+                    type="text"
+                    value={(values as any)[name]}
+                    onChange={(e) => {
+                      const onlyNums = e.target.value.replace(/[^0-9]/g, "");
+                      handleChange({
+                        target: {
+                          name,
+                          value: onlyNums,
+                        },
+                      });
+                    }}
+                    inputProps={{ maxLength: 8 }}
+                    error={
+                      touched[name as keyof FormValues] &&
+                      Boolean(errors[name as keyof FormValues])
+                    }
+                    helperText={
+                      touched[name as keyof FormValues] &&
+                      errors[name as keyof FormValues]
+                    }
+                    InputProps={{
+                      sx: {
+                        backgroundColor: "#fff",
+                        borderRadius: "15px",
+                        boxShadow: "2px 2px 5px rgba(0,0,0,0.1)",
+                        border: "none",
+                      },
+                    }}
+                  />
+                ) : (
+                  // Campo genérico para fullname y edad
+                  <TextField
+                    name={name}
+                    variant="outlined"
+                    fullWidth
+                    required
+                    type={type || "text"}
+                    value={(values as any)[name]}
+                    onChange={handleChange}
+                    error={
+                      touched[name as keyof FormValues] &&
+                      Boolean(errors[name as keyof FormValues])
+                    }
+                    helperText={
+                      touched[name as keyof FormValues] &&
+                      errors[name as keyof FormValues]
+                    }
+                    InputProps={{
+                      sx: {
+                        backgroundColor: "#fff",
+                        borderRadius: "15px",
+                        boxShadow: "2px 2px 5px rgba(0,0,0,0.1)",
+                        border: "none",
+                      },
+                    }}
+                  />
+                )}
+
                     </Box>
                   ))}
 

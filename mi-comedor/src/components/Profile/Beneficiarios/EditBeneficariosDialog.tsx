@@ -42,109 +42,169 @@ const EditBeneficiariosDialog: React.FC<Props> = ({
     onSubmit(values);
     setShowSuccess(true);
     setTimeout(() => {
-      onClose(); // Cerramos después del feedback
+      onClose();
       setShowSuccess(false);
     }, 1500);
   };
 
   return (
     <>
-      <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-        <DialogTitle sx={{ fontWeight: "bold", fontSize: 24 }}>
-          Editar Beneficiario
-        </DialogTitle>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth="sm"
+      scroll="paper"
+      PaperProps={{
+        sx: {
+          backgroundColor: "#E4FAA4",
+          borderRadius: 2,
+          overflow: "visible",
+          maxWidth: 420, // aumentado de 380 a 420
+        },
+      }}
+    >
+      <DialogTitle sx={{ fontWeight: "bold", fontSize: 22, py: 2 }}>
+        Editar beneficiario
+      </DialogTitle>
 
-        <Formik
-          initialValues={initialData}
-          validationSchema={validationSchema}
-          onSubmit={handleSubmit}
-        >
-          {({ values, handleChange, errors, touched }) => (
-            <Form>
-              <DialogContent sx={{ px: 3, pb: 3 }}>
-                <Stack spacing={3}>
-                  <Box>
-                    <label className="titulo-arriba-form">Nombre completo</label>
-                    <TextField
-                      name="fullnameBenefeciary"
-                      fullWidth
-                      value={values.fullnameBenefeciary}
-                      onChange={handleChange}
-                      error={touched.fullnameBenefeciary && Boolean(errors.fullnameBenefeciary)}
-                      helperText={touched.fullnameBenefeciary && errors.fullnameBenefeciary}
-                    />
-                  </Box>
+      <Formik
+        initialValues={initialData}
+        validationSchema={validationSchema}
+        onSubmit={handleSubmit}
+      >
+        {({ values, handleChange, errors, touched }) => (
+          <Form>
+            <DialogContent sx={{ px: 3, pb: 2 }}>
+              <Stack spacing={2.5}>
+                <Box>
+                  <h6 className="titulo-arriba-form" style={{ fontSize: 19, margin: 0 }}>Nombre completo</h6>
+                  <TextField
+                    name="fullnameBenefeciary"
+                    fullWidth
+                    size="medium"
+                    value={values.fullnameBenefeciary}
+                    onChange={handleChange}
+                    error={touched.fullnameBenefeciary && Boolean(errors.fullnameBenefeciary)}
+                    helperText={touched.fullnameBenefeciary && errors.fullnameBenefeciary}
+                    InputProps={{
+                      sx: {
+                        backgroundColor: "#fff",
+                        borderRadius: "12px",
+                        boxShadow: "1px 1px 4px rgba(0,0,0,0.10)",
+                        border: "none",
+                        fontSize: 17,
+                        height: 48,
+                      },
+                    }}
+                  />
+                </Box>
 
-                  <Box>
-                    <label className="titulo-arriba-form">Edad</label>
-                    <TextField
-                      name="ageBeneficiary"
-                      type="number"
-                      fullWidth
-                      value={values.ageBeneficiary}
-                      onChange={handleChange}
-                      error={touched.ageBeneficiary && Boolean(errors.ageBeneficiary)}
-                      helperText={touched.ageBeneficiary && errors.ageBeneficiary}
-                    />
-                  </Box>
+                <Box>
+                  <h6 className="titulo-arriba-form" style={{ fontSize: 19, margin: 0 }}>Edad</h6>
+                  <TextField
+                    name="ageBeneficiary"
+                    type="number"
+                    fullWidth
+                    size="medium"
+                    value={values.ageBeneficiary}
+                    onChange={handleChange}
+                    error={touched.ageBeneficiary && Boolean(errors.ageBeneficiary)}
+                    helperText={touched.ageBeneficiary && errors.ageBeneficiary}
+                    InputProps={{
+                      sx: {
+                        backgroundColor: "#fff",
+                        borderRadius: "12px",
+                        boxShadow: "1px 1px 4px rgba(0,0,0,0.10)",
+                        border: "none",
+                        fontSize: 17,
+                        height: 48,
+                      },
+                    }}
+                  />
+                </Box>
 
-                  <Box>
-                    <label className="titulo-arriba-form">DNI</label>
-                    <TextField
-                      name="dniBenefeciary"
-                      fullWidth
-                      value={values.dniBenefeciary}
-                      onChange={handleChange}
-                      error={touched.dniBenefeciary && Boolean(errors.dniBenefeciary)}
-                      helperText={touched.dniBenefeciary && errors.dniBenefeciary}
-                    />
-                  </Box>
+                <Box>
+                  <h6 className="titulo-arriba-form" style={{ fontSize: 19, margin: 0 }}>DNI</h6>
+                  <TextField
+                    name="dniBenefeciary"
+                    fullWidth
+                    size="medium"
+                    value={values.dniBenefeciary}
+                    onChange={handleChange}
+                    error={touched.dniBenefeciary && Boolean(errors.dniBenefeciary)}
+                    helperText={touched.dniBenefeciary && errors.dniBenefeciary}
+                    InputProps={{
+                      sx: {
+                        backgroundColor: "#fff",
+                        borderRadius: "12px",
+                        boxShadow: "1px 1px 4px rgba(0,0,0,0.10)",
+                        border: "none",
+                        fontSize: 17,
+                        height: 48,
+                      },
+                    }}
+                  />
+                </Box>
 
-                  <Box>
-                    <label className="titulo-arriba-form">Observaciones</label>
-                    <TextField
-                      name="observationsBeneficiary"
-                      fullWidth
-                      multiline
-                      rows={2}
-                      value={values.observationsBeneficiary}
-                      onChange={handleChange}
-                    />
-                  </Box>
-                </Stack>
-              </DialogContent>
+                <Box>
+                  <h6 className="titulo-arriba-form" style={{ fontSize: 19, margin: 0 }}>Observaciones</h6>
+                  <TextField
+                    name="observationsBeneficiary"
+                    fullWidth
+                    multiline
+                    rows={3}
+                    size="medium"
+                    value={values.observationsBeneficiary}
+                    onChange={handleChange}
+                    InputProps={{
+                      sx: {
+                        backgroundColor: "#fff",
+                        borderRadius: "12px",
+                        boxShadow: "1px 1px 4px rgba(0,0,0,0.10)",
+                        border: "none",
+                        fontSize: 17,
+                        minHeight: 48,
+                      },
+                    }}
+                  />
+                </Box>
+              </Stack>
 
-              <Stack direction="row" justifyContent="space-around" sx={{ mb: 3 }}>
+              <Stack direction="row" justifyContent="space-around" mt={3}>
                 <Button
                   type="button"
                   onClick={onClose}
                   sx={{
                     backgroundColor: "red",
                     color: "white",
-                    width: 60,
+                    minWidth: 60,
                     height: 60,
-                    borderRadius: 1,
+                    borderRadius: 2.5,
+                    "&:hover": { backgroundColor: "#b71c1c" },
                   }}
                 >
-                  <CloseIcon />
+                  <CloseIcon sx={{ fontSize: 34 }} />
                 </Button>
                 <Button
                   type="submit"
                   sx={{
                     backgroundColor: "#1976D2",
                     color: "white",
-                    width: 60,
+                    minWidth: 60,
                     height: 60,
-                    borderRadius: 1,
+                    borderRadius: 2.5,
+                    "&:hover": { backgroundColor: "#0d47a1" },
                   }}
                 >
-                  <CheckIcon />
+                  <CheckIcon sx={{ fontSize: 34 }} />
                 </Button>
               </Stack>
-            </Form>
-          )}
-        </Formik>
-      </Dialog>
+            </DialogContent>
+          </Form>
+        )}
+      </Formik>
+    </Dialog>
 
       <Snackbar
         open={showSuccess}
