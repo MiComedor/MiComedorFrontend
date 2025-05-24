@@ -6,6 +6,7 @@ import {
   Button,
   TextField,
   Autocomplete,
+  Box,
 } from "@mui/material";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
@@ -70,169 +71,241 @@ const tipoSeleccionado = tipos.find(
 );
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth >
-      <DialogTitle sx={{ fontWeight: "bold", fontSize: 24 }}>
-        Editar Producto
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs" PaperProps={{ sx: { backgroundColor: "#E4FAA4" } }}>
+      <DialogTitle sx={{ fontWeight: "bold", fontSize: 20, py: 1.5 }}>
+      Editar Producto
       </DialogTitle>
 
       <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
-        <Formik<FormProductoValues >
-          enableReinitialize
-          initialValues={{
-            descriptionProduct: producto.descriptionProduct,
-            amountProduct: producto.amountProduct.toString(),
-            unitOfMeasurement: unidadSeleccionada ?? null,
-            productType: tipoSeleccionado ?? null,
-            expirationDate: producto.expirationDate || "",
+      <Formik<FormProductoValues>
+        enableReinitialize
+        initialValues={{
+        descriptionProduct: producto.descriptionProduct,
+        amountProduct: producto.amountProduct.toString(),
+        unitOfMeasurement: unidadSeleccionada ?? null,
+        productType: tipoSeleccionado ?? null,
+        expirationDate: producto.expirationDate || "",
+        }}
+        validationSchema={validationSchema}
+        onSubmit={async (values) => {
+        const payload = {
+          ...producto,
+          descriptionProduct: values.descriptionProduct,
+          amountProduct: parseFloat(values.amountProduct),
+          unitOfMeasurement_id: values.unitOfMeasurement!.idUnitOfMeasurement,
+          productType_id: values.productType!.idProductType,
+          expirationDate: values.expirationDate,
+        };
+
+        await ProductService.actualizar(payload.idProduct, payload);
+        onSuccess();
+        onClose();
+        }}
+      >
+        {({ values, touched, errors, setFieldValue }) => (
+        <Form>
+          <DialogContent
+          sx={{
+            backgroundColor: "#E4FAA4",
+            px: 2,
+            pt: 0.5,
+            pb: 2,
           }}
-          validationSchema={validationSchema}
-          onSubmit={async (values) => {
-            const payload = {
-              ...producto,
-              descriptionProduct: values.descriptionProduct,
-              amountProduct: parseFloat(values.amountProduct),
-              unitOfMeasurement_id: values.unitOfMeasurement!.idUnitOfMeasurement,
-              productType_id: values.productType!.idProductType,
-              expirationDate: values.expirationDate,
-            };
+          >
+          {/* Descripción */}
+          <Box sx={{ mt: 0.5 }}>
+            <label className="titulo-arriba-form" style={{ fontSize: 13 }}>Descripción</label>
+            <TextField
+            name="descriptionProduct"
+            fullWidth
+            margin="dense"
+            size="small"
+            value={values.descriptionProduct}
+            onChange={(e) => setFieldValue("descriptionProduct", e.target.value)}
+            error={touched.descriptionProduct && Boolean(errors.descriptionProduct)}
+            helperText={touched.descriptionProduct && errors.descriptionProduct}
+            InputProps={{
+              sx: {
+              backgroundColor: "#fff",
+              borderRadius: "10px",
+              boxShadow: "1px 1px 3px rgba(0,0,0,0.08)",
+              border: "none",
+              fontSize: 14,
+              height: 36,
+              },
+            }}
+            />
+          </Box>
 
-            await ProductService.actualizar(payload.idProduct, payload);
-            onSuccess();
-            onClose();
-          }}
-        >
-          {({ values, touched, errors, setFieldValue }) => (
-            <Form>
-              <DialogContent>
-                <TextField
-                  label="Descripción"
-                  name="descriptionProduct"
-                  fullWidth
-                  margin="dense"
-                  value={values.descriptionProduct}
-                  onChange={(e) =>
-                    setFieldValue("descriptionProduct", e.target.value)
-                  }
-                  error={
-                    touched.descriptionProduct &&
-                    Boolean(errors.descriptionProduct)
-                  }
-                  helperText={
-                    touched.descriptionProduct && errors.descriptionProduct
-                  }
-                />
+          {/* Cantidad */}
+          <Box sx={{ mt: 1 }}>
+            <label className="titulo-arriba-form" style={{ fontSize: 13 }}>Cantidad</label>
+            <TextField
+            name="amountProduct"
+            fullWidth
+            margin="dense"
+            size="small"
+            value={values.amountProduct}
+            onChange={(e) => setFieldValue("amountProduct", e.target.value)}
+            error={touched.amountProduct && Boolean(errors.amountProduct)}
+            helperText={touched.amountProduct && errors.amountProduct}
+            InputProps={{
+              sx: {
+              backgroundColor: "#fff",
+              borderRadius: "10px",
+              boxShadow: "1px 1px 3px rgba(0,0,0,0.08)",
+              border: "none",
+              fontSize: 14,
+              height: 36,
+              },
+            }}
+            />
+          </Box>
 
-                <TextField
-                  label="Cantidad"
-                  name="amountProduct"
-                  fullWidth
-                  margin="dense"
-                  value={values.amountProduct}
-                  onChange={(e) => setFieldValue("amountProduct", e.target.value)}
-                  error={
-                    touched.amountProduct && Boolean(errors.amountProduct)
-                  }
-                  helperText={touched.amountProduct && errors.amountProduct}
-                />
+          {/* Unidad de medida */}
+          <Box sx={{ mt: 1 }}>
+            <label className="titulo-arriba-form" style={{ fontSize: 13 }}>Unidad de medida</label>
+            <Autocomplete
+            options={unidades}
+            getOptionLabel={(opt) => opt.name}
+            isOptionEqualToValue={(opt, val) =>
+              opt.idUnitOfMeasurement === val?.idUnitOfMeasurement
+            }
+            value={values.unitOfMeasurement}
+            onChange={(_, value) => setFieldValue("unitOfMeasurement", value)}
+            size="small"
+            renderInput={(params) => (
+              <TextField
+              {...params}
+              margin="dense"
+              fullWidth
+              size="small"
+              error={touched.unitOfMeasurement && Boolean(errors.unitOfMeasurement)}
+              helperText={
+                touched.unitOfMeasurement && typeof errors.unitOfMeasurement === "string"
+                ? errors.unitOfMeasurement
+                : ""
+              }
+              InputProps={{
+                ...params.InputProps,
+                sx: {
+                backgroundColor: "#fff",
+                borderRadius: "10px",
+                boxShadow: "1px 1px 3px rgba(0,0,0,0.08)",
+                border: "none",
+                fontSize: 14,
+                height: 36,
+                },
+              }}
+              />
+            )}
+            />
+          </Box>
 
-                <Autocomplete
-                  options={unidades}
-                  getOptionLabel={(opt) => opt.name}
-                  isOptionEqualToValue={(opt, val) =>
-                    opt.idUnitOfMeasurement === val?.idUnitOfMeasurement
-                  }
-                  value={values.unitOfMeasurement}
-                  onChange={(_, value) =>
-                    setFieldValue("unitOfMeasurement", value)
-                  }
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Unidad de medida"
-                      margin="dense"
-                      fullWidth
-                      error={
-                        touched.unitOfMeasurement &&
-                        Boolean(errors.unitOfMeasurement)
-                      }
-                      helperText={
-                        touched.unitOfMeasurement &&
-                        typeof errors.unitOfMeasurement === "string"
-                          ? errors.unitOfMeasurement
-                          : ""
-                      }
-                    />
-                  )}
-                />
+          {/* Tipo de producto */}
+          <Box sx={{ mt: 1 }}>
+            <label className="titulo-arriba-form" style={{ fontSize: 13 }}>Tipo de producto</label>
+            <Autocomplete
+            options={tipos}
+            getOptionLabel={(opt) => opt.nameProductType}
+            isOptionEqualToValue={(opt, val) =>
+              opt.idProductType === val?.idProductType
+            }
+            value={values.productType}
+            onChange={(_, value) => setFieldValue("productType", value)}
+            size="small"
+            renderInput={(params) => (
+              <TextField
+              {...params}
+              margin="dense"
+              fullWidth
+              size="small"
+              error={touched.productType && Boolean(errors.productType)}
+              helperText={
+                touched.productType && typeof errors.productType === "string"
+                ? errors.productType
+                : ""
+              }
+              InputProps={{
+                ...params.InputProps,
+                sx: {
+                backgroundColor: "#fff",
+                borderRadius: "10px",
+                boxShadow: "1px 1px 3px rgba(0,0,0,0.08)",
+                border: "none",
+                fontSize: 14,
+                height: 36,
+                },
+              }}
+              />
+            )}
+            />
+          </Box>
 
-                <Autocomplete
-                  options={tipos}
-                  getOptionLabel={(opt) => opt.nameProductType}
-                  isOptionEqualToValue={(opt, val) =>
-                    opt.idProductType === val?.idProductType
-                  }
-                  value={values.productType}
-                  onChange={(_, value) =>
-                    setFieldValue("productType", value)
-                  }
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Tipo de producto"
-                      margin="dense"
-                      fullWidth
-                      error={
-                        touched.productType && Boolean(errors.productType)
-                      }
-                      helperText={
-                        touched.productType &&
-                        typeof errors.productType === "string"
-                          ? errors.productType
-                          : ""
-                      }
-                    />
-                  )}
-                />
-
-                {values.productType?.nameProductType.toLowerCase() ===
-                  "perecible" && (
-                  <MobileDatePicker
-                    label="Fecha de vencimiento"
-                    value={
-                      values.expirationDate
-                        ? dayjs(values.expirationDate)
-                        : null
-                    }
-                    onChange={(newDate) =>
-                      setFieldValue(
-                        "expirationDate",
-                        newDate ? newDate.format("YYYY-MM-DD") : ""
-                      )
-                    }
-                    slotProps={{
-                      textField: {
-                        margin: "dense",
-                        fullWidth: true,
-                      },
-                    }}
-                  />
-                )}
-              </DialogContent>
-
-              
-
-              <DialogActions className="edit-actions">
-                <Button onClick={onClose} className="edit-button cancel">
-                  <ClearIcon  sx={{ fontSize: 36 }}  />
-                </Button>
-                <Button type="submit" className="edit-button save">
-                  <CheckIcon  sx={{ fontSize: 36 }}/>
-                </Button>
-              </DialogActions>
-
-            </Form>
+          {/* Fecha de vencimiento */}
+          {values.productType?.nameProductType.toLowerCase() === "perecible" && (
+            <Box sx={{ mt: 1 }}>
+            <label className="titulo-arriba-form" style={{ fontSize: 13 }}>Fecha de vencimiento</label>
+            <MobileDatePicker
+              value={values.expirationDate ? dayjs(values.expirationDate) : null}
+              onChange={(newDate) =>
+              setFieldValue("expirationDate", newDate ? newDate.format("YYYY-MM-DD") : "")
+              }
+              slotProps={{
+              textField: {
+                margin: "dense",
+                fullWidth: true,
+                size: "small",
+                InputProps: {
+                sx: {
+                  backgroundColor: "#fff",
+                  borderRadius: "10px",
+                  boxShadow: "1px 1px 3px rgba(0,0,0,0.08)",
+                  border: "none",
+                  fontSize: 14,
+                  height: 36,
+                },
+                },
+              },
+              }}
+            />
+            </Box>
           )}
-        </Formik>
+          </DialogContent>
+
+          <DialogActions sx={{ justifyContent: "center", gap: 2, mt: 1 }}>
+          <Button
+            onClick={onClose}
+            sx={{
+            backgroundColor: "red",
+            color: "white",
+            minWidth: 40,
+            width: 40,
+            height: 40,
+            borderRadius: 1,
+            "&:hover": { backgroundColor: "#b71c1c" },
+            }}
+          >
+            <ClearIcon sx={{ fontSize: 24 }} />
+          </Button>
+          <Button
+            type="submit"
+            sx={{
+            backgroundColor: "#1976D2",
+            color: "white",
+            minWidth: 40,
+            width: 40,
+            height: 40,
+            borderRadius: 1,
+            "&:hover": { backgroundColor: "#0d47a1" },
+            }}
+          >
+            <CheckIcon sx={{ fontSize: 24 }} />
+          </Button>
+          </DialogActions>
+        </Form>
+        )}
+      </Formik>
       </LocalizationProvider>
     </Dialog>
   );

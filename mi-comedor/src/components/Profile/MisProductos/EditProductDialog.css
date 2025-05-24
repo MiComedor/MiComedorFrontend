@@ -4,6 +4,13 @@
   padding: 20px;
 }
 
+.titulo-arriba-form {
+  font-weight: bold;
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 4px;
+  display: inline-block;
+}
 /* Contenedor de botones de acción */
 .edit-actions {
   display: flex;
