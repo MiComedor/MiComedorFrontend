@@ -13,6 +13,8 @@ import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import CheckIcon from "@mui/icons-material/Check";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import BeneficiaryService from "../../../services/beneficiary.service";
@@ -65,7 +67,7 @@ const BeneficiariosPage: React.FC = () => {
   );
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ p: { xs: 2, sm: 4, md: 8 }, pt: 4 }}>
       <Stack
         direction={{ xs: "column", sm: "row" }}
         spacing={2}
@@ -320,6 +322,50 @@ const BeneficiariosPage: React.FC = () => {
           )}
         </Formik>
       </Dialog>
+
+      <Stack spacing={2} mt={4}>
+  {filtered.map((beneficiario) => (
+    <Box
+      key={beneficiario.idBeneficiary}
+      sx={{
+        border: "1px solid black",
+        borderRadius: "4px",
+        p: 2,
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+      }}
+    >
+      <Box>
+        <Box sx={{ fontWeight: "bold", fontSize: 18 }}>
+          {beneficiario.fullnameBenefeciary}
+        </Box>
+        <Box>Edad: {beneficiario.ageBeneficiary}</Box>
+        <Box>DNI: {beneficiario.dniBenefeciary}</Box>
+        <Box>
+          Observación:{" "}
+          {beneficiario.observationsBeneficiary || "Sin observaciones"}
+        </Box>
+      </Box>
+
+      <Stack direction="row" spacing={1}>
+        <Button
+          variant="contained"
+          sx={{ backgroundColor: "#1976D2", minWidth: 0, p: 1 }}
+        >
+          <EditIcon />
+        </Button>
+        <Button
+          variant="contained"
+          sx={{ backgroundColor: "#D32F2F", minWidth: 0, p: 1 }}
+        >
+          <DeleteIcon />
+        </Button>
+      </Stack>
+    </Box>
+  ))}
+</Stack>
+
     </Box>
   );
 };
