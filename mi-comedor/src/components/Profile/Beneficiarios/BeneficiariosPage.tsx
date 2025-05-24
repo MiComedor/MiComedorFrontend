@@ -85,7 +85,7 @@ const BeneficiariosPage: React.FC = () => {
   );
 
   return (
-    <Box sx={{ p: { xs: 2, sm: 4, md: 8 }, pt: 4 }}>
+    <Box sx={{ p: { xs: 2, sm: 4, md: 8 }, pt: 1 }}>
       <Stack
         direction={{ xs: "column", sm: "row" }}
         spacing={2}
@@ -93,8 +93,13 @@ const BeneficiariosPage: React.FC = () => {
         justifyContent="space-between"
         sx={{ mb: 4 }}
       >
-        <Box sx={{ flex: 1 }}>
-          <label className="titulo-arriba-form">Buscar</label>
+        <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
+          <label
+            className="titulo-arriba-form"
+            style={{ marginBottom: 4, marginLeft: 4 }}
+          >
+            Buscar
+          </label>
           <TextField
             variant="outlined"
             placeholder="Buscar"

@@ -447,18 +447,22 @@ const MisProductosPage: React.FC = () => {
                           : "Sin fecha de vencimiento"}
                       </TableCell>
                       <TableCell>
-                        <IconButton
-                          color="primary"
-                          onClick={() => setProductoAEditar(prod)}
-                        >
-                          <EditIcon />
-                        </IconButton>
-                        <IconButton
-                          color="error"
-                          onClick={() => setProductoAEliminar(prod)}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
+                        <Stack direction="row" spacing={1}>
+                          <Button
+                            variant="contained"
+                            sx={{ backgroundColor: "#1976D2", minWidth: 0, p: 1 }}
+                            onClick={() => setProductoAEditar(prod)}
+                          >
+                            <EditIcon />
+                          </Button>
+                          <Button
+                            variant="contained"
+                            sx={{ backgroundColor: "#D32F2F", minWidth: 0, p: 1 }}
+                            onClick={() => setProductoAEliminar(prod)}
+                          >
+                            <DeleteIcon />
+                          </Button>
+                        </Stack>
                       </TableCell>
 
                     </TableRow>
