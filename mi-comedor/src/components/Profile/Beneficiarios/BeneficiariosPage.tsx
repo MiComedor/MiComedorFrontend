@@ -19,6 +19,9 @@ import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import BeneficiaryService from "../../../services/beneficiary.service";
 import BeneficiaryByUserId from "../../../types/BeneficiaryByUserId";
+import Beneficiary from "../../../types/beneficiaty";
+import EditBeneficiariosDialog from "./EditBeneficariosDialog";
+import DeleteBeneficiariosDialog from "./DeleteBeneficariosDialog";
 
 const validationSchema = Yup.object({
   fullnameBenefeciary: Yup.string().required("Campo obligatorio"),
@@ -41,9 +44,19 @@ const BeneficiariosPage: React.FC = () => {
   const [search, setSearch] = useState("");
   const [beneficiarios, setBeneficiarios] = useState<BeneficiaryByUserId[]>([]);
   const [openDialog, setOpenDialog] = useState(false);
+  const [beneficiarioAEditar, setBeneficiarioAEditar] = useState<Beneficiary | null>(null);
+  const [beneficiarioAEliminar, setBeneficiarioAEliminar] = useState<Beneficiary | null>(null);
 
   const handleOpen = () => setOpenDialog(true);
   const handleClose = () => setOpenDialog(false);
+
+  const handleEditClick = (beneficiario: Beneficiary) => {
+    setBeneficiarioAEditar(beneficiario);
+  };
+
+  const handleDeleteClick = (beneficiario: Beneficiary) => {
+    setBeneficiarioAEliminar(beneficiario);
+  };
 
   const loadBeneficiarios = async () => {
     const userStr = localStorage.getItem("user");
@@ -123,7 +136,7 @@ const BeneficiariosPage: React.FC = () => {
         </Button>
       </Stack>
 
-      {/* Modal con mismo estilo */}
+      {/* MODAL AÑADIR */}
       <Dialog
         open={openDialog}
         onClose={handleClose}
@@ -174,9 +187,7 @@ const BeneficiariosPage: React.FC = () => {
                 dniBenefeciary: Number(values.dniBenefeciary),
                 ageBeneficiary: Number(values.ageBeneficiary),
                 observationsBeneficiary: values.observationsBeneficiary,
-                users: {
-                    idUser: user.idUser,
-                  }, // Use 'idUser' as expected by the Beneficiary type
+                users: { idUser: user.idUser },
               });
 
               resetForm();
@@ -198,72 +209,34 @@ const BeneficiariosPage: React.FC = () => {
                 }}
               >
                 <Stack spacing={3} mt={1}>
-                  <Box>
-                    <label className="titulo-arriba-form">Nombre completo</label>
-                    <TextField
-                      name="fullnameBenefeciary"
-                      variant="outlined"
-                      fullWidth
-                      required
-                      value={values.fullnameBenefeciary}
-                      onChange={handleChange}
-                      error={touched.fullnameBenefeciary && Boolean(errors.fullnameBenefeciary)}
-                      helperText={touched.fullnameBenefeciary && errors.fullnameBenefeciary}
-                      InputProps={{
-                        sx: {
-                          backgroundColor: "#fff",
-                          borderRadius: "15px",
-                          boxShadow: "2px 2px 5px rgba(0,0,0,0.1)",
-                          border: "none",
-                        },
-                      }}
-                    />
-                  </Box>
-
-                  <Box>
-                    <label className="titulo-arriba-form">Edad</label>
-                    <TextField
-                      name="ageBeneficiary"
-                      type="number"
-                      variant="outlined"
-                      fullWidth
-                      required
-                      value={values.ageBeneficiary}
-                      onChange={handleChange}
-                      error={touched.ageBeneficiary && Boolean(errors.ageBeneficiary)}
-                      helperText={touched.ageBeneficiary && errors.ageBeneficiary}
-                      InputProps={{
-                        sx: {
-                          backgroundColor: "#fff",
-                          borderRadius: "15px",
-                          boxShadow: "2px 2px 5px rgba(0,0,0,0.1)",
-                          border: "none",
-                        },
-                      }}
-                    />
-                  </Box>
-
-                  <Box>
-                    <label className="titulo-arriba-form">DNI</label>
-                    <TextField
-                      name="dniBenefeciary"
-                      variant="outlined"
-                      fullWidth
-                      required
-                      value={values.dniBenefeciary}
-                      onChange={handleChange}
-                      error={touched.dniBenefeciary && Boolean(errors.dniBenefeciary)}
-                      helperText={touched.dniBenefeciary && errors.dniBenefeciary}
-                      InputProps={{
-                        sx: {
-                          backgroundColor: "#fff",
-                          borderRadius: "15px",
-                          boxShadow: "2px 2px 5px rgba(0,0,0,0.1)",
-                          border: "none",
-                        },
-                      }}
-                    />
-                  </Box>
+                  {[
+                    { name: "fullnameBenefeciary", label: "Nombre completo" },
+                    { name: "ageBeneficiary", label: "Edad", type: "number" },
+                    { name: "dniBenefeciary", label: "DNI" },
+                  ].map(({ name, label, type }) => (
+                    <Box key={name}>
+                      <label className="titulo-arriba-form">{label}</label>
+                      <TextField
+                        name={name}
+                        variant="outlined"
+                        fullWidth
+                        required
+                        type={type || "text"}
+                        value={(values as any)[name]}
+                        onChange={handleChange}
+                        error={touched[name as keyof FormValues] && Boolean(errors[name as keyof FormValues])}
+                        helperText={touched[name as keyof FormValues] && errors[name as keyof FormValues]}
+                        InputProps={{
+                          sx: {
+                            backgroundColor: "#fff",
+                            borderRadius: "15px",
+                            boxShadow: "2px 2px 5px rgba(0,0,0,0.1)",
+                            border: "none",
+                          },
+                        }}
+                      />
+                    </Box>
+                  ))}
 
                   <Box>
                     <label className="titulo-arriba-form">Observaciones</label>
@@ -301,7 +274,6 @@ const BeneficiariosPage: React.FC = () => {
                     >
                       <CloseIcon sx={{ fontSize: 36 }} />
                     </Button>
-
                     <Button
                       type="submit"
                       sx={{
@@ -323,49 +295,77 @@ const BeneficiariosPage: React.FC = () => {
         </Formik>
       </Dialog>
 
+      {/* LISTADO DE BENEFICIARIOS */}
       <Stack spacing={2} mt={4}>
-  {filtered.map((beneficiario) => (
-    <Box
-      key={beneficiario.idBeneficiary}
-      sx={{
-        border: "1px solid black",
-        borderRadius: "4px",
-        p: 2,
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-      }}
-    >
-      <Box>
-        <Box sx={{ fontWeight: "bold", fontSize: 18 }}>
-          {beneficiario.fullnameBenefeciary}
-        </Box>
-        <Box>Edad: {beneficiario.ageBeneficiary}</Box>
-        <Box>DNI: {beneficiario.dniBenefeciary}</Box>
-        <Box>
-          Observación:{" "}
-          {beneficiario.observationsBeneficiary || "Sin observaciones"}
-        </Box>
-      </Box>
+        {filtered.map((beneficiario) => (
+          <Box
+            key={beneficiario.idBeneficiary}
+            sx={{
+              border: "1px solid black",
+              borderRadius: "4px",
+              p: 2,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Box>
+              <Box sx={{ fontWeight: "bold", fontSize: 18 }}>
+                {beneficiario.fullnameBenefeciary}
+              </Box>
+              <Box>Edad: {beneficiario.ageBeneficiary}</Box>
+              <Box>DNI: {beneficiario.dniBenefeciary}</Box>
+              <Box>
+                Observación: {beneficiario.observationsBeneficiary || "Sin observaciones"}
+              </Box>
+            </Box>
 
-      <Stack direction="row" spacing={1}>
-        <Button
-          variant="contained"
-          sx={{ backgroundColor: "#1976D2", minWidth: 0, p: 1 }}
-        >
-          <EditIcon />
-        </Button>
-        <Button
-          variant="contained"
-          sx={{ backgroundColor: "#D32F2F", minWidth: 0, p: 1 }}
-        >
-          <DeleteIcon />
-        </Button>
+            <Stack direction="row" spacing={1}>
+              <Button
+                variant="contained"
+                sx={{ backgroundColor: "#1976D2", minWidth: 0, p: 1 }}
+                onClick={() => handleEditClick(beneficiario)}
+              >
+                <EditIcon />
+              </Button>
+              <Button
+                variant="contained"
+                sx={{ backgroundColor: "#D32F2F", minWidth: 0, p: 1 }}
+                onClick={() => handleDeleteClick(beneficiario)}
+              >
+                <DeleteIcon />
+              </Button>
+            </Stack>
+          </Box>
+        ))}
       </Stack>
-    </Box>
-  ))}
-</Stack>
 
+      {/* DIÁLOGOS DE EDITAR / ELIMINAR */}
+      {beneficiarioAEditar && (
+        <EditBeneficiariosDialog
+          open={Boolean(beneficiarioAEditar)}
+          onClose={() => setBeneficiarioAEditar(null)}
+          initialData={beneficiarioAEditar}
+          onSubmit={async (dataActualizada) => {
+            await BeneficiaryService.actualizarBeneficiary(dataActualizada);
+            loadBeneficiarios();
+            setBeneficiarioAEditar(null);
+          }}
+        />
+      )}
+
+      {beneficiarioAEliminar && (
+        <DeleteBeneficiariosDialog
+          open={Boolean(beneficiarioAEliminar)}
+          onClose={() => setBeneficiarioAEliminar(null)}
+          nombre={beneficiarioAEliminar.fullnameBenefeciary}
+          onConfirm={async () => {
+            await BeneficiaryService.eliminarBeneficiary(beneficiarioAEliminar.idBeneficiary);
+            loadBeneficiarios();
+            setBeneficiarioAEliminar(null);
+          }}
+        />
+      )}
     </Box>
   );
 };
