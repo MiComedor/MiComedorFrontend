@@ -69,7 +69,7 @@ const BeneficiariosPage: React.FC = () => {
               },
             }}
             sx={{
-              width: "100%",
+              width: "80%",
               maxWidth: 600,
               "& .MuiOutlinedInput-root": {
                 borderRadius: "20px",
@@ -94,132 +94,127 @@ const BeneficiariosPage: React.FC = () => {
           Añadir beneficiario
         </Button>
       </Stack>
-
-      {/* 🟩 FORMULARIO EN MODAL */}
-      
-      <Dialog open={openDialog} onClose={handleClose}>
-        <DialogTitle
-          sx={{ backgroundColor: "#E4FAA4", fontWeight: "bold", fontSize: 24 }}
-        >
-          Añadir pensionista
-        </DialogTitle>
-        <Dialog
+<Dialog
   open={openDialog}
   onClose={handleClose}
+  fullWidth
+  maxWidth="sm"
+  scroll="body"
   PaperProps={{
     sx: {
       width: "100%",
-      maxWidth: 600,
+      maxWidth: 400, // 👈 ancho personalizado
+      mx: "auto",
+      borderRadius: 2,
+      overflow: "hidden",
       backgroundColor: "#E4FAA4",
-      borderRadius: 3,
-      p: 2,
     },
   }}
 >
-          <Stack spacing={3} mt={1}>
-            <Box>
-              <label className="titulo-arriba-form">Nombre completo</label>
+  <DialogTitle
+    sx={{
+      backgroundColor: "#E4FAA4",
+      fontWeight: "bold",
+      fontSize: 24,
+      pb: 0,
+    }}
+  >
+    Añadir pensionista
+  </DialogTitle>
+
+  <DialogContent
+    sx={{
+      backgroundColor: "#E4FAA4",
+      overflow: "visible",
+      px: 0,
+      pt: 0,
+      pb: 3,
+    }}
+  >
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        alert("Formulario enviado");
+      }}
+    >
+      <Box
+        sx={{
+          width: "80%",
+          maxWidth: 500,
+          mx: "auto",
+          px: 3,
+          py: 2,
+          backgroundColor: "#E4FAA4",
+        }}
+      >
+        <Stack spacing={3}>
+          {[
+            { name: "nombre", label: "Nombre completo" },
+            { name: "edad", label: "Edad", type: "number" },
+            { name: "dni", label: "DNI" },
+            { name: "observaciones", label: "Observaciones", multiline: true, rows: 2 },
+          ].map((field) => (
+            <Box key={field.name}>
+              <label className="titulo-arriba-form">{field.label}</label>
               <TextField
+                name={field.name}
                 variant="outlined"
                 fullWidth
+                required
+                type={field.type || "text"}
+                multiline={field.multiline || false}
+                rows={field.rows || undefined}
                 InputProps={{
                   sx: {
                     backgroundColor: "#fff",
                     borderRadius: "15px",
                     boxShadow: "2px 2px 5px rgba(0,0,0,0.1)",
                     border: "none",
-                    outline: "none"
                   },
                 }}
               />
             </Box>
+          ))}
 
-            <Box>
-              <label className="titulo-arriba-form">Edad</label>
-              <TextField
-                type="number"
-                variant="outlined"
-                fullWidth
-                InputProps={{
-                  sx: {
-                    backgroundColor: "#fff",
-                    borderRadius: "15px",
-                    boxShadow: "2px 2px 5px rgba(0,0,0,0.1)",
-                    border: "none",
-                    outline: "none"
-                  },
-                }}
-              />
-            </Box>
+          <Stack direction="row" justifyContent="space-around" mt={2}>
+            <Button
+              type="button"
+              onClick={handleClose}
+              sx={{
+                backgroundColor: "red",
+                color: "white",
+                width: 60,
+                height: 60,
+                borderRadius: 1,
+                "&:hover": { backgroundColor: "#b71c1c" },
+              }}
+            >
+              <CloseIcon sx={{ fontSize: 36 }} />
+            </Button>
 
-            <Box>
-              <label className="titulo-arriba-form">DNI</label>
-              <TextField
-                variant="outlined"
-                fullWidth
-                InputProps={{
-                  sx: {
-                    backgroundColor: "#fff",
-                    borderRadius: "15px",
-                    boxShadow: "2px 2px 5px rgba(0,0,0,0.1)",
-                    border: "none",
-                    outline: "none"
-                  },
-                }}
-              />
-            </Box>
-
-            <Box>
-              <label className="titulo-arriba-form">Observaciones</label>
-              <TextField
-                multiline
-                rows={2}
-                variant="outlined"
-                fullWidth
-                InputProps={{
-                  sx: {
-                    backgroundColor: "#fff",
-                    borderRadius: "15px",
-                    boxShadow: "2px 2px 5px rgba(0,0,0,0.1)",
-                    border: "none",
-                    outline: "none"
-                  },
-                }}
-              />
-            </Box>
-
-            <Stack direction="row" justifyContent="space-around" mt={2}>
-              <Button
-                onClick={handleClose}
-                sx={{
-                  backgroundColor: "red",
-                  color: "white",
-                  width: 60,
-                  height: 60,
-                  borderRadius: 1,
-                  "&:hover": { backgroundColor: "#b71c1c" }
-                }}
-              >
-                <CloseIcon sx={{ fontSize: 36 }} />
-              </Button>
-              <Button
-                onClick={() => alert("Formulario enviado")}
-                sx={{
-                  backgroundColor: "#1976D2",
-                  color: "white",
-                  width: 6,
-                  height: 60,
-                  borderRadius: 1,
-                  "&:hover": { backgroundColor: "#0d47a1" }
-                }}
-              >
-                <CheckIcon sx={{ fontSize: 36 }} />
-              </Button>
-            </Stack>
+            <Button
+              type="submit"
+              sx={{
+                backgroundColor: "#1976D2",
+                color: "white",
+                width: 60,
+                height: 60,
+                borderRadius: 1,
+                "&:hover": { backgroundColor: "#0d47a1" },
+              }}
+            >
+              <CheckIcon sx={{ fontSize: 36 }} />
+            </Button>
           </Stack>
-        </DialogContent>
-      </Dialog>
-    </Box>
+        </Stack>
+      </Box>
+    </form>
+  </DialogContent>
+</Dialog>
+
+
+
+      </Box>
   );
 };
 
