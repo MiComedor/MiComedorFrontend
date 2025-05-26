@@ -13,8 +13,10 @@ import {
   Paper,
   TableBody,
   TablePagination,
+  Button,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import "./PresupuestoPage.css";
 import { Formik, Form, Field, FieldProps } from "formik";
 import * as Yup from "yup";
@@ -59,6 +61,23 @@ const PresupuestoPage: React.FC = () => {
     setPresupuestos(data.reverse());
   };
 
+  const calcularSaldo = () => {
+  let saldo = 0;
+  presupuestos.forEach((p) => {
+    const categoria = p.budgetCategory?.name?.toLowerCase();
+
+    if (categoria === "ingresos" || categoria === "ingreso") {
+      saldo += p.amountBudget;
+    } else if (categoria === "egresos" || categoria === "egreso") {
+      saldo -= p.amountBudget;
+    }
+  });
+  return saldo;
+};
+
+const saldoActual = calcularSaldo();
+
+
   useEffect(() => {
     getCategorias();
     getPresupuestos();
@@ -96,131 +115,149 @@ const PresupuestoPage: React.FC = () => {
     <Box sx={{ padding: 4 }}>
       <div className="formulario-raciones">
         <Formik
-  initialValues={initialValues}
-  validationSchema={validationSchema}
-  onSubmit={handleSubmit}
->
-  {({ errors, touched }) => (
-    <Form>
-      <Stack
-        direction={{ xs: "column", sm: "row" }}
-        spacing={2}
-        flexWrap="wrap"
-        justifyContent="center"
-        alignItems={{ xs: "center", sm: "flex-end" }}
-        sx={{ width: "100%" }}
-      >
-        {/* CATEGORÍA */}
-        <Stack direction="column" sx={{ width: { xs: "100%", sm: 275 } }}>
-          <label className="titulo-arriba-form">Categoría</label>
-          <Field name="budgetCategory">
-            {({ field, form, meta }: FieldProps) => (
-              <TextField
-                select
-                className="form-input"
-                fullWidth
-                value={field.value?.idBudgetCategory || ""}
-                onChange={(e) => {
-                  const selected = categorias.find(
-                    (c) => c.idBudgetCategory === parseInt(e.target.value)
-                  );
-                  form.setFieldValue("budgetCategory", selected || null);
-                }}
-                error={meta.touched && Boolean(meta.error)}
-                helperText={
-                  meta.touched &&
-                  (typeof meta.error === "object" && meta.error !== null
-                    ? (meta.error as any).idBudgetCategory
-                    : meta.error)
-                }
-              >
-                {categorias.map((cat) => (
-                  <MenuItem key={cat.idBudgetCategory} value={cat.idBudgetCategory}>
-                    {cat.name}
-                  </MenuItem>
-                ))}
-              </TextField>
-            )}
-          </Field>
-        </Stack>
-
-        {/* MONTO */}
-        <Stack direction="column" sx={{ width: { xs: "100%", sm: 275 } }}>
-          <label className="titulo-arriba-form">Monto</label>
-          <Field name="amountBudget">
-            {({ field, form }: FieldProps) => (
-              <TextField
-                {...field}
-                type="number"
-                className="form-input"
-                fullWidth
-                error={touched.amountBudget && Boolean(errors.amountBudget)}
-                helperText={touched.amountBudget && errors.amountBudget}
-                inputProps={{ min: 0 }}
-                onFocus={() => {
-                  if (field.value === 0) {
-                    form.setFieldValue("amountBudget", "");
-                  }
-                }}
-              />
-            )}
-          </Field>
-        </Stack>
-
-        {/* DESCRIPCIÓN */}
-        <Stack direction="column" sx={{ width: { xs: "100%", sm: 275 } }}>
-          <label className="titulo-arriba-form">Descripción</label>
-          <Field name="descriptionProduct">
-            {({ field }: FieldProps) => (
-              <TextField
-                {...field}
-                className="form-input"
-                fullWidth
-                error={touched.descriptionProduct && Boolean(errors.descriptionProduct)}
-                helperText={touched.descriptionProduct && errors.descriptionProduct}
-              />
-            )}
-          </Field>
-        </Stack> 
-
-        {/* FECHA */}
-        <Stack direction="column" sx={{ width: { xs: "100%", sm: 275 } }}>
-          <label className="titulo-arriba-form">Fecha</label>
-          <Field name="dateBudget">
-            {({ field }: FieldProps) => (
-              <TextField
-                {...field}
-                type="date"
-                className="form-input"
-                fullWidth
-                InputLabelProps={{ shrink: true }}
-                error={touched.dateBudget && Boolean(errors.dateBudget)}
-                helperText={touched.dateBudget && errors.dateBudget}
-              />
-            )}
-          </Field>
-        </Stack>
-
-        {/* BOTÓN */}
-        <IconButton
-          type="submit"
-          sx={{
-            backgroundColor: "#00e676",
-            height: 50,
-            width: 50,
-            mt: { xs: 2, sm: "25px" },
-            alignSelf: { xs: "center", sm: "flex-end" },
-            boxShadow: 2,
-            borderRadius: 1,
-          }}
+          initialValues={initialValues}
+          validationSchema={validationSchema}
+          onSubmit={handleSubmit}
         >
-          <AddIcon sx={{ fontSize: 30 }} />
-        </IconButton>
-      </Stack>
-    </Form>
-  )}
-</Formik>
+          {({ errors, touched }) => (
+            <Form>
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                spacing={2}
+                flexWrap="wrap"
+                justifyContent="center"
+                alignItems={{ xs: "center", sm: "flex-end" }}
+                sx={{ width: "100%" }}
+              >
+                {/* CATEGORÍA */}
+                <Stack direction="column" sx={{ width: { xs: "100%", sm: 275 } }}>
+                  <label className="titulo-arriba-form">Categoría</label>
+                  <Field name="budgetCategory">
+                    {({ field, form, meta }: FieldProps) => (
+                      <TextField
+                        select
+                        className="form-input"
+                        fullWidth
+                        value={field.value?.idBudgetCategory || ""}
+                        onChange={(e) => {
+                          const selected = categorias.find(
+                            (c) => c.idBudgetCategory === parseInt(e.target.value)
+                          );
+                          form.setFieldValue("budgetCategory", selected || null);
+                        }}
+                        error={meta.touched && Boolean(meta.error)}
+                        helperText={
+                          meta.touched &&
+                          (typeof meta.error === "object" && meta.error !== null
+                            ? (meta.error as any).idBudgetCategory
+                            : meta.error)
+                        }
+                      >
+                        {categorias.map((cat) => (
+                          <MenuItem key={cat.idBudgetCategory} value={cat.idBudgetCategory}>
+                            {cat.name}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    )}
+                  </Field>
+                </Stack>
+
+                {/* MONTO */}
+                <Stack direction="column" sx={{ width: { xs: "100%", sm: 275 } }}>
+                  <label className="titulo-arriba-form">Monto</label>
+                  <Field name="amountBudget">
+                    {({ field, form }: FieldProps) => (
+                      <TextField
+                        {...field}
+                        type="number"
+                        className="form-input"
+                        fullWidth
+                        error={touched.amountBudget && Boolean(errors.amountBudget)}
+                        helperText={touched.amountBudget && errors.amountBudget}
+                        inputProps={{ min: 0 }}
+                        onFocus={() => {
+                          if (field.value === 0) {
+                            form.setFieldValue("amountBudget", "");
+                          }
+                        }}
+                      />
+                    )}
+                  </Field>
+                </Stack>
+
+                {/* DESCRIPCIÓN */}
+                <Stack direction="column" sx={{ width: { xs: "100%", sm: 275 } }}>
+                  <label className="titulo-arriba-form">Descripción</label>
+                  <Field name="descriptionProduct">
+                    {({ field }: FieldProps) => (
+                      <TextField
+                        {...field}
+                        className="form-input"
+                        fullWidth
+                        error={touched.descriptionProduct && Boolean(errors.descriptionProduct)}
+                        helperText={touched.descriptionProduct && errors.descriptionProduct}
+                      />
+                    )}
+                  </Field>
+                </Stack> 
+
+                {/* FECHA */}
+                <Stack direction="column" sx={{ width: { xs: "100%", sm: 275 } }}>
+                  <label className="titulo-arriba-form">Fecha</label>
+                  <Field name="dateBudget">
+                    {({ field }: FieldProps) => (
+                      <TextField
+                        {...field}
+                        type="date"
+                        className="form-input"
+                        fullWidth
+                        InputLabelProps={{ shrink: true }}
+                        error={touched.dateBudget && Boolean(errors.dateBudget)}
+                        helperText={touched.dateBudget && errors.dateBudget}
+                      />
+                    )}
+                  </Field>
+                </Stack>
+
+                {/* BOTÓN */}
+                <IconButton
+                  className="boton-verde"
+                  type="submit"
+                  sx={{
+                    height: 70,
+                    width: 75,
+                    mt: { xs: 2, sm: "25px" },
+                    alignSelf: { xs: "center", sm: "flex-end" },
+                    boxShadow: 2,
+                    borderRadius: 1,
+                  }}
+                >
+                  <AddIcon sx={{ fontSize: 30 }} />
+                </IconButton>
+              </Stack>
+            </Form>
+          )}
+        </Formik>
       </div>
+
+      <Box
+        sx={{
+          backgroundColor: saldoActual < 0 ? "#d32f2f" : "#f57c00", // rojo si negativo, naranja si positivo
+          color: "white",
+          fontWeight: "bold",
+          fontSize: "1.2rem",
+          px: 2,
+          py: 1,
+          display: "inline-block",
+          mt: 5,
+          borderRadius: 1,
+        }}
+      >
+        {saldoActual < 0 ? "Déficit actual :" : "Saldo actual :"} &nbsp; S/{Math.abs(saldoActual).toFixed(2)}
+      </Box>
+
+
 
       {/* Tabla responsive debajo del formulario */}
       <Box className="table-container-raciones" sx={{ mt: 5, width: "100%", overflowX: "auto" }}>
@@ -243,7 +280,17 @@ const PresupuestoPage: React.FC = () => {
               {presupuestos
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((item) => (
-                  <TableRow key={item.idBudget} sx={{ height: 70 }}>
+                 <TableRow
+                      key={item.idBudget}
+                      sx={{
+                        height: 70,
+                        backgroundColor:
+                          item.budgetCategory?.name?.toLowerCase().includes("egreso") ||
+                          item.budgetCategory?.name?.toLowerCase().includes("egresos")
+                            ? "#f8d7da" // rojo suave
+                            : "inherit", // color por defecto
+                      }}
+                    >
                     <TableCell sx={{ fontSize: "1.1rem" }}>
                       {dayjs(item.dateBudget).format("DD/MM/YYYY")}
                     </TableCell>
@@ -256,17 +303,54 @@ const PresupuestoPage: React.FC = () => {
                 ))}
             </TableBody>
           </Table>
-          <TablePagination
-            rowsPerPageOptions={[5, 10, 25]}
-            component="div"
-            count={presupuestos.length}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onPageChange={handleChangePage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-          />
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              count={presupuestos.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+              labelRowsPerPage="Filas por página"
+              labelDisplayedRows={({ from, to, count }) =>
+                `Del ${from} al ${to} de ${count !== -1 ? count : `más de ${to}`} movimientos`
+              }
+              sx={{
+                '& .MuiTablePagination-toolbar': {
+                  flexDirection: { xs: 'row', sm: 'row' },
+                  flexWrap: { xs: 'wrap', sm: 'nowrap' },
+                  justifyContent: { xs: 'space-between', sm: 'flex-end' },
+                  alignItems: 'center',
+                  gap: 1,
+                  px: 1,
+                },
+                '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
+                  fontSize: '0.85rem',
+                  marginBottom: { xs: 0.5, sm: 0 },
+                },
+                '& .MuiTablePagination-actions': {
+                  marginLeft: { xs: 0, sm: 2 },
+                },
+              }}
+            />
+
         </TableContainer>
+
+        
       </Box>
+
+      {/* Botón de regresar */}
+            <Box sx={{ pt: 4 }}>
+              <Button
+                variant="contained"
+                color="warning"
+                startIcon={<ArrowBackIcon />}
+                sx={{ fontWeight: "bold" }}
+                href="/profile"
+                >
+                  REGRESAR AL MENÚ
+              </Button>
+            </Box>
     </Box>
   );
 };
