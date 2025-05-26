@@ -1,3 +1,5 @@
+import BugdeCategoty from "./budgetCategory";
+
 export interface BudgetDTO {
   idBudget: number;
   descriptionProduct: string;
@@ -6,7 +8,5 @@ export interface BudgetDTO {
   users?: {
     idUser: number;
   };
-  budgetCategory?: {
-    idBudgetCategory: number;
-  };
+  budgetCategory?: BugdeCategoty; // ✅ Esto es lo correcto
 }
