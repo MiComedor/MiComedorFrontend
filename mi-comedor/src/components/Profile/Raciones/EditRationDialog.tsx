@@ -13,6 +13,9 @@ import Autocomplete from "@mui/material/Autocomplete";
 import Ration from "../../../types/ration.type";
 import RationType from "../../../types/TypeRation";
 import BeneficiaryByUserId from "../../../types/BeneficiaryByUserId";
+import { Snackbar, Alert } from "@mui/material";
+import { useState } from "react";
+import "./EditRacionesDialog.css";
 
 type FormRationValues = {
   date: string;
@@ -58,147 +61,199 @@ export default function EditRationDialog({
   rationTypes,
   beneficiaries,
 }: Props) {
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      fullWidth
-      maxWidth="xs"
-      className="container-dialog-ration-edit"
-    >
-      <DialogTitle
-        className="titulo-dialog-editar-ration"
-        sx={{ fontWeight: "bold", fontSize: 30 }}
+    <>
+      <Dialog
+        open={open}
+        onClose={onClose}
+        fullWidth
+        maxWidth="xs"
+        className="container-dialog-ration-edit"
       >
-        Editar Ración
-      </DialogTitle>
+        <DialogTitle
+          className="titulo-dialog-editar-ration"
+          sx={{ fontWeight: "bold", fontSize: 30, textAlign: "left" }}
+        >
+          Editar Ración
+        </DialogTitle>
 
-      <Formik<FormRationValues>
-        enableReinitialize
-        initialValues={{
-          date: data.date,
-          price: data.price,
-          rationType:
-            rationTypes.find(
-              (r) => r.idRationType === data.rationType?.idRationType
-            ) || null,
-          beneficiary:
-            beneficiaries.find(
-              (b) => b.idBeneficiary === data.beneficiary?.idBeneficiary
-            ) || null,
-        }}
-        validationSchema={validationSchema}
-        onSubmit={(values) => {
-          const updatedRation: Ration = {
-            ...data,
-            date: values.date,
-            price: Number(values.price),
-            rationType: {
-              idRationType: values.rationType!.idRationType,
-            },
-            beneficiary: {
-              idBeneficiary: values.beneficiary!.idBeneficiary,
-            },
-          };
-          onSubmit(updatedRation);
-          onClose();
-        }}
+        <Formik<FormRationValues>
+          enableReinitialize
+          initialValues={{
+            date: data.date,
+            price: data.price,
+            rationType:
+              rationTypes.find(
+                (r) => r.idRationType === data.rationType?.idRationType
+              ) || null,
+            beneficiary:
+              beneficiaries.find(
+                (b) => b.idBeneficiary === data.beneficiary?.idBeneficiary
+              ) || null,
+          }}
+          validationSchema={validationSchema}
+          onSubmit={(values) => {
+            const isRationTypeInvalid =
+              !values.rationType || !values.rationType.idRationType;
+            const isBeneficiaryInvalid =
+              !values.beneficiary || !values.beneficiary.idBeneficiary;
+            const isDateInvalid = !values.date || values.date.trim() === "";
+            const isPriceInvalid = !values.price || isNaN(Number(values.price));
+
+            if (
+              isRationTypeInvalid ||
+              isBeneficiaryInvalid ||
+              isDateInvalid ||
+              isPriceInvalid
+            ) {
+              setSnackbarMessage("❌ ¡No puede haber campos vacíos!");
+              setSnackbarOpen(true);
+              return;
+            }
+
+            const updatedRation: Ration = {
+              ...data,
+              date: values.date,
+              price: Number(values.price),
+              rationType: {
+                idRationType: values.rationType!.idRationType,
+              },
+              beneficiary: {
+                idBeneficiary: values.beneficiary!.idBeneficiary,
+              },
+            };
+
+            onSubmit(updatedRation);
+
+            // ✅ Mostramos mensaje de éxito
+            setSnackbarMessage("✅ ¡Ración actualizada correctamente!");
+            setSnackbarOpen(true);
+
+            // Cerramos el diálogo después de un momento para que se vea el mensaje
+            setTimeout(() => {
+              onClose();
+            }, 1000);
+          }}
+        >
+          {({ values, errors, touched, setFieldValue }) => (
+            <Form>
+              <DialogContent className="dialog-content-ration">
+                <label className="titulo-arriba-form-racion">Fecha</label>
+                <TextField
+                  className="textfield-ration"
+                  name="date"
+                  type="date"
+                  fullWidth
+                  margin="dense"
+                  InputLabelProps={{ shrink: true }}
+                  value={values.date}
+                  onChange={(e) => setFieldValue("date", e.target.value)}
+                  error={touched.date && Boolean(errors.date)}
+                  helperText={touched.date && errors.date}
+                />
+                <label className="titulo-arriba-form-racion">
+                  Tipo de Ración
+                </label>
+                <Autocomplete
+                  options={rationTypes}
+                  getOptionLabel={(option) => option.nameRationType}
+                  isOptionEqualToValue={(opt, val) =>
+                    opt.idRationType === val?.idRationType
+                  }
+                  value={values.rationType}
+                  onChange={(_, value) => setFieldValue("rationType", value)}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      className="textfield-ration"
+                      margin="dense"
+                      fullWidth
+                      error={touched.rationType && Boolean(errors.rationType)}
+                      helperText={
+                        touched.rationType &&
+                        typeof errors.rationType === "object"
+                      }
+                    />
+                  )}
+                />
+                <label className="titulo-arriba-form-racion">Dni</label>
+
+                <Autocomplete
+                  options={beneficiaries}
+                  getOptionLabel={(option) =>
+                    `${option.dniBenefeciary} / ${option.fullnameBenefeciary}`
+                  }
+                  isOptionEqualToValue={(opt, val) =>
+                    opt.idBeneficiary === val?.idBeneficiary
+                  }
+                  value={values.beneficiary}
+                  onChange={(_, value) => setFieldValue("beneficiary", value)}
+                  renderInput={(params) => (
+                    <TextField
+                      className="textfield-ration"
+                      {...params}
+                      margin="dense"
+                      fullWidth
+                      error={touched.beneficiary && Boolean(errors.beneficiary)}
+                      helperText={
+                        touched.beneficiary &&
+                        typeof errors.beneficiary === "object"
+                      }
+                    />
+                  )}
+                />
+                <label className="titulo-arriba-form-racion">
+                  Precio por Ración
+                </label>
+                <TextField
+                  className="textfield-ration"
+                  name="price"
+                  type="number"
+                  fullWidth
+                  margin="dense"
+                  value={values.price}
+                  onChange={(e) => setFieldValue("price", e.target.value)}
+                  error={touched.price && Boolean(errors.price)}
+                  helperText={touched.price && errors.price}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">S/</InputAdornment>
+                    ),
+                  }}
+                />
+              </DialogContent>
+
+              <DialogActions
+                className="dialog-actions-ration"
+                sx={{ justifyContent: "center", gap: 4 }}
+              >
+                <Button onClick={onClose}>X</Button>
+                <Button type="submit">✔</Button>
+              </DialogActions>
+            </Form>
+          )}
+        </Formik>
+      </Dialog>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        sx={{ zIndex: 1500 }}
       >
-        {({ values, errors, touched, setFieldValue }) => (
-          <Form>
-            <DialogContent className="dialog-content-ration">
-              <label className="titulo-arriba-form-racion">Fecha</label>
-              <TextField
-                className="textfield-ration"
-                name="date"
-                type="date"
-                fullWidth
-                margin="dense"
-                InputLabelProps={{ shrink: true }}
-                value={values.date}
-                onChange={(e) => setFieldValue("date", e.target.value)}
-                error={touched.date && Boolean(errors.date)}
-                helperText={touched.date && errors.date}
-              />
-              <label className="titulo-arriba-form-racion">
-                Tipo de Ración
-              </label>
-              <Autocomplete
-                options={rationTypes}
-                getOptionLabel={(option) => option.nameRationType}
-                isOptionEqualToValue={(opt, val) =>
-                  opt.idRationType === val?.idRationType
-                }
-                value={values.rationType}
-                onChange={(_, value) => setFieldValue("rationType", value)}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    className="textfield-ration"
-                    margin="dense"
-                    fullWidth
-                    error={touched.rationType && Boolean(errors.rationType)}
-                    helperText={
-                      touched.rationType &&
-                      typeof errors.rationType === "object"
-                    }
-                  />
-                )}
-              />
-              <label className="titulo-arriba-form-racion">Dni</label>
-
-              <Autocomplete
-                options={beneficiaries}
-                getOptionLabel={(option) =>
-                  `${option.dniBenefeciary} / ${option.fullnameBenefeciary}`
-                }
-                isOptionEqualToValue={(opt, val) =>
-                  opt.idBeneficiary === val?.idBeneficiary
-                }
-                value={values.beneficiary}
-                onChange={(_, value) => setFieldValue("beneficiary", value)}
-                renderInput={(params) => (
-                  <TextField
-                    className="textfield-ration"
-                    {...params}
-                    margin="dense"
-                    fullWidth
-                    error={touched.beneficiary && Boolean(errors.beneficiary)}
-                    helperText={
-                      touched.beneficiary &&
-                      typeof errors.beneficiary === "object"
-                    }
-                  />
-                )}
-              />
-              <label className="titulo-arriba-form-racion">
-                Precio por Ración
-              </label>
-              <TextField
-                className="textfield-ration"
-                name="price"
-                type="number"
-                fullWidth
-                margin="dense"
-                value={values.price}
-                onChange={(e) => setFieldValue("price", e.target.value)}
-                error={touched.price && Boolean(errors.price)}
-                helperText={touched.price && errors.price}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">S/</InputAdornment>
-                  ),
-                }}
-              />
-            </DialogContent>
-
-            <DialogActions className="dialog-actions-ration">
-              <Button onClick={onClose}>X</Button>
-              <Button type="submit">✔</Button>
-            </DialogActions>
-          </Form>
-        )}
-      </Formik>
-    </Dialog>
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity="success"
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+    </>
   );
 }

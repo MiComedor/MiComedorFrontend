@@ -30,6 +30,7 @@ import MoneyOffIcon from "@mui/icons-material/MoneyOff";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import GroupsIcon from "@mui/icons-material/Groups";
 import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
+import { pieArcLabelClasses } from "@mui/x-charts/PieChart";
 
 const ReportePage: React.FC = () => {
   const [value, setValue] = useState("diarioReportes");
@@ -574,6 +575,13 @@ const ReportePage: React.FC = () => {
                             arcLabel: (item) => `${item.value}`,
                           },
                         ]}
+                        sx={{
+                          [`& .${pieArcLabelClasses.root}`]: {
+                            fill: "white", 
+                            fontSize: 25,
+                            fontWeight: "bold",
+                          },
+                        }}
                         height={300}
                         width={300}
                       />

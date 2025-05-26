@@ -60,7 +60,7 @@ export default function EditTareasDialog({
     >
       <DialogTitle
         className="titulo-dialog-editar-tarea"
-        sx={{ fontWeight: "bold", fontSize: 30 }}
+        sx={{ fontWeight: "bold", fontSize: 30, textAlign: "left" }}
       >
         Editar Tarea
       </DialogTitle>
@@ -93,10 +93,10 @@ export default function EditTareasDialog({
       >
         {({ values, errors, touched, setFieldValue }) => (
           <Form>
-            <DialogContent className="dialog-content-tarea">
+            <DialogContent className="dialog-edit-content-tarea">
               <label className="titulo-arriba-form-tarea">Responsable</label>
               <TextField
-                className="textfield-tarea"
+                className="textfield-tarea-edit"
                 name="fullname"
                 fullWidth
                 margin="dense"
@@ -118,7 +118,7 @@ export default function EditTareasDialog({
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    className="textfield-tarea"
+                    className="textfield-tarea-edit"
                     margin="dense"
                     fullWidth
                     error={touched.typeOfTask && Boolean(errors.typeOfTask)}
@@ -142,7 +142,7 @@ export default function EditTareasDialog({
                 }
                 slotProps={{
                   textField: {
-                    className: "textfield-tarea",
+                    className: "textfield-tarea-edit",
                     fullWidth: true,
                     margin: "dense",
                     error: touched.dateTask && Boolean(errors.dateTask),
@@ -173,7 +173,7 @@ export default function EditTareasDialog({
                 }}
                 slotProps={{
                   textField: {
-                    className: "textfield-tarea",
+                    className: "textfield-tarea-edit",
                     fullWidth: true,
                     margin: "dense",
                     error: touched.timeTask && Boolean(errors.timeTask),
@@ -186,7 +186,10 @@ export default function EditTareasDialog({
               />
             </DialogContent>
 
-            <DialogActions className="dialog-actions-tarea">
+            <DialogActions
+              className="dialog-edit-actions-tarea"
+              sx={{ justifyContent: "center", gap: 4 }}
+            >
               <Button onClick={onClose}>X</Button>
               <Button type="submit">✔</Button>
             </DialogActions>

@@ -7,7 +7,7 @@
 }
 
 .dialog-content-tarea {
-    background-color: #FBE9E7;
+    background-color: #FBE9E7 !important;
     text-align: center;
     font-size: 18px !important;
 }
@@ -17,7 +17,7 @@
     justify-content: center !important;
     align-items: center;
     gap: 24px;
-    background-color: #FBE9E7;
+    background-color: #FBE9E7 !important;
     padding: 16px;
 }
 

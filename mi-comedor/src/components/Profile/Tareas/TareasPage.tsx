@@ -264,7 +264,16 @@ const RegistroTareas: React.FC = () => {
                                 {...params}
                                 className="form-input"
                                 error={meta.touched && Boolean(meta.error)}
-                                helperText={meta.touched && meta.error}
+                                helperText={
+                                  meta.touched
+                                    ? typeof meta.error === "string"
+                                      ? meta.error
+                                      : meta.error &&
+                                        typeof meta.error === "object"
+                                      ? String(Object.values(meta.error)[0])
+                                      : ""
+                                    : ""
+                                }
                               />
                             )}
                           />

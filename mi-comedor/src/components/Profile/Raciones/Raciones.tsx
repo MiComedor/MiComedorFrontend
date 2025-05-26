@@ -118,7 +118,7 @@ const RegistroRaciones: React.FC = () => {
     setDialogOpenDelete(false);
     setDeleting(null);
   };
-  
+
   const getRaciones = () => {
     const userStr = localStorage.getItem("user");
     const user = userStr ? JSON.parse(userStr) : null;
@@ -297,7 +297,14 @@ const RegistroRaciones: React.FC = () => {
                                 {...params}
                                 className="form-input"
                                 error={meta.touched && Boolean(meta.error)}
-                                helperText={meta.touched && meta.error}
+                                helperText={
+                                  meta.touched &&
+                                  typeof meta.error === "object" &&
+                                  meta.error
+                                    ? (meta.error as { idRationType?: string })
+                                        .idRationType
+                                    : undefined
+                                }
                               />
                             )}
                           />
@@ -329,7 +336,14 @@ const RegistroRaciones: React.FC = () => {
                                 {...params}
                                 className="form-input"
                                 error={meta.touched && Boolean(meta.error)}
-                                helperText={meta.touched && meta.error}
+                                helperText={
+                                  meta.touched &&
+                                  typeof meta.error === "object" &&
+                                  meta.error
+                                    ? (meta.error as { idBeneficiary?: string })
+                                        .idBeneficiary
+                                    : undefined
+                                }
                               />
                             )}
                             renderGroup={(params) => (
