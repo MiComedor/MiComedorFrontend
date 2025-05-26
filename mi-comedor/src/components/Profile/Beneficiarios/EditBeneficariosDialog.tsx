@@ -47,6 +47,12 @@ const EditBeneficiariosDialog: React.FC<Props> = ({
     }, 1500);
   };
 
+  
+
+  function setFieldValue(arg0: string, safeValue: string | number) {
+  throw new Error("Function not implemented.");
+}
+
   return (
     <>
     <Dialog
@@ -108,7 +114,28 @@ const EditBeneficiariosDialog: React.FC<Props> = ({
                     fullWidth
                     size="medium"
                     value={values.ageBeneficiary}
-                    onChange={handleChange}
+                    onChange={(e) => {
+                      const inputValue = parseInt(e.target.value, 10);
+
+                      if (isNaN(inputValue)) {
+                        values.ageBeneficiary = 0; // evita "NaN"
+                      } else if (inputValue < 0) {
+                        values.ageBeneficiary = 0; // trunca en 0
+                      } else {
+                        values.ageBeneficiary = inputValue;
+                      }
+
+                      handleChange(e);
+                    }}
+                    inputProps={{
+                      min: 0,
+                      onKeyDown: (e) => {
+                        if (["-", "e", "E", "+", "."].includes(e.key)) {
+                          e.preventDefault(); // bloquea caracteres no deseados
+                        }
+                      },
+                      onWheel: (e) => e.currentTarget.blur(), // evita scroll con el mouse
+                    }}
                     error={touched.ageBeneficiary && Boolean(errors.ageBeneficiary)}
                     helperText={touched.ageBeneficiary && errors.ageBeneficiary}
                     InputProps={{
@@ -123,6 +150,8 @@ const EditBeneficiariosDialog: React.FC<Props> = ({
                     }}
                   />
                 </Box>
+
+
 
                 <Box>
                   <h6 className="titulo-arriba-form" style={{ fontSize: 19, margin: 0 }}>DNI</h6>

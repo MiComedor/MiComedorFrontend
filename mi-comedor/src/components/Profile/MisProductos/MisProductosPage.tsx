@@ -480,8 +480,25 @@ const MisProductosPage: React.FC = () => {
                 onRowsPerPageChange={handleChangeRowsPerPage}
                 labelRowsPerPage="Filas por página"
                 labelDisplayedRows={({ from, to, count }) =>
-                  `Mostrando del ${from} al ${to} de ${count !== -1 ? count : `más de ${to}`} productos`
+                  `Del ${from} al ${to} de ${count !== -1 ? count : `más de ${to}`} movimientos`
                 }
+                sx={{
+                  '& .MuiTablePagination-toolbar': {
+                    flexDirection: { xs: 'row', sm: 'row' },
+                    flexWrap: { xs: 'wrap', sm: 'nowrap' },
+                    justifyContent: { xs: 'space-between', sm: 'flex-end' },
+                    alignItems: 'center',
+                    gap: 1,
+                    px: 1,
+                  },
+                  '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
+                    fontSize: '0.85rem',
+                    marginBottom: { xs: 0.5, sm: 0 },
+                  },
+                  '& .MuiTablePagination-actions': {
+                    marginLeft: { xs: 0, sm: 2 },
+                  },
+                }}
               />
             </TableContainer>
 
