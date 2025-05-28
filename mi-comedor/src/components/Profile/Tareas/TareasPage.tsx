@@ -11,6 +11,7 @@ import {
   Paper,
   Stack,
   IconButton,
+  TablePagination,
 } from "@mui/material";
 import { Formik, Form, Field, FieldProps, FormikHelpers } from "formik";
 import * as Yup from "yup";
@@ -35,6 +36,7 @@ import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import EditTareasDialog from "./EditTareasDialog";
 import "./Tareas.css";
 import DeleteTareasDialog from "./DeleteTareasDialog";
+import { useNavigate } from "react-router-dom";
 
 const initialTaskCoordinationValues: TaskCoordination = {
   fullname: "",
@@ -64,6 +66,20 @@ const RegistroTareas: React.FC = () => {
   const [deleting, setDeleting] = useState<TaskCoordination | null>(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const navigate = useNavigate();
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  const handleChangePage = (_event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   const handleOpenEdit = (tarea: TaskCoordinationByUserId) => {
     const tipoSeleccionado = tipoTarea.find(
@@ -364,49 +380,83 @@ const RegistroTareas: React.FC = () => {
 
           {/* Tabla */}
           {isMobile ? (
-            <Stack spacing={2}>
-              {tareas.map((tarea) => (
-                <Paper
-                  key={tarea.idTaskCoordination}
-                  elevation={3}
-                  sx={{ padding: 2, borderRadius: 2 }}
-                >
-                  <div>
-                    <strong>Responsable: </strong>
-                    {tarea.fullname}
-                  </div>
-
-                  <div>
-                    <strong>Tipo:</strong> {tarea.nameTypeTask}
-                  </div>
-
-                  <div>
-                    <strong>Fecha:</strong>{" "}
-                    {dayjs(tarea.dateTask).format("DD/MM/YYYY")}
-                  </div>
-
-                  <div>
-                    <strong>Hora:</strong>{" "}
-                    {dayjs(tarea.timeTask, "HH:mm:ss").format("HH:mm")}
-                  </div>
-
-                  <Stack direction="row" spacing={1} mt={1}>
-                    <IconButton
-                      color="primary"
-                      onClick={() => handleOpenEdit(tarea)}
+            <>
+              <Stack spacing={2}>
+                {tareas
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((tarea) => (
+                    <Paper
+                      key={tarea.idTaskCoordination}
+                      elevation={3}
+                      sx={{ padding: 2, borderRadius: 2 }}
                     >
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton
-                      color="error"
-                      onClick={() => handleOpenDelete(tarea)}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </Stack>
-                </Paper>
-              ))}
-            </Stack>
+                      <div>
+                        <strong>Responsable: </strong>
+                        {tarea.fullname}
+                      </div>
+
+                      <div>
+                        <strong>Tipo:</strong> {tarea.nameTypeTask}
+                      </div>
+
+                      <div>
+                        <strong>Fecha:</strong>{" "}
+                        {dayjs(tarea.dateTask).format("DD/MM/YYYY")}
+                      </div>
+
+                      <div>
+                        <strong>Hora:</strong>{" "}
+                        {dayjs(tarea.timeTask, "HH:mm:ss").format("HH:mm")}
+                      </div>
+
+                      <Stack direction="row" spacing={1} mt={1}>
+                        <IconButton
+                          color="primary"
+                          onClick={() => handleOpenEdit(tarea)}
+                        >
+                          <EditIcon />
+                        </IconButton>
+                        <IconButton
+                          color="error"
+                          onClick={() => handleOpenDelete(tarea)}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Stack>
+                    </Paper>
+                  ))}
+              </Stack>
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 25]}
+                component="div"
+                count={tareas.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                labelRowsPerPage="Filas por página"
+                labelDisplayedRows={({ from, to, count }) =>
+                  `Del ${from} al ${to} de ${
+                    count !== -1 ? count : `más de ${to}`
+                  } movimientos`
+                }
+                sx={{
+                  "& .MuiTablePagination-toolbar": {
+                    flexDirection: "column",
+                    alignItems: "flex-start",
+                    px: 1,
+                    gap: 1,
+                  },
+                  "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows":
+                    {
+                      fontSize: "0.85rem",
+                    },
+                  "& .MuiTablePagination-actions": {
+                    alignSelf: "flex-end",
+                  },
+                }}
+              />
+            </>
           ) : (
             <Box className="table-container-tareas">
               <TableContainer component={Paper}>
@@ -431,31 +481,69 @@ const RegistroTareas: React.FC = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {tareas.map((tarea) => (
-                      <TableRow key={tarea.idTaskCoordination}>
-                        <TableCell>{tarea.fullname}</TableCell>
-                        <TableCell>{tarea.nameTypeTask}</TableCell>
-                        <TableCell>
-                          {dayjs(tarea.dateTask).format("DD/MM/YYYY")}
-                        </TableCell>
-                        <TableCell>
-                          {dayjs(tarea.timeTask, "HH:mm:ss").format("HH:mm")}
-                        </TableCell>
-                        <TableCell>
-                          <IconButton color="primary">
-                            <EditIcon onClick={() => handleOpenEdit(tarea)} />
-                          </IconButton>
-                          <IconButton
-                            color="error"
-                            onClick={() => handleOpenDelete(tarea)}
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {tareas
+                      .slice(
+                        page * rowsPerPage,
+                        page * rowsPerPage + rowsPerPage
+                      )
+                      .map((tarea) => (
+                        <TableRow key={tarea.idTaskCoordination}>
+                          <TableCell>{tarea.fullname}</TableCell>
+                          <TableCell>{tarea.nameTypeTask}</TableCell>
+                          <TableCell>
+                            {dayjs(tarea.dateTask).format("DD/MM/YYYY")}
+                          </TableCell>
+                          <TableCell>
+                            {dayjs(tarea.timeTask, "HH:mm:ss").format("HH:mm")}
+                          </TableCell>
+                          <TableCell>
+                            <IconButton color="primary">
+                              <EditIcon onClick={() => handleOpenEdit(tarea)} />
+                            </IconButton>
+                            <IconButton
+                              color="error"
+                              onClick={() => handleOpenDelete(tarea)}
+                            >
+                              <DeleteIcon />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      ))}
                   </TableBody>
                 </Table>
+                <TablePagination
+                  rowsPerPageOptions={[5, 10, 25]}
+                  component="div"
+                  count={tareas.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                  labelRowsPerPage="Filas por página"
+                  labelDisplayedRows={({ from, to, count }) =>
+                    `Del ${from} al ${to} de ${
+                      count !== -1 ? count : `más de ${to}`
+                    } movimientos`
+                  }
+                  sx={{
+                    "& .MuiTablePagination-toolbar": {
+                      flexDirection: { xs: "row", sm: "row" },
+                      flexWrap: { xs: "wrap", sm: "nowrap" },
+                      justifyContent: { xs: "space-between", sm: "flex-end" },
+                      alignItems: "center",
+                      gap: 1,
+                      px: 1,
+                    },
+                    "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows":
+                      {
+                        fontSize: "0.85rem",
+                        marginBottom: { xs: 0.5, sm: 0 },
+                      },
+                    "& .MuiTablePagination-actions": {
+                      marginLeft: { xs: 0, sm: 2 },
+                    },
+                  }}
+                />
               </TableContainer>
             </Box>
           )}
@@ -466,6 +554,7 @@ const RegistroTareas: React.FC = () => {
               color="warning"
               startIcon={<ArrowBackIcon />}
               sx={{ fontWeight: "bold" }}
+              onClick={() => navigate("/profile")}
             >
               REGRESAR AL MENÚ
             </Button>

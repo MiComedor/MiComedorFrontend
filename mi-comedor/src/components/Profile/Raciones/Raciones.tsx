@@ -12,6 +12,7 @@ import {
   Stack,
   IconButton,
   InputAdornment,
+  TablePagination,
 } from "@mui/material";
 import { Formik, Form, Field, FieldProps, FormikHelpers } from "formik";
 import * as Yup from "yup";
@@ -37,6 +38,7 @@ import RationTypeService from "../../../services/rationType.service";
 import DeleteRacionesDialog from "./DeleteRacionesDialog";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import { useNavigate } from "react-router-dom";
 
 const initialRationValues: Ration = {
   date: "",
@@ -76,6 +78,21 @@ const RegistroRaciones: React.FC = () => {
   const [deleting, setDeleting] = useState<Ration | null>(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  const navigate = useNavigate();
+
+  const handleChangePage = (_event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   const handleOpenDelete = (racion: RationByUserId) => {
     const fullRation: Ration = {
@@ -433,46 +450,80 @@ const RegistroRaciones: React.FC = () => {
 
           {/* Tabla */}
           {isMobile ? (
-            <Stack spacing={2}>
-              {raciones.map((racion) => (
-                <Paper
-                  key={racion.idRation}
-                  elevation={3}
-                  sx={{ padding: 2, borderRadius: 2 }}
-                >
-                  <div>
-                    <strong>Fecha:</strong>{" "}
-                    {dayjs(racion.date).format("DD/MM/YYYY")}
-                  </div>
-                  <div>
-                    <strong>Tipo:</strong> {racion.nameRationType}
-                  </div>
-                  <div>
-                    <strong>Beneficiario:</strong> {racion.dniBenefeciary} /{" "}
-                    {beneficiarios.find(
-                      (b) => b.dniBenefeciary === racion.dniBenefeciary
-                    )?.fullnameBenefeciary || "Desconocido"}
-                  </div>
-                  <div>
-                    <strong>Precio:</strong> S/ {racion.price.toFixed(2)}
-                  </div>
-                  <Stack direction="row" spacing={1} mt={1}>
-                    <IconButton
-                      color="primary"
-                      onClick={() => handleOpenEdit(racion)}
+            <>
+              <Stack spacing={2}>
+                {raciones
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((racion) => (
+                    <Paper
+                      key={racion.idRation}
+                      elevation={3}
+                      sx={{ padding: 2, borderRadius: 2 }}
                     >
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton
-                      color="error"
-                      onClick={() => handleOpenDelete(racion)}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </Stack>
-                </Paper>
-              ))}
-            </Stack>
+                      <div>
+                        <strong>Fecha:</strong>{" "}
+                        {dayjs(racion.date).format("DD/MM/YYYY")}
+                      </div>
+                      <div>
+                        <strong>Tipo:</strong> {racion.nameRationType}
+                      </div>
+                      <div>
+                        <strong>Beneficiario:</strong> {racion.dniBenefeciary} /{" "}
+                        {beneficiarios.find(
+                          (b) => b.dniBenefeciary === racion.dniBenefeciary
+                        )?.fullnameBenefeciary || "Desconocido"}
+                      </div>
+                      <div>
+                        <strong>Precio:</strong> S/ {racion.price.toFixed(2)}
+                      </div>
+                      <Stack direction="row" spacing={1} mt={1}>
+                        <IconButton
+                          color="primary"
+                          onClick={() => handleOpenEdit(racion)}
+                        >
+                          <EditIcon />
+                        </IconButton>
+                        <IconButton
+                          color="error"
+                          onClick={() => handleOpenDelete(racion)}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Stack>
+                    </Paper>
+                  ))}
+              </Stack>
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 25]}
+                component="div"
+                count={raciones.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                labelRowsPerPage="Filas por página"
+                labelDisplayedRows={({ from, to, count }) =>
+                  `Del ${from} al ${to} de ${
+                    count !== -1 ? count : `más de ${to}`
+                  } movimientos`
+                }
+                sx={{
+                  "& .MuiTablePagination-toolbar": {
+                    flexDirection: "column",
+                    alignItems: "flex-start",
+                    px: 1,
+                    gap: 1,
+                  },
+                  "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows":
+                    {
+                      fontSize: "0.85rem",
+                    },
+                  "& .MuiTablePagination-actions": {
+                    alignSelf: "flex-end",
+                  },
+                }}
+              />
+            </>
           ) : (
             <Box className="table-container-raciones">
               <TableContainer component={Paper}>
@@ -497,34 +548,74 @@ const RegistroRaciones: React.FC = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {raciones.map((racion) => (
-                      <TableRow key={racion.idRation}>
-                        <TableCell>
-                          {dayjs(racion.date).format("DD/MM/YYYY")}
-                        </TableCell>
-                        <TableCell>{racion.nameRationType}</TableCell>
-                        <TableCell>
-                          {racion.dniBenefeciary} /{" "}
-                          {beneficiarios.find(
-                            (b) => b.dniBenefeciary === racion.dniBenefeciary
-                          )?.fullnameBenefeciary || "Desconocido"}
-                        </TableCell>
-                        <TableCell>S/ {racion.price.toFixed(2)}</TableCell>
-                        <TableCell>
-                          <IconButton color="primary">
-                            <EditIcon onClick={() => handleOpenEdit(racion)} />
-                          </IconButton>
-                          <IconButton
-                            color="error"
-                            onClick={() => handleOpenDelete(racion)}
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {raciones
+                      .slice(
+                        page * rowsPerPage,
+                        page * rowsPerPage + rowsPerPage
+                      )
+                      .map((racion) => (
+                        <TableRow key={racion.idRation}>
+                          <TableCell>
+                            {dayjs(racion.date).format("DD/MM/YYYY")}
+                          </TableCell>
+                          <TableCell>{racion.nameRationType}</TableCell>
+                          <TableCell>
+                            {racion.dniBenefeciary} /{" "}
+                            {beneficiarios.find(
+                              (b) => b.dniBenefeciary === racion.dniBenefeciary
+                            )?.fullnameBenefeciary || "Desconocido"}
+                          </TableCell>
+                          <TableCell>S/ {racion.price.toFixed(2)}</TableCell>
+                          <TableCell>
+                            <IconButton color="primary">
+                              <EditIcon
+                                onClick={() => handleOpenEdit(racion)}
+                              />
+                            </IconButton>
+                            <IconButton
+                              color="error"
+                              onClick={() => handleOpenDelete(racion)}
+                            >
+                              <DeleteIcon />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      ))}
                   </TableBody>
                 </Table>
+                <TablePagination
+                  rowsPerPageOptions={[5, 10, 25]}
+                  component="div"
+                  count={raciones.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                  labelRowsPerPage="Filas por página"
+                  labelDisplayedRows={({ from, to, count }) =>
+                    `Del ${from} al ${to} de ${
+                      count !== -1 ? count : `más de ${to}`
+                    } movimientos`
+                  }
+                  sx={{
+                    "& .MuiTablePagination-toolbar": {
+                      flexDirection: { xs: "row", sm: "row" },
+                      flexWrap: { xs: "wrap", sm: "nowrap" },
+                      justifyContent: { xs: "space-between", sm: "flex-end" },
+                      alignItems: "center",
+                      gap: 1,
+                      px: 1,
+                    },
+                    "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows":
+                      {
+                        fontSize: "0.85rem",
+                        marginBottom: { xs: 0.5, sm: 0 },
+                      },
+                    "& .MuiTablePagination-actions": {
+                      marginLeft: { xs: 0, sm: 2 },
+                    },
+                  }}
+                />
               </TableContainer>
             </Box>
           )}
@@ -535,6 +626,7 @@ const RegistroRaciones: React.FC = () => {
               color="warning"
               startIcon={<ArrowBackIcon />}
               sx={{ fontWeight: "bold" }}
+              onClick={() => navigate("/profile")}
             >
               REGRESAR AL MENÚ
             </Button>
