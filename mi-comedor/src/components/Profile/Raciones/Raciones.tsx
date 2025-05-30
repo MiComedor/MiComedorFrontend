@@ -476,20 +476,29 @@ const RegistroRaciones: React.FC = () => {
                       <div>
                         <strong>Precio:</strong> S/ {racion.price.toFixed(2)}
                       </div>
-                      <Stack direction="row" spacing={1} mt={1}>
-                        <IconButton
+                      <Box
+                        mt={2}
+                        display="flex"
+                        justifyContent="center"
+                        gap={2}
+                      >
+                        <Button
+                          variant="outlined"
                           color="primary"
+                          startIcon={<EditIcon />}
                           onClick={() => handleOpenEdit(racion)}
                         >
-                          <EditIcon />
-                        </IconButton>
-                        <IconButton
+                          Editar
+                        </Button>
+                        <Button
+                          variant="outlined"
                           color="error"
+                          startIcon={<DeleteIcon />}
                           onClick={() => handleOpenDelete(racion)}
                         >
-                          <DeleteIcon />
-                        </IconButton>
-                      </Stack>
+                          Eliminar
+                        </Button>
+                      </Box>
                     </Paper>
                   ))}
               </Stack>

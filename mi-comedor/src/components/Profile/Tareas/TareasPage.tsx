@@ -409,20 +409,29 @@ const RegistroTareas: React.FC = () => {
                         {dayjs(tarea.timeTask, "HH:mm:ss").format("HH:mm")}
                       </div>
 
-                      <Stack direction="row" spacing={1} mt={1}>
-                        <IconButton
+                      <Box
+                        mt={2}
+                        display="flex"
+                        justifyContent="center"
+                        gap={2}
+                      >
+                        <Button
+                          variant="outlined"
                           color="primary"
+                          startIcon={<EditIcon />}
                           onClick={() => handleOpenEdit(tarea)}
                         >
-                          <EditIcon />
-                        </IconButton>
-                        <IconButton
+                          Editar
+                        </Button>
+                        <Button
+                          variant="outlined"
                           color="error"
+                          startIcon={<DeleteIcon />}
                           onClick={() => handleOpenDelete(tarea)}
                         >
-                          <DeleteIcon />
-                        </IconButton>
-                      </Stack>
+                          Eliminar
+                        </Button>
+                      </Box>
                     </Paper>
                   ))}
               </Stack>
