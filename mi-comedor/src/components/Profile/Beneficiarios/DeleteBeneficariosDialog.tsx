@@ -44,7 +44,7 @@ const DeleteBeneficiariosDialog: React.FC<Props> = ({
       >
         ¿Deseas eliminar
         <br />
-        al pensionista?
+        al beneficiario?
       </Typography>
     </DialogContent>
     <DialogActions sx={{ justifyContent: "center" }}>
