@@ -47,11 +47,7 @@ const EditBeneficiariosDialog: React.FC<Props> = ({
     }, 1500);
   };
 
-  
 
-  function setFieldValue(arg0: string, safeValue: string | number) {
-  throw new Error("Function not implemented.");
-}
 
   return (
     <>
@@ -118,9 +114,9 @@ const EditBeneficiariosDialog: React.FC<Props> = ({
                       const inputValue = parseInt(e.target.value, 10);
 
                       if (isNaN(inputValue)) {
-                        values.ageBeneficiary = 0; // evita "NaN"
+                        values.ageBeneficiary = 0;
                       } else if (inputValue < 0) {
-                        values.ageBeneficiary = 0; // trunca en 0
+                        values.ageBeneficiary = 0;
                       } else {
                         values.ageBeneficiary = inputValue;
                       }
@@ -131,13 +127,19 @@ const EditBeneficiariosDialog: React.FC<Props> = ({
                       min: 0,
                       onKeyDown: (e) => {
                         if (["-", "e", "E", "+", "."].includes(e.key)) {
-                          e.preventDefault(); // bloquea caracteres no deseados
+                          e.preventDefault();
                         }
                       },
-                      onWheel: (e) => e.currentTarget.blur(), // evita scroll con el mouse
+                      onWheel: (e) => e.currentTarget.blur(),
                     }}
                     error={touched.ageBeneficiary && Boolean(errors.ageBeneficiary)}
-                    helperText={touched.ageBeneficiary && errors.ageBeneficiary}
+                    helperText={
+                      touched.ageBeneficiary && values.ageBeneficiary === 0
+                        ? "La edad debe ser mayor a 0."
+                        : touched.ageBeneficiary && errors.ageBeneficiary
+                        ? "Por favor ingrese una edad válida (mayor a 0)."
+                        : ""
+                    }
                     InputProps={{
                       sx: {
                         backgroundColor: "#fff",

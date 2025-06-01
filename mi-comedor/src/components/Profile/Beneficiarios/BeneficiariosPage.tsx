@@ -49,8 +49,10 @@ const BeneficiariosPage: React.FC = () => {
   const [search, setSearch] = useState("");
   const [beneficiarios, setBeneficiarios] = useState<BeneficiaryByUserId[]>([]);
   const [openDialog, setOpenDialog] = useState(false);
-  const [beneficiarioAEditar, setBeneficiarioAEditar] = useState<Beneficiary | null>(null);
-  const [beneficiarioAEliminar, setBeneficiarioAEliminar] = useState<Beneficiary | null>(null);
+  const [beneficiarioAEditar, setBeneficiarioAEditar] =
+    useState<Beneficiary | null>(null);
+  const [beneficiarioAEliminar, setBeneficiarioAEliminar] =
+    useState<Beneficiary | null>(null);
 
   const handleOpen = () => setOpenDialog(true);
   const handleClose = () => setOpenDialog(false);
@@ -69,7 +71,9 @@ const BeneficiariosPage: React.FC = () => {
     if (!user) return;
 
     try {
-      const data = await BeneficiaryService.buscarBeneficiaryPorUserId(user.idUser);
+      const data = await BeneficiaryService.buscarBeneficiaryPorUserId(
+        user.idUser
+      );
       setBeneficiarios(data);
     } catch (err) {
       console.error("Error al cargar beneficiarios", err);
@@ -218,97 +222,169 @@ const BeneficiariosPage: React.FC = () => {
                   pb: 3,
                 }}
               >
-                <Stack spacing={3} mt={1}>
-                  {[
-                    { name: "fullnameBenefeciary", label: "Nombre completo" },
-                    { name: "ageBeneficiary", label: "Edad", type: "number" },
-                    { name: "dniBenefeciary", label: "DNI" },
-                  ].map(({ name, label, type }) => (
-                    <Box key={name}>
-                      <label className="titulo-arriba-form">{label}</label>
-                      {name === "dniBenefeciary" ? (
-                  <TextField
-                    name={name}
-                    variant="outlined"
-                    fullWidth
-                    required
-                    type="text"
-                    value={(values as any)[name]}
-                    onChange={(e) => {
-                      const onlyNums = e.target.value.replace(/[^0-9]/g, "");
-                      handleChange({
-                        target: {
-                          name,
-                          value: onlyNums,
+                <Stack spacing={2.5}>
+                  <Box>
+                    <h6
+                      className="titulo-arriba-form"
+                      style={{ fontSize: 19, margin: 0 }}
+                    >
+                      Nombre completo
+                    </h6>
+                    <TextField
+                      name="fullnameBenefeciary"
+                      fullWidth
+                      size="medium"
+                      value={values.fullnameBenefeciary}
+                      onChange={handleChange}
+                      error={
+                        touched.fullnameBenefeciary &&
+                        Boolean(errors.fullnameBenefeciary)
+                      }
+                      helperText={
+                        touched.fullnameBenefeciary &&
+                        errors.fullnameBenefeciary
+                      }
+                      InputProps={{
+                        sx: {
+                          backgroundColor: "#fff",
+                          borderRadius: "12px",
+                          boxShadow: "1px 1px 4px rgba(0,0,0,0.10)",
+                          border: "none",
+                          fontSize: 17,
+                          height: 48,
                         },
-                      });
-                    }}
-                    inputProps={{ maxLength: 8 }}
-                    error={
-                      touched[name as keyof FormValues] &&
-                      Boolean(errors[name as keyof FormValues])
-                    }
-                    helperText={
-                      touched[name as keyof FormValues] &&
-                      errors[name as keyof FormValues]
-                    }
-                    InputProps={{
-                      sx: {
-                        backgroundColor: "#fff",
-                        borderRadius: "15px",
-                        boxShadow: "2px 2px 5px rgba(0,0,0,0.1)",
-                        border: "none",
-                      },
-                    }}
-                  />
-                ) : (
-                  // Campo genérico para fullname y edad
-                  <TextField
-                    name={name}
-                    variant="outlined"
-                    fullWidth
-                    required
-                    type={type || "text"}
-                    value={(values as any)[name]}
-                    onChange={handleChange}
-                    error={
-                      touched[name as keyof FormValues] &&
-                      Boolean(errors[name as keyof FormValues])
-                    }
-                    helperText={
-                      touched[name as keyof FormValues] &&
-                      errors[name as keyof FormValues]
-                    }
-                    InputProps={{
-                      sx: {
-                        backgroundColor: "#fff",
-                        borderRadius: "15px",
-                        boxShadow: "2px 2px 5px rgba(0,0,0,0.1)",
-                        border: "none",
-                      },
-                    }}
-                  />
-                )}
+                      }}
+                    />
+                  </Box>
 
+                    <Box>
+                    <h6
+                      className="titulo-arriba-form"
+                      style={{ fontSize: 19, margin: 0 }}
+                    >
+                      Edad
+                    </h6>
+                    <TextField
+                      name="ageBeneficiary"
+                      type="number"
+                      fullWidth
+                      size="medium"
+                      value={values.ageBeneficiary}
+                      onChange={(e) => {
+                      const inputValue = parseInt(e.target.value, 10);
+
+                      if (isNaN(inputValue)) {
+                        values.ageBeneficiary = "0"; // evita "NaN"
+                      } else if (inputValue < 0) {
+                        values.ageBeneficiary = "0"; // trunca en 0
+                      } else {
+                        values.ageBeneficiary = inputValue.toString();
+                      }
+
+                      handleChange(e);
+                      }}
+                      inputProps={{
+                      min: 0,
+                      onKeyDown: (e) => {
+                        if (["-", "e", "E", "+", "."].includes(e.key)) {
+                        e.preventDefault(); // bloquea caracteres no deseados
+                        }
+                      },
+                      onWheel: (e) => e.currentTarget.blur(), // evita scroll con el mouse
+                      }}
+                      error={
+                      touched.ageBeneficiary && Boolean(errors.ageBeneficiary)
+                      }
+                      helperText={
+                      touched.ageBeneficiary && values.ageBeneficiary === "0"
+                        ? "La edad debe ser mayor a 0."
+                        : touched.ageBeneficiary && errors.ageBeneficiary
+                        ? "Por favor ingrese una edad válida (mayor a 0)."
+                        : ""
+                      }
+                      InputProps={{
+                      sx: {
+                        backgroundColor: "#fff",
+                        borderRadius: "12px",
+                        boxShadow: "1px 1px 4px rgba(0,0,0,0.10)",
+                        border: "none",
+                        fontSize: 17,
+                        height: 48,
+                      },
+                      }}
+                    />
                     </Box>
-                  ))}
 
                   <Box>
-                    <label className="titulo-arriba-form">Observaciones</label>
+                    <h6
+                      className="titulo-arriba-form"
+                      style={{ fontSize: 19, margin: 0 }}
+                    >
+                      DNI
+                    </h6>
+                    <TextField
+                      name="dniBenefeciary"
+                      fullWidth
+                      size="medium"
+                      value={values.dniBenefeciary}
+                      onChange={(e) => {
+                        // Solo permite hasta 8 dígitos numéricos
+                        const value = e.target.value.replace(/\D/g, "").slice(0, 8);
+                        // Simula el evento para Formik
+                        handleChange({
+                          target: {
+                            name: "dniBenefeciary",
+                            value,
+                          },
+                        });
+                      }}
+                      inputProps={{
+                        maxLength: 8,
+                        inputMode: "numeric",
+                        pattern: "[0-9]{8}",
+                      }}
+                      error={
+                        touched.dniBenefeciary && Boolean(errors.dniBenefeciary)
+                      }
+                      helperText={
+                        touched.dniBenefeciary && errors.dniBenefeciary
+                      }
+                      InputProps={{
+                        sx: {
+                          backgroundColor: "#fff",
+                          borderRadius: "12px",
+                          boxShadow: "1px 1px 4px rgba(0,0,0,0.10)",
+                          border: "none",
+                          fontSize: 17,
+                          height: 48,
+                        },
+                      }}
+                    />
+                  </Box>
+
+                  <Box>
+                    <h6
+                      className="titulo-arriba-form"
+                      style={{ fontSize: 19, margin: 0 }}
+                    >
+                      Observaciones
+                    </h6>
                     <TextField
                       name="observationsBeneficiary"
-                      multiline
-                      rows={2}
-                      variant="outlined"
                       fullWidth
+                      multiline
+                      rows={3}
+                      size="medium"
                       value={values.observationsBeneficiary}
                       onChange={handleChange}
                       InputProps={{
                         sx: {
                           backgroundColor: "#fff",
-                          borderRadius: "15px",
-                          boxShadow: "2px 2px 5px rgba(0,0,0,0.1)",
+                          borderRadius: "12px",
+                          boxShadow: "1px 1px 4px rgba(0,0,0,0.10)",
                           border: "none",
+                          fontSize: 17,
+                          minHeight: 48,
                         },
                       }}
                     />
@@ -371,7 +447,8 @@ const BeneficiariosPage: React.FC = () => {
               <Box>Edad: {beneficiario.ageBeneficiary}</Box>
               <Box>DNI: {beneficiario.dniBenefeciary}</Box>
               <Box>
-                Observación: {beneficiario.observationsBeneficiary || "Sin observaciones"}
+                Observación:{" "}
+                {beneficiario.observationsBeneficiary || "Sin observaciones"}
               </Box>
             </Box>
 
@@ -392,23 +469,21 @@ const BeneficiariosPage: React.FC = () => {
               </Button>
             </Stack>
           </Box>
-
-          
         ))}
       </Stack>
 
       {/* Botón de regresar */}
-                <Box sx={{ pt: 4 }}>
-                  <Button
-                    variant="contained"
-                    color="warning"
-                    startIcon={<ArrowBackIcon />}
-                    sx={{ fontWeight: "bold" }}
-                    href="/profile"
-                  >
-                    REGRESAR AL MENÚ
-                  </Button>
-                </Box>
+      <Box sx={{ pt: 4 }}>
+        <Button
+          variant="contained"
+          color="warning"
+          startIcon={<ArrowBackIcon />}
+          sx={{ fontWeight: "bold" }}
+          href="/profile"
+        >
+          REGRESAR AL MENÚ
+        </Button>
+      </Box>
 
       {/* DIÁLOGOS DE EDITAR / ELIMINAR */}
       {beneficiarioAEditar && (
@@ -430,7 +505,9 @@ const BeneficiariosPage: React.FC = () => {
           onClose={() => setBeneficiarioAEliminar(null)}
           nombre={beneficiarioAEliminar.fullnameBenefeciary}
           onConfirm={async () => {
-            await BeneficiaryService.eliminarBeneficiary(beneficiarioAEliminar.idBeneficiary);
+            await BeneficiaryService.eliminarBeneficiary(
+              beneficiarioAEliminar.idBeneficiary
+            );
             loadBeneficiarios();
             setBeneficiarioAEliminar(null);
           }}
