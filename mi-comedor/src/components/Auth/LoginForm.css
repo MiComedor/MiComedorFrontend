@@ -1,0 +1,136 @@
+.login-stack {
+    width: 100%;
+    height: 100vh;
+}
+
+.login-right {
+    background-color: #F57C00;
+    color: white;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-left h2 {
+    margin-bottom: 20px;
+    font-size: 43px;
+}
+
+.login-right-button {
+    font-size: 20px;
+    padding: 10px 30px;
+    background-color: white;
+    color: black;
+    border: none;
+    border-radius: 15px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.login-left {
+    background-color: white;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-left: 0;
+    padding-top: 110px;
+    align-items: center;
+}
+
+.titulo-Pderecho {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.login-right h2 {
+    align-items: flex-end;
+    font-size: 40px;
+    font-size: bold;
+}
+
+.login-form-stack {
+    width: 325px;
+    margin-left: 30px;
+}
+
+.form-group {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    font-size: 22px;
+}
+
+.form-input-login {
+    padding: 10px 15px;
+    border-radius: 10px;
+    border: none;
+    background-color: #b3e5fc;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 1rem;
+    outline: none;
+}
+
+.login-submit-button {
+    font-size: 18px;
+    display: block;
+    margin: 20px;
+    margin-left: 120px;
+    padding: 10px 20px;
+    background-color: #90caf9;
+    color: black;
+    border: none;
+    border-radius: 20px;
+    font-weight: bold;
+    width: auto;
+}
+
+.error-message {
+    color: red;
+    font-size: 0.9rem;
+}
+
+.success-message {
+    color: green;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.formulario-grupo-completo1 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .login-stack {
+        flex-direction: column !important;
+    }
+
+    .login-right {
+        order:2;
+        width: 100%;
+        min-height: 50vh;
+        flex: none;
+        height: 500px;
+    }
+
+    .login-left {
+        min-height: 50vh;
+        order: 1;
+        width: 100%;
+        flex: none;
+        padding-top: 0px;
+        padding-bottom: 10px;
+    }
+
+    .titulo-Pderecho {
+        padding: 0px;
+        margin-bottom: 0px;
+    }
+}

@@ -1,0 +1,90 @@
+.profile-container {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 33px;
+    text-align: center;
+}
+
+.card-button {
+    background-color: #F57C00 !important;
+    border: 3.5px solid black;
+    min-width: 120px;
+    flex: 0 0 auto;
+}
+
+.card-action {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    transition: 0.3s ease;
+}
+
+.card-action[data-active="true"] {
+    background-color: rgba(0, 0, 0, 0.04);
+}
+
+.card-action[data-active="true"]:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+}
+
+.card-image {
+    background-color: white;
+    width: 180px;
+    height: 148px;
+    object-fit: contain;
+    border-radius: 8px;
+    margin-top: 15px;
+    border: 3.5px solid black;
+}
+
+.card-title-modules {
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    color: #FFFFFF !important;
+    text-align: center !important;
+    margin-top: 8px;
+}
+
+.notas-list-container {
+    flex-direction: column;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+@media screen and (max-width: 600px) {
+    .profile-container {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 20px !important;
+    }
+
+    .card-button {
+        min-width: 250px !important;
+        max-width: 300px !important;
+        width: 100% !important;
+        padding: 0 !important;
+    }
+
+    .card-action {
+        padding: 10px !important;
+    }
+
+    .card-image {
+        width: 180px !important;
+        height: 170px !important;
+        margin-top: 10px !important;
+    }
+
+    .card-title-modules {
+        font-size: 23px !important;
+        margin-top: 6px !important;
+    }
+}
