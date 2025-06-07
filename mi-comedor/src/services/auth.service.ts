@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:8084/";
+const API_URL = "https://micomedorbackend.onrender.com/";
 
 const parseJwt = (token: string) => {
   try {
