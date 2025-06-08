@@ -104,16 +104,16 @@ const tipoSeleccionado = tipos.find(
       >
         {({ values, touched, errors, setFieldValue }) => (
         <Form>
-          <DialogContent
-          sx={{
+            <DialogContent
+            sx={{
             backgroundColor: "#E4FAA4",
             px: 2,
             pt: 0.5,
             pb: 2,
-          }}
-          >
-          {/* Descripción */}
-          <Box sx={{ mt: 0.5 }}>
+            }}
+            >
+            {/* Descripción */}
+            <Box sx={{ mt: 0.5 }}>
             <label className="titulo-arriba-form" style={{ fontSize: 13 }}>Descripción</label>
             <TextField
             name="descriptionProduct"
@@ -135,10 +135,10 @@ const tipoSeleccionado = tipos.find(
               },
             }}
             />
-          </Box>
+            </Box>
 
-          {/* Cantidad */}
-          <Box sx={{ mt: 1 }}>
+            {/* Cantidad */}
+            <Box sx={{ mt: 1 }}>
             <label className="titulo-arriba-form" style={{ fontSize: 13 }}>Cantidad</label>
             <TextField
             name="amountProduct"
@@ -160,10 +160,10 @@ const tipoSeleccionado = tipos.find(
               },
             }}
             />
-          </Box>
+            </Box>
 
-          {/* Unidad de medida */}
-          <Box sx={{ mt: 1 }}>
+            {/* Unidad de medida */}
+            <Box sx={{ mt: 1 }}>
             <label className="titulo-arriba-form" style={{ fontSize: 13 }}>Unidad de medida</label>
             <Autocomplete
             options={unidades}
@@ -222,28 +222,28 @@ const tipoSeleccionado = tipos.find(
               size="small"
               error={touched.productType && Boolean(errors.productType)}
               helperText={
-                touched.productType && typeof errors.productType === "string"
-                ? errors.productType
-                : ""
+              touched.productType && typeof errors.productType === "string"
+              ? errors.productType
+              : ""
               }
               InputProps={{
-                ...params.InputProps,
-                sx: {
-                backgroundColor: "#fff",
-                borderRadius: "10px",
-                boxShadow: "1px 1px 3px rgba(0,0,0,0.08)",
-                border: "none",
-                fontSize: 14,
-                height: 36,
-                },
+              ...params.InputProps,
+              sx: {
+              backgroundColor: "#fff",
+              borderRadius: "10px",
+              boxShadow: "1px 1px 3px rgba(0,0,0,0.08)",
+              border: "none",
+              fontSize: 14,
+              height: 36,
+              },
               }}
               />
             )}
             />
-          </Box>
+            </Box>
 
-          {/* Fecha de vencimiento */}
-          {values.productType?.nameProductType.toLowerCase() === "perecible" && (
+            {/* Fecha de vencimiento */}
+            {values.productType?.nameProductType.toLowerCase() === "perecible" && (
             <Box sx={{ mt: 1 }}>
             <label className="titulo-arriba-form" style={{ fontSize: 13 }}>Fecha de vencimiento</label>
             <MobileDatePicker
@@ -251,6 +251,7 @@ const tipoSeleccionado = tipos.find(
               onChange={(newDate) =>
               setFieldValue("expirationDate", newDate ? newDate.format("YYYY-MM-DD") : "")
               }
+              minDate={dayjs()} // Solo permite seleccionar desde hoy en adelante
               slotProps={{
               textField: {
                 margin: "dense",
@@ -268,10 +269,11 @@ const tipoSeleccionado = tipos.find(
                 },
               },
               }}
+              // El idioma español ya está configurado por adapterLocale="es" en LocalizationProvider
             />
             </Box>
-          )}
-          </DialogContent>
+            )}
+            </DialogContent>
 
             <DialogActions sx={{ justifyContent: "center", gap: 4, mt: 1, pb: 3 }}>
               <Button

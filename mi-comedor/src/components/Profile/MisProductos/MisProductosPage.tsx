@@ -284,107 +284,120 @@ const MisProductosPage: React.FC = () => {
 
                     <div className="form-group-productos">
                       <label htmlFor="productType_id" className="titulo-arriba-form">
-                        Tipo de producto
+                      Tipo de producto
                       </label>
                       <Field name="productType_id">
-                        {({ field, form, meta }: FieldProps) => (
-                          <>
-                            <TextField
-                              {...field}
-                              id="productType_id"
-                              fullWidth
-                              className="form-input"
-                              size="small"
-                              onClick={() => setOpenTipoDialog(true)}
-                              value={tipoSeleccionado}
-                              placeholder="Seleccionar tipo"
-                              InputProps={{
-                                readOnly: true,
+                      {({ field, form, meta }: FieldProps) => (
+                        <>
+                        <TextField
+                          {...field}
+                          id="productType_id"
+                          fullWidth
+                          className="form-input"
+                          size="small"
+                          onClick={() => setOpenTipoDialog(true)}
+                          value={tipoSeleccionado}
+                          placeholder="Seleccionar tipo"
+                          InputProps={{
+                          readOnly: true,
+                          }}
+                          error={Boolean(meta.touched && meta.error)}
+                          helperText={meta.touched && meta.error}
+                        />
+
+                        <Dialog
+                          open={openTipoDialog}
+                          onClose={() => setOpenTipoDialog(false)}
+                          PaperProps={{
+                          style: { backgroundColor: "#f57c00", padding: "20px" },
+                          }}
+                        >
+                          <DialogTitle style={{ color: "white", fontWeight: "bold" }}>
+                          Selecciona el tipo de producto
+                          </DialogTitle>
+
+                          <DialogContent>
+                          <Stack spacing={2}>
+                            {tiposProducto.map((tipo) => (
+                            <Box key={tipo.idProductType} display="flex" alignItems="center">
+                              <input
+                              type="radio"
+                              id={`tipo-${tipo.idProductType}`}
+                              checked={tipoSeleccionado === tipo.nameProductType}
+                              onChange={() => {
+                                setTipoSeleccionado(tipo.nameProductType);
+                                form.setFieldValue("productType_id", tipo.idProductType);
                               }}
-                              error={Boolean(meta.touched && meta.error)}
-                              helperText={meta.touched && meta.error}
-                            />
+                              style={{ width: 20, height: 20, marginRight: 10 }}
+                              />
+                              <label
+                              htmlFor={`tipo-${tipo.idProductType}`}
+                              style={{ color: "white", fontWeight: "bold" }}
+                              >
+                              {tipo.nameProductType.toUpperCase()}
+                              </label>
+                            </Box>
+                            ))}
 
-                            <Dialog
-                              open={openTipoDialog}
-                              onClose={() => setOpenTipoDialog(false)}
-                              PaperProps={{
-                                style: { backgroundColor: "#f57c00", padding: "20px" },
-                              }}
-                            >
-                              <DialogTitle style={{ color: "white", fontWeight: "bold" }}>
-                                Selecciona el tipo de producto
-                              </DialogTitle>
+                            {tipoSeleccionado && (
+                            <Box display="flex" flexDirection="column" gap={2}>
+                              {tipoSeleccionado === "Perecible" && (
+                              // Agregamos LocalizationProvider con locale "es"
+                              <LocalizationProvider
+                                dateAdapter={AdapterDayjs}
+                                adapterLocale="es"
+                              >
+                                <StaticDatePicker
+                                value={expirationDate}
+                                onChange={(newDate) => setexpirationDate(newDate)}
+                                displayStaticWrapperAs="desktop"
+                                slots={{ actionBar: () => null }}
+                                localeText={{
+                                  cancelButtonLabel: "Cancelar",
+                                  okButtonLabel: "Aceptar",
+                                  toolbarTitle: "Selecciona fecha",
+                                  previousMonth: "Mes anterior",
+                                  nextMonth: "Mes siguiente",
+                                }}
+                                minDate={dayjs().startOf("day")}
+                                />
+                              </LocalizationProvider>
+                              )}
 
-                              <DialogContent>
-                                <Stack spacing={2}>
-                                  {tiposProducto.map((tipo) => (
-                                    <Box key={tipo.idProductType} display="flex" alignItems="center">
-                                      <input
-                                        type="radio"
-                                        id={`tipo-${tipo.idProductType}`}
-                                        checked={tipoSeleccionado === tipo.nameProductType}
-                                        onChange={() => {
-                                          setTipoSeleccionado(tipo.nameProductType);
-                                          form.setFieldValue("productType_id", tipo.idProductType);
-                                        }}
-                                        style={{ width: 20, height: 20, marginRight: 10 }}
-                                      />
-                                      <label
-                                        htmlFor={`tipo-${tipo.idProductType}`}
-                                        style={{ color: "white", fontWeight: "bold" }}
-                                      >
-                                        {tipo.nameProductType.toUpperCase()}
-                                      </label>
-                                    </Box>  
-                                  ))}
+                              <Box display="flex" justifyContent="flex-end">
+                              <IconButton
+                                onClick={() => {
+                                const tipo = tiposProducto.find(t => t.nameProductType === tipoSeleccionado);
+                                if (tipo) {
+                                  form.setFieldValue("productType_id", tipo.idProductType);
+                                }
+                                if (tipoSeleccionado === "Perecible" && expirationDate) {
+                                  form.setFieldValue("expirationDate", expirationDate.format("YYYY-MM-DD"));
+                                } else {
+                                  form.setFieldValue("expirationDate", "");
+                                }
+                                setOpenTipoDialog(false);
+                                }}
+                                sx={{
+                                backgroundColor: "#4caf50",
+                                color: "white",
+                                width: 60,
+                                height: 60,
+                                "&:hover": { backgroundColor: "#43a047" },
+                                }}
+                              >
+                                <CheckIcon sx={{ fontSize: 36 }} />
+                              </IconButton>
+                              </Box>
+                            </Box>
+                            )}
 
-                                  {tipoSeleccionado && (
-                                    <Box display="flex" flexDirection="column" gap={2}>
-                                      {tipoSeleccionado === "Perecible" && (
-                                        <StaticDatePicker
-                                          value={expirationDate}
-                                          onChange={(newDate) => setexpirationDate(newDate)}
-                                          displayStaticWrapperAs="desktop"
-                                          slots={{ actionBar: () => null }}
-                                        />
-                                      )}
-
-                                      <Box display="flex" justifyContent="flex-end">
-                                        <IconButton
-                                          onClick={() => {
-                                            const tipo = tiposProducto.find(t => t.nameProductType === tipoSeleccionado);
-                                            if (tipo) {
-                                              form.setFieldValue("productType_id", tipo.idProductType);
-                                            }
-                                            if (tipoSeleccionado === "Perecible" && expirationDate) {
-                                              form.setFieldValue("expirationDate", expirationDate.format("YYYY-MM-DD"));
-                                            } else {
-                                              form.setFieldValue("expirationDate", "");
-                                            }
-                                            setOpenTipoDialog(false);
-                                          }}
-                                          sx={{
-                                            backgroundColor: "#4caf50",
-                                            color: "white",
-                                            width: 60,
-                                            height: 60,
-                                            "&:hover": { backgroundColor: "#43a047" },
-                                          }}
-                                        >
-                                          <CheckIcon sx={{ fontSize: 36 }} />
-                                        </IconButton>
-                                      </Box>
-                                    </Box>
-                                  )}
-
-                                </Stack>
-                              </DialogContent>
-                            </Dialog>
-                          </>
-                        )}
+                          </Stack>
+                          </DialogContent>
+                        </Dialog>
+                        </>
+                      )}
                       </Field>
-
                     </div>
 
                 
