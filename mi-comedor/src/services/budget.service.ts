@@ -21,19 +21,21 @@ class BudgetService {
 
   // ⬇️ ESTE MÉTODO es para listar presupuestos
   listar = async (): Promise<BudgetDTO[]> => {
-  const res = await api.get<BudgetDTO[]>("/budget");
-  return res.data;
-};
+    const res = await api.get<BudgetDTO[]>("/budget");
+    return res.data;
+  };
 
-
-  // Reportes (ya estaban)
   presupuestoPorDia = async (id: number): Promise<BugdetByDay[]> => {
-    const res = await api.get<BugdetByDay[]>(`${API_URL}/reportePresupuestoPorDia/${id}`);
+    const res = await api.get<BugdetByDay[]>(
+      `${API_URL}/reportePresupuestoPorDia/${id}`
+    );
     return res.data;
   };
 
   presupuestoPorSemana = async (id: number): Promise<BugdetByWeek[]> => {
-    const res = await api.get<BugdetByWeek[]>(`${API_URL}/reportePresupuestoPorSemana/${id}`);
+    const res = await api.get<BugdetByWeek[]>(
+      `${API_URL}/reportePresupuestoPorSemana/${id}`
+    );
     return res.data;
   };
 }
