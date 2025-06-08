@@ -206,17 +206,20 @@ const saldoActual = calcularSaldo();
                 <Stack direction="column" sx={{ width: { xs: "100%", sm: 275 } }}>
                   <label className="titulo-arriba-form">Fecha</label>
                   <Field name="dateBudget">
-                    {({ field }: FieldProps) => (
-                      <TextField
-                        {...field}
-                        type="date"
-                        className="form-input"
-                        fullWidth
-                        InputLabelProps={{ shrink: true }}
-                        error={touched.dateBudget && Boolean(errors.dateBudget)}
-                        helperText={touched.dateBudget && errors.dateBudget}
-                      />
-                    )}
+                  {({ field }: FieldProps) => (
+                    <TextField
+                    {...field}
+                    type="date"
+                    className="form-input"
+                    fullWidth
+                    InputLabelProps={{ shrink: true }}
+                    error={touched.dateBudget && Boolean(errors.dateBudget)}
+                    helperText={touched.dateBudget && errors.dateBudget}
+                    inputProps={{
+                      min: dayjs().format("YYYY-MM-DD"),
+                    }}
+                    />
+                  )}
                   </Field>
                 </Stack>
 
