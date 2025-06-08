@@ -23,10 +23,6 @@ import dayjs from "dayjs";
 import "dayjs/locale/es";
 import "./EditProductDialog.css";
 
-
-
-
-
 type FormProductoValues = {
   descriptionProduct: string;
   amountProduct: string;

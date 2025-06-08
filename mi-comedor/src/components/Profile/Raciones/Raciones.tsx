@@ -39,6 +39,8 @@ import DeleteRacionesDialog from "./DeleteRacionesDialog";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useNavigate } from "react-router-dom";
+import "dayjs/locale/es";
+dayjs.locale('es');
 
 const initialRationValues: Ration = {
   date: "",
@@ -264,6 +266,7 @@ const RegistroRaciones: React.FC = () => {
                       <label className="titulo-arriba-form">Fecha</label>
                       <Field name="date" className="form-input-fecha">
                         {({ field, form, meta }: FieldProps) => (
+                        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
                           <MobileDatePicker
                             format="DD/MM/YYYY"
                             value={field.value ? dayjs(field.value) : null}
@@ -273,6 +276,8 @@ const RegistroRaciones: React.FC = () => {
                                 date?.format("YYYY-MM-DD")
                               )
                             }
+                            minDate={dayjs().subtract(2, "day")}
+                            maxDate={dayjs()}
                             slotProps={{
                               textField: {
                                 className: "form-input",
@@ -281,6 +286,7 @@ const RegistroRaciones: React.FC = () => {
                               },
                             }}
                           />
+                          </LocalizationProvider>
                         )}
                       </Field>
                     </div>

@@ -37,6 +37,8 @@ import EditTareasDialog from "./EditTareasDialog";
 import "./Tareas.css";
 import DeleteTareasDialog from "./DeleteTareasDialog";
 import { useNavigate } from "react-router-dom";
+import "dayjs/locale/es";
+dayjs.locale("es");
 
 const initialTaskCoordinationValues: TaskCoordination = {
   fullname: "",
@@ -69,6 +71,8 @@ const RegistroTareas: React.FC = () => {
   const navigate = useNavigate();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const startOfWeek = dayjs().startOf("week").add(1, "day"); // lunes
+  const endOfWeek = dayjs().endOf("week").add(1, "day"); // domingo
 
   const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage);
@@ -301,26 +305,33 @@ const RegistroTareas: React.FC = () => {
                       <label className="titulo-arriba-form">Fecha</label>
                       <Field name="dateTask" className="form-input-tarea">
                         {({ field, form, meta }: FieldProps) => (
-                          <MobileDatePicker
-                            format="DD/MM/YYYY"
-                            value={field.value ? dayjs(field.value) : null}
-                            onChange={(date) =>
-                              form.setFieldValue(
-                                "dateTask",
-                                date ? date.format("YYYY-MM-DD") : ""
-                              )
-                            }
-                            slotProps={{
-                              textField: {
-                                className: "form-input",
-                                error: meta.touched && Boolean(meta.error),
-                                helperText: meta.touched && meta.error,
-                                sx: {
-                                  border: "2.5px solid black",
+                          <LocalizationProvider
+                            dateAdapter={AdapterDayjs}
+                            adapterLocale="es"
+                          >
+                            <MobileDatePicker
+                              format="DD/MM/YYYY"
+                              value={field.value ? dayjs(field.value) : null}
+                              onChange={(date) =>
+                                form.setFieldValue(
+                                  "dateTask",
+                                  date ? date.format("YYYY-MM-DD") : ""
+                                )
+                              }
+                              minDate={startOfWeek}
+                              maxDate={endOfWeek}
+                              slotProps={{
+                                textField: {
+                                  className: "form-input",
+                                  error: meta.touched && Boolean(meta.error),
+                                  helperText: meta.touched && meta.error,
+                                  sx: {
+                                    border: "2.5px solid black",
+                                  },
                                 },
-                              },
-                            }}
-                          />
+                              }}
+                            />
+                          </LocalizationProvider>
                         )}
                       </Field>
                     </div>
