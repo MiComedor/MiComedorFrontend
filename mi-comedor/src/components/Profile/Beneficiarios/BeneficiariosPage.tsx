@@ -176,7 +176,7 @@ const BeneficiariosPage: React.FC = () => {
             pb: 0,
           }}
         >
-          Añadir pensionista
+          Añadir beneficario
         </DialogTitle>
 
         <Formik<FormValues>
