@@ -59,19 +59,12 @@ const PresupuestoPage: React.FC = () => {
   const getPresupuestos = async () => {
   const userStr = localStorage.getItem("user");
   const user = userStr ? JSON.parse(userStr) : null;
-  if (!user) {
-    console.warn("No se encontró un usuario en localStorage");
-    return;
-  }
+  if (!user) return;
 
-  try {
-    const data = await budgetService.listarPorUsuario(user.idUser);
-    console.log("Presupuestos obtenidos:", data);  // 👈 Para debug
-    setPresupuestos(data.reverse()); // Si quieres los más recientes primero
-  } catch (error) {
-    console.error("Error al obtener presupuestos:", error);
-  }
+  const data = await budgetService.listarPorUsuario(user.idUser);
+  setPresupuestos(data.reverse()); // si quieres los más recientes arriba
 };
+
 
 
   const calcularSaldo = () => {
