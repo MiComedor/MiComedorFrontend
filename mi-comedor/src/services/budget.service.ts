@@ -25,6 +25,11 @@ class BudgetService {
     return res.data;
   };
 
+  listarPorUsuario = async (idUser: number): Promise<BudgetDTO[]> => {
+  const res = await api.get<BudgetDTO[]>(`/budget/usuario/${idUser}`);
+  return res.data;
+};
+
   presupuestoPorDia = async (id: number): Promise<BugdetByDay[]> => {
     const res = await api.get<BugdetByDay[]>(
       `${API_URL}/reportePresupuestoPorDia/${id}`
