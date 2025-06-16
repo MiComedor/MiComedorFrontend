@@ -460,13 +460,13 @@ const BeneficiariosPage: React.FC = () => {
               >
                 <EditIcon />
               </Button>
-              <Button
+              {/* <Button
                 variant="contained"
                 sx={{ backgroundColor: "#D32F2F", minWidth: 0, p: 1 }}
                 onClick={() => handleDeleteClick(beneficiario)}
               >
                 <DeleteIcon />
-              </Button>
+              </Button> */}
             </Stack>
           </Box>
         ))}
