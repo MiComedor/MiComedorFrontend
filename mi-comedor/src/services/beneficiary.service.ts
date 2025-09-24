@@ -27,8 +27,8 @@ class BeneficiaryService {
     return response.data;
   };
 
-  eliminarBeneficiary = async (id: number): Promise<void> => {
-    await api.delete(`${API_URL}/${id}`);
+  eliminarBeneficiaryActive = async (id: number): Promise<void> => {
+    await api.put(`${API_URL}/deleteActive/${id}`);
   };
 
   buscarBeneficiaryPorUserId = async (

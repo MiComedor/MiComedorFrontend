@@ -135,7 +135,7 @@ const BeneficiariosPage: React.FC = () => {
 
         <Button
           variant="contained"
-          onClick={handleOpen}
+          onClick={handleOpen} 
           sx={{
             backgroundColor: "#00C300",
             color: "#000",
@@ -460,13 +460,13 @@ const BeneficiariosPage: React.FC = () => {
               >
                 <EditIcon />
               </Button>
-              {/* <Button
+              { <Button
                 variant="contained"
                 sx={{ backgroundColor: "#D32F2F", minWidth: 0, p: 1 }}
                 onClick={() => handleDeleteClick(beneficiario)}
               >
                 <DeleteIcon />
-              </Button> */}
+              </Button> }
             </Stack>
           </Box>
         ))}
@@ -505,7 +505,7 @@ const BeneficiariosPage: React.FC = () => {
           onClose={() => setBeneficiarioAEliminar(null)}
           nombre={beneficiarioAEliminar.fullnameBenefeciary}
           onConfirm={async () => {
-            await BeneficiaryService.eliminarBeneficiary(
+            await BeneficiaryService.eliminarBeneficiaryActive(
               beneficiarioAEliminar.idBeneficiary
             );
             loadBeneficiarios();

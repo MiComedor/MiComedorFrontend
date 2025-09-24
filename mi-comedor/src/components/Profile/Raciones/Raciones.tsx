@@ -476,7 +476,7 @@ const RegistroRaciones: React.FC = () => {
                       <div>
                         <strong>Beneficiario:</strong> {racion.dniBenefeciary} /{" "}
                         {beneficiarios.find(
-                          (b) => b.dniBenefeciary === racion.dniBenefeciary
+                          (b) => b.dniBenefeciary === racion.dniBenefeciary 
                         )?.fullnameBenefeciary || "Desconocido"}
                       </div>
                       <div>
