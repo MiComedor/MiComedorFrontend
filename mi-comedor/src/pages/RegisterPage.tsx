@@ -28,10 +28,12 @@ const RegisterPage: React.FC = () => {
     name: Yup.string()
       .min(3, "El nombre  debe tener al menos 3 letras.")
       .required("Por favor, escribe tu nombre."),
-      
     mail: Yup.string()
       .email("El correo no es válido. Revisa que esté bien escrito (ejemplo: nombre@gmail.com).")
       .required("Por favor, escribe tu correo electrónico."),
+    password: Yup.string()
+      .min(6, "La contraseña debe tener al menos 6 caracteres.")
+      .required("Por favor, escribe una contraseña."),
   });
 
   const handleRegister = (formValue: typeof initialValues) => {
@@ -40,7 +42,7 @@ const RegisterPage: React.FC = () => {
     setLoading(true);
 
     register(username, name, mail, password, true).then(
-      (response) => {
+      () => {
         setMessage("Tu cuenta fue creada con éxito ✅");
         setSuccessful(true);
         setLoading(false);
