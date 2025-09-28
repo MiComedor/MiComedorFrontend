@@ -18,9 +18,12 @@ const LoginPage: React.FC = () => {
   };
 
   const validationSchema = Yup.object().shape({
-    username: Yup.string().required("This field is required!"),
-    password: Yup.string().required("This field is required!"),
+    username: Yup.string()
+      .required("Por favor, escribe tu nombre de usuario."),
+    password: Yup.string()
+      .required("Por favor, escribe tu contraseña."),
   });
+
 
   const handleLogin = (formValue: { username: string; password: string }) => {
     const { username, password } = formValue;
