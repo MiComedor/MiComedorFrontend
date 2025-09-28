@@ -22,17 +22,16 @@ const RegisterPage: React.FC = () => {
 
   const validationSchema = Yup.object({
     username: Yup.string()
-      .min(3, "The username must be at least 3 characters.")
-      .max(20, "The username must be at most 20 characters.")
-      .required("This field is required!"),
-    name: Yup.string().required("This field is required!"),
+      .min(3, "El nombre de usuario debe tener al menos 3 letras.")
+      .max(20, "El nombre de usuario no puede tener más de 20 letras.")
+      .required("Por favor, escribe un nombre de usuario."),
+    name: Yup.string()
+      .min(3, "El nombre  debe tener al menos 3 letras.")
+      .required("Por favor, escribe tu nombre."),
+      
     mail: Yup.string()
-      .email("This is not a valid email.")
-      .required("This field is required!"),
-    password: Yup.string()
-      .min(6, "The password must be at least 6 characters.")
-      .max(40, "The password must be at most 40 characters.")
-      .required("This field is required!"),
+      .email("El correo no es válido. Revisa que esté bien escrito (ejemplo: nombre@gmail.com).")
+      .required("Por favor, escribe tu correo electrónico."),
   });
 
   const handleRegister = (formValue: typeof initialValues) => {
@@ -42,7 +41,7 @@ const RegisterPage: React.FC = () => {
 
     register(username, name, mail, password, true).then(
       (response) => {
-        setMessage(response.data.message);
+        setMessage("Tu cuenta fue creada con éxito ✅");
         setSuccessful(true);
         setLoading(false);
 
@@ -52,21 +51,14 @@ const RegisterPage: React.FC = () => {
             navigate("/profile");
             window.location.reload();
           },
-          (error) => {
-            const resMessage =
-              error.response?.data?.message ||
-              error.message ||
-              error.toString();
-            setMessage(resMessage);
+          () => {
+            setMessage("Tu cuenta se creó, pero no pudimos iniciar sesión automáticamente. Intenta iniciar sesión manualmente.");
             setLoading(false);
           }
         );
       },
-      (error) => {
-        const resMessage =
-          error.response?.data?.message || error.message || error.toString();
-
-        setMessage(resMessage);
+      () => {
+        setMessage("No pudimos crear tu cuenta. Verifica los datos e inténtalo otra vez.");
         setSuccessful(false);
         setLoading(false);
       }
