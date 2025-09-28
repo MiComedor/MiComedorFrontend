@@ -14,7 +14,7 @@ import Ration from "../../../types/ration.type";
 import RationType from "../../../types/TypeRation";
 import BeneficiaryByUserId from "../../../types/BeneficiaryByUserId";
 import { Snackbar, Alert } from "@mui/material";
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import "./EditRacionesDialog.css";
 
 type FormRationValues = {
@@ -63,6 +63,27 @@ export default function EditRationDialog({
 }: Props) {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
+  const isBeneficiaryActive = (b: BeneficiaryByUserId) => b.isActive === true;
+
+  const selectedBeneficiary = useMemo(
+    () =>
+      beneficiaries.find(
+        (b) => b.idBeneficiary === data.beneficiary?.idBeneficiary
+      ) || null,
+    [beneficiaries, data.beneficiary?.idBeneficiary]
+  );
+
+  const initialBeneficiary =
+    selectedBeneficiary && isBeneficiaryActive(selectedBeneficiary)
+      ? selectedBeneficiary
+      : null;
+
+  useEffect(() => {
+    if (selectedBeneficiary && !isBeneficiaryActive(selectedBeneficiary)) {
+      setSnackbarMessage("El beneficiario original está inactivo");
+      setSnackbarOpen(true);
+    }
+  }, [selectedBeneficiary]);
 
   return (
     <>
@@ -89,10 +110,7 @@ export default function EditRationDialog({
               rationTypes.find(
                 (r) => r.idRationType === data.rationType?.idRationType
               ) || null,
-            beneficiary:
-              beneficiaries.find(
-                (b) => b.idBeneficiary === data.beneficiary?.idBeneficiary
-              ) || null,
+            beneficiary: initialBeneficiary,
           }}
           validationSchema={validationSchema}
           onSubmit={(values) => {
@@ -180,9 +198,8 @@ export default function EditRationDialog({
                   )}
                 />
                 <label className="titulo-arriba-form-racion">Dni</label>
-
-                <Autocomplete
-                  options={beneficiaries}
+                <Autocomplete<BeneficiaryByUserId>
+                  options={beneficiaries.filter((b) => b.isActive)}
                   getOptionLabel={(option) =>
                     `${option.dniBenefeciary} / ${option.fullnameBenefeciary}`
                   }
@@ -197,14 +214,14 @@ export default function EditRationDialog({
                       {...params}
                       margin="dense"
                       fullWidth
-                      error={touched.beneficiary && Boolean(errors.beneficiary)}
-                      helperText={
-                        touched.beneficiary &&
-                        typeof errors.beneficiary === "object"
-                      }
+                      error={Boolean(touched.beneficiary && errors.beneficiary)}
+                       helperText={
+        touched.beneficiary && errors.beneficiary ? "Campo obligatorio" : ""
+      }
                     />
                   )}
                 />
+
                 <label className="titulo-arriba-form-racion">
                   Precio por Ración
                 </label>

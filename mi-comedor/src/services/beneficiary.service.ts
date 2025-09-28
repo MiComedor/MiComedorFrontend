@@ -39,6 +39,15 @@ class BeneficiaryService {
     );
     return response.data;
   };
+
+  buscarBeneficiaryPorUserIdGeneral = async (
+    id: number
+  ): Promise<BeneficiaryByUserId[]> => {
+    const response = await api.get<BeneficiaryByUserId[]>(
+      `${API_URL}/beneficiarioPorUsuarioGeneral/${id}`
+    );
+    return response.data;
+  };
 }
 
 export default new BeneficiaryService();

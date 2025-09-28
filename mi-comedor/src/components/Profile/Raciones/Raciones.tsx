@@ -40,7 +40,7 @@ import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useNavigate } from "react-router-dom";
 import "dayjs/locale/es";
-dayjs.locale('es');
+dayjs.locale("es");
 
 const initialRationValues: Ration = {
   date: "",
@@ -73,6 +73,10 @@ const RegistroRaciones: React.FC = () => {
   const [beneficiarios, setBeneficiarios] = useState<
     (BeneficiaryByUserId & { firstLetter: string })[]
   >([]);
+  const [beneficiariosActivos, setBeneficiariosActivos] = useState<
+    (BeneficiaryByUserId & { firstLetter: string })[]
+  >([]);
+
   const [tipoRacion, setTipoRacion] = useState<RationType[]>([]);
   const [dialogOpenEdit, setDialogOpenEdit] = useState(false);
   const [dialogOpenDelete, setDialogOpenDelete] = useState(false);
@@ -156,12 +160,20 @@ const RegistroRaciones: React.FC = () => {
       setRaciones(listaRaciones);
     });
 
+    beneficiaryService.buscarBeneficiaryPorUserIdGeneral(user.idUser).then((data) => {
+        const beneficiariosConLetra = data.map((b) => ({
+          ...b,
+          firstLetter: b.fullnameBenefeciary.charAt(0).toUpperCase(),
+        }));
+        setBeneficiarios(beneficiariosConLetra);
+      });
+
     beneficiaryService.buscarBeneficiaryPorUserId(user.idUser).then((data) => {
       const beneficiariosConLetra = data.map((b) => ({
         ...b,
         firstLetter: b.fullnameBenefeciary.charAt(0).toUpperCase(),
       }));
-      setBeneficiarios(beneficiariosConLetra);
+      setBeneficiariosActivos(beneficiariosConLetra);
     });
 
     RationTypeService.listarRacion().then((tipoRacion) => {
@@ -266,26 +278,29 @@ const RegistroRaciones: React.FC = () => {
                       <label className="titulo-arriba-form">Fecha</label>
                       <Field name="date" className="form-input-fecha">
                         {({ field, form, meta }: FieldProps) => (
-                        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="es">
-                          <MobileDatePicker
-                            format="DD/MM/YYYY"
-                            value={field.value ? dayjs(field.value) : null}
-                            onChange={(date) =>
-                              form.setFieldValue(
-                                "date",
-                                date?.format("YYYY-MM-DD")
-                              )
-                            }
-                            minDate={dayjs().subtract(2, "day")}
-                            maxDate={dayjs()}
-                            slotProps={{
-                              textField: {
-                                className: "form-input",
-                                error: meta.touched && Boolean(meta.error),
-                                helperText: meta.touched && meta.error,
-                              },
-                            }}
-                          />
+                          <LocalizationProvider
+                            dateAdapter={AdapterDayjs}
+                            adapterLocale="es"
+                          >
+                            <MobileDatePicker
+                              format="DD/MM/YYYY"
+                              value={field.value ? dayjs(field.value) : null}
+                              onChange={(date) =>
+                                form.setFieldValue(
+                                  "date",
+                                  date?.format("YYYY-MM-DD")
+                                )
+                              }
+                              minDate={dayjs().subtract(2, "day")}
+                              maxDate={dayjs()}
+                              slotProps={{
+                                textField: {
+                                  className: "form-input",
+                                  error: meta.touched && Boolean(meta.error),
+                                  helperText: meta.touched && meta.error,
+                                },
+                              }}
+                            />
                           </LocalizationProvider>
                         )}
                       </Field>
@@ -340,7 +355,7 @@ const RegistroRaciones: React.FC = () => {
                       <Field name="beneficiary" className="form-input">
                         {({ form, field, meta }: FieldProps) => (
                           <Autocomplete
-                            options={beneficiarios.sort((a, b) =>
+                            options={beneficiariosActivos.sort((a, b) =>
                               a.firstLetter.localeCompare(b.firstLetter)
                             )}
                             groupBy={(option) => option.firstLetter}
@@ -475,9 +490,11 @@ const RegistroRaciones: React.FC = () => {
                       </div>
                       <div>
                         <strong>Beneficiario:</strong> {racion.dniBenefeciary} /{" "}
-                        {beneficiarios.find(
-                          (b) => b.dniBenefeciary === racion.dniBenefeciary 
-                        )?.fullnameBenefeciary || "Desconocido"}
+                        {
+                          beneficiarios.find(
+                            (b) => b.dniBenefeciary === racion.dniBenefeciary
+                          )?.fullnameBenefeciary
+                        }
                       </div>
                       <div>
                         <strong>Precio:</strong> S/ {racion.price.toFixed(2)}
@@ -576,9 +593,12 @@ const RegistroRaciones: React.FC = () => {
                           <TableCell>{racion.nameRationType}</TableCell>
                           <TableCell>
                             {racion.dniBenefeciary} /{" "}
-                            {beneficiarios.find(
-                              (b) => b.dniBenefeciary === racion.dniBenefeciary
-                            )?.fullnameBenefeciary || "Desconocido"}
+                            {
+                              beneficiarios.find(
+                                (b) =>
+                                  b.dniBenefeciary === racion.dniBenefeciary
+                              )?.fullnameBenefeciary
+                            }
                           </TableCell>
                           <TableCell>S/ {racion.price.toFixed(2)}</TableCell>
                           <TableCell>

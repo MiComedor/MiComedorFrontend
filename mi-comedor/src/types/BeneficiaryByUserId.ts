@@ -8,4 +8,5 @@ export default interface BeneficiaryByUserId {
   fullnameBenefeciary: string;
   ageBeneficiary: number;
   observationsBeneficiary: string;
+  isActive: boolean;
 }
