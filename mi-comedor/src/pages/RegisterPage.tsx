@@ -22,17 +22,19 @@ const RegisterPage: React.FC = () => {
 
   const validationSchema = Yup.object({
     username: Yup.string()
+      .matches(/^[A-Za-zÁÉÍÓÚáéíóúñÑ]+$/, "El nombre de usuario no puede contener números ni símbolos.")
       .min(3, "El nombre de usuario debe tener al menos 3 letras.")
       .max(20, "El nombre de usuario no puede tener más de 20 letras.")
       .required("Por favor, escribe un nombre de usuario."),
     name: Yup.string()
-      .min(3, "El nombre  debe tener al menos 3 letras.")
+      .matches(/^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/, "El nombre no puede contener números ni símbolos.")
+      .min(3, "El nombre debe tener al menos 3 letras.")
       .required("Por favor, escribe tu nombre."),
     mail: Yup.string()
       .email("El correo no es válido. Revisa que esté bien escrito (ejemplo: nombre@gmail.com).")
       .required("Por favor, escribe tu correo electrónico."),
     password: Yup.string()
-      .min(6, "La contraseña debe tener al menos 6 caracteres.")
+      .min(6, "La contraseña debe tener al menos 8 caracteres.")
       .required("Por favor, escribe una contraseña."),
   });
 
