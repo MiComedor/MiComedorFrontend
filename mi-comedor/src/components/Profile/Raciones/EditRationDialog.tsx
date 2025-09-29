@@ -242,15 +242,24 @@ export default function EditRationDialog({
                   fullWidth
                   margin="dense"
                   value={values.price}
-                  onChange={(e) => setFieldValue("price", e.target.value)}
+                  onChange={(e) => {
+                    let rawValue = e.target.value;
+
+                    // Permitir solo hasta 3 dígitos antes del punto y hasta 2 después
+                    const regex = /^\d{0,5}(\.\d{0,2})?$/;
+
+                    // Si el valor cumple con el regex, actualizamos el estado
+                    if (regex.test(rawValue)) {
+                      setFieldValue("price", rawValue);
+                    }
+                  }}
                   error={touched.price && Boolean(errors.price)}
                   helperText={touched.price && errors.price}
                   InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">S/</InputAdornment>
-                    ),
+                    startAdornment: <InputAdornment position="start">S/</InputAdornment>,
                   }}
                 />
+
               </DialogContent>
 
               <DialogActions
