@@ -173,22 +173,27 @@ const saldoActual = calcularSaldo();
                 <Stack direction="column" sx={{ width: { xs: "100%", sm: 275 } }}>
                   <label className="titulo-arriba-form">Monto</label>
                   <Field name="amountBudget">
-                    {({ field, form }: FieldProps) => (
-                      <TextField
-                        {...field}
-                        type="number"
-                        className="form-input"
-                        fullWidth
-                        error={touched.amountBudget && Boolean(errors.amountBudget)}
-                        helperText={touched.amountBudget && errors.amountBudget}
-                        inputProps={{ min: 0 }}
-                        onFocus={() => {
-                          if (field.value === 0) {
-                            form.setFieldValue("amountBudget", "");
-                          }
-                        }}
-                      />
-                    )}
+                  {({ field, form }: FieldProps) => (
+                    <TextField
+                    {...field}
+                    type="number"
+                    className="form-input"
+                    fullWidth
+                    error={touched.amountBudget && Boolean(errors.amountBudget)}
+                    helperText={touched.amountBudget && errors.amountBudget}
+                    inputProps={{ min: 0, max: 99999, maxLength: 5 }}
+                    onInput={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      if (e.target.value.length > 4) {
+                      e.target.value = e.target.value.slice(0, 5);
+                      }
+                    }}
+                    onFocus={() => {
+                      if (field.value === 0) {
+                      form.setFieldValue("amountBudget", "");
+                      }
+                    }}
+                    />
+                  )}
                   </Field>
                 </Stack>
 
