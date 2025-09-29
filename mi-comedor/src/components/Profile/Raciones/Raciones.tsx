@@ -417,9 +417,9 @@ const RegistroRaciones: React.FC = () => {
                           </InputAdornment>
                           ),
                           inputProps: {
-                          maxLength: 3, // 3 digits + dot + 2 decimals
+                          maxLength: 4, // 3 digits + dot + 2 decimals
                           inputMode: "decimal",
-                          pattern: "^\\d{0,3}(\\.\\d{0,2})?$",
+                          pattern: "^\\d{0,4}(\\.\\d{0,2})?$",
                           onKeyDown: (
                             e: React.KeyboardEvent<HTMLInputElement>
                           ) => {

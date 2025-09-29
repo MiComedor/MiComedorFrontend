@@ -258,7 +258,7 @@ export default function EditRationDialog({
                     let rawValue = e.target.value;
 
                     // Permitir solo hasta 3 dígitos antes del punto y hasta 2 después
-                    const regex = /^\d{0,3}(\.\d{0,2})?$/;
+                    const regex = /^\d{0,4}(\.\d{0,2})?$/;
 
                     // Si el valor cumple con el regex, actualizamos el estado
                     if (regex.test(rawValue)) {
