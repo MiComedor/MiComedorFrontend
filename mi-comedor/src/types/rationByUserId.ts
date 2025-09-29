@@ -4,4 +4,5 @@ export default interface RationByUserId {
   price: number;
   dniBenefeciary: number;
   nameRationType: string;
+  isActive: boolean;
 }

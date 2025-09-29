@@ -64,6 +64,8 @@ export default function EditRationDialog({
 }: Props) {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarOpenInactive, setSnackbarOpenInactive] = useState(false);
+  const [snackbarMessageInactive, setSnackbarMessageInactive] = useState("");
   const [beneficiariosActivos, setBeneficiariosActivos] = useState<
     (BeneficiaryByUserId & { firstLetter: string })[]
   >([]);
@@ -75,24 +77,39 @@ export default function EditRationDialog({
       ) || null,
     [beneficiaries, data.beneficiary?.idBeneficiary]
   );
-  
+
   const BeneficiariosActivosLista = () => {
     const userStr = localStorage.getItem("user");
     const user = userStr ? JSON.parse(userStr) : null;
     if (!user) return;
+
     beneficiaryService.buscarBeneficiaryPorUserId(user.idUser).then((data) => {
       const beneficiariosConLetra = data.map((b) => ({
         ...b,
         firstLetter: b.fullnameBenefeciary.charAt(0).toUpperCase(),
+        isActive: b.active === undefined ? true : b.active,
       }));
       setBeneficiariosActivos(beneficiariosConLetra);
     });
   };
-  
 
   useEffect(() => {
     BeneficiariosActivosLista();
-  }, []);
+    if (selectedBeneficiary && selectedBeneficiary.active === false) {
+      setSnackbarMessageInactive(
+        "Este beneficiario está inactivo y no puede ser cambiado. Puede actualizar otros datos, pero el beneficiario no se puede modificar ya que lo eliminaste."
+      );
+      setSnackbarOpenInactive(true);
+    } else {
+      setSnackbarOpenInactive(false);
+    }
+  }, [open, selectedBeneficiary]);
+
+  const handleSnackClose = (_?: unknown, reason?: string) => {
+    if (reason === "clickaway") return;
+    setSnackbarOpen(false);
+    onClose(); // cierra el dialog cuando el snackbar termina
+  };
 
   return (
     <>
@@ -154,12 +171,8 @@ export default function EditRationDialog({
             };
 
             onSubmit(updatedRation);
-
             setSnackbarMessage("✅ ¡Ración actualizada correctamente!");
-            setSnackbarOpen(true);
-            setTimeout(() => {
-              onClose();
-            }, 1000);
+            setSnackbarOpen(true); // Mostrar Snackbar
           }}
         >
           {({ values, errors, touched, setFieldValue }) => (
@@ -267,18 +280,40 @@ export default function EditRationDialog({
 
       <Snackbar
         open={snackbarOpen}
-        autoHideDuration={3000}
-        onClose={() => setSnackbarOpen(false)}
+        autoHideDuration={2500}
+        onClose={handleSnackClose}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        sx={{ zIndex: 1500 }}
+        sx={{ zIndex: (theme) => theme.zIndex.modal + 100 }}
       >
         <Alert
-          onClose={() => setSnackbarOpen(false)}
-          severity="success"
+          onClose={handleSnackClose}
+          severity={snackbarMessage.startsWith("❌") ? "error" : "success"}
           variant="filled"
           sx={{ width: "100%" }}
         >
           {snackbarMessage}
+        </Alert>
+      </Snackbar> 
+
+      <Snackbar
+        open={snackbarOpenInactive}
+        autoHideDuration={10000} // 10 segundos para el mensaje del beneficiario inactivo
+        onClose={() => setSnackbarOpenInactive(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        sx={{ zIndex: 1500 }}
+      >
+        <Alert
+          onClose={() => setSnackbarOpenInactive(false)}
+          severity="warning"
+          variant="filled"
+          sx={{
+            width: "100%",
+            backgroundColor: "#ff9800", // Naranja
+            color: "#000000ff", // Color del texto
+            "& .MuiAlert-icon": { color: "#000000ff" }, // Color del icono
+          }}
+        >
+          {snackbarMessageInactive}
         </Alert>
       </Snackbar>
     </>

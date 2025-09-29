@@ -14,6 +14,7 @@ import {
   InputAdornment,
   TablePagination,
 } from "@mui/material";
+import { Snackbar, Alert } from "@mui/material";
 import { Formik, Form, Field, FieldProps, FormikHelpers } from "formik";
 import * as Yup from "yup";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -39,6 +40,8 @@ import DeleteRacionesDialog from "./DeleteRacionesDialog";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useNavigate } from "react-router-dom";
+import type { AlertColor } from "@mui/material/Alert";
+
 import "dayjs/locale/es";
 dayjs.locale("es");
 
@@ -86,6 +89,10 @@ const RegistroRaciones: React.FC = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] =
+    useState<AlertColor>("success");
 
   const navigate = useNavigate();
 
@@ -155,12 +162,15 @@ const RegistroRaciones: React.FC = () => {
           nameRationType: r.nameRationType,
           dniBenefeciary: r.dniBenefeciary,
           price: r.price,
+          isActive: true,
         }))
         .reverse();
       setRaciones(listaRaciones);
     });
 
-    beneficiaryService.buscarBeneficiaryPorUserIdGeneral(user.idUser).then((data) => {
+    beneficiaryService
+      .buscarBeneficiaryPorUserIdGeneral(user.idUser)
+      .then((data) => {
         const beneficiariosConLetra = data.map((b) => ({
           ...b,
           firstLetter: b.fullnameBenefeciary.charAt(0).toUpperCase(),
@@ -210,8 +220,14 @@ const RegistroRaciones: React.FC = () => {
 
       actions.resetForm();
       getRaciones();
+      setSnackbarMessage("Ración guardada correctamente");
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
     } catch (error) {
       console.error("❌ Error al guardar ración:", error);
+      setSnackbarMessage("Error al guardar la ración");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
     }
   };
 
@@ -232,8 +248,14 @@ const RegistroRaciones: React.FC = () => {
 
       getRaciones();
       handleCloseEdit();
+      setSnackbarMessage("Ración actualizada correctamente");
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
     } catch (error) {
       console.error("❌ Error al actualizar ración:", error);
+      setSnackbarMessage("Error al actualizar la ración");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
     }
   };
 
@@ -245,6 +267,9 @@ const RegistroRaciones: React.FC = () => {
 
       getRaciones();
       handleCloseDelete();
+      setSnackbarMessage("Ración eliminada correctamente");
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
     } catch (error) {
       console.error("❌ Error al eliminar ración:", error);
     }
@@ -688,6 +713,19 @@ const RegistroRaciones: React.FC = () => {
           )}
         </Stack>
       </Box>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000} // El Snackbar se cerrará automáticamente después de 6 segundos
+        onClose={() => setSnackbarOpen(false)}
+      >
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity={snackbarSeverity} // 'success', 'error', 'info', 'warning'
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </LocalizationProvider>
   );
 };

@@ -3,7 +3,7 @@ export default interface Beneficiary {
   dniBenefeciary: number;
   fullnameBenefeciary: string;
   ageBeneficiary: number;
-  is_active:boolean;
+  isActive: boolean;
   observationsBeneficiary: string;
   users?: {
     idUser: number;
