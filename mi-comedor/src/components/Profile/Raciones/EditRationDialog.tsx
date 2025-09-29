@@ -15,6 +15,7 @@ import RationType from "../../../types/TypeRation";
 import BeneficiaryByUserId from "../../../types/BeneficiaryByUserId";
 import { Snackbar, Alert } from "@mui/material";
 import { useState, useMemo, useEffect } from "react";
+import beneficiaryService from "../../../services/beneficiary.service";
 import "./EditRacionesDialog.css";
 
 type FormRationValues = {
@@ -63,7 +64,9 @@ export default function EditRationDialog({
 }: Props) {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const isBeneficiaryActive = (b: BeneficiaryByUserId) => b.isActive === true;
+  const [beneficiariosActivos, setBeneficiariosActivos] = useState<
+    (BeneficiaryByUserId & { firstLetter: string })[]
+  >([]);
 
   const selectedBeneficiary = useMemo(
     () =>
@@ -72,18 +75,24 @@ export default function EditRationDialog({
       ) || null,
     [beneficiaries, data.beneficiary?.idBeneficiary]
   );
-
-  const initialBeneficiary =
-    selectedBeneficiary && isBeneficiaryActive(selectedBeneficiary)
-      ? selectedBeneficiary
-      : null;
+  
+  const BeneficiariosActivosLista = () => {
+    const userStr = localStorage.getItem("user");
+    const user = userStr ? JSON.parse(userStr) : null;
+    if (!user) return;
+    beneficiaryService.buscarBeneficiaryPorUserId(user.idUser).then((data) => {
+      const beneficiariosConLetra = data.map((b) => ({
+        ...b,
+        firstLetter: b.fullnameBenefeciary.charAt(0).toUpperCase(),
+      }));
+      setBeneficiariosActivos(beneficiariosConLetra);
+    });
+  };
+  
 
   useEffect(() => {
-    if (selectedBeneficiary && !isBeneficiaryActive(selectedBeneficiary)) {
-      setSnackbarMessage("El beneficiario original está inactivo");
-      setSnackbarOpen(true);
-    }
-  }, [selectedBeneficiary]);
+    BeneficiariosActivosLista();
+  }, []);
 
   return (
     <>
@@ -110,7 +119,7 @@ export default function EditRationDialog({
               rationTypes.find(
                 (r) => r.idRationType === data.rationType?.idRationType
               ) || null,
-            beneficiary: initialBeneficiary,
+            beneficiary: selectedBeneficiary,
           }}
           validationSchema={validationSchema}
           onSubmit={(values) => {
@@ -146,11 +155,8 @@ export default function EditRationDialog({
 
             onSubmit(updatedRation);
 
-            // ✅ Mostramos mensaje de éxito
             setSnackbarMessage("✅ ¡Ración actualizada correctamente!");
             setSnackbarOpen(true);
-
-            // Cerramos el diálogo después de un momento para que se vea el mensaje
             setTimeout(() => {
               onClose();
             }, 1000);
@@ -198,8 +204,10 @@ export default function EditRationDialog({
                   )}
                 />
                 <label className="titulo-arriba-form-racion">Dni</label>
-                <Autocomplete<BeneficiaryByUserId>
-                  options={beneficiaries.filter((b) => b.isActive)}
+                <Autocomplete
+                  options={beneficiariosActivos.sort((a, b) =>
+                    a.firstLetter.localeCompare(b.firstLetter)
+                  )}
                   getOptionLabel={(option) =>
                     `${option.dniBenefeciary} / ${option.fullnameBenefeciary}`
                   }
@@ -215,9 +223,11 @@ export default function EditRationDialog({
                       margin="dense"
                       fullWidth
                       error={Boolean(touched.beneficiary && errors.beneficiary)}
-                       helperText={
-        touched.beneficiary && errors.beneficiary ? "Campo obligatorio" : ""
-      }
+                      helperText={
+                        touched.beneficiary && errors.beneficiary
+                          ? "Campo obligatorio"
+                          : ""
+                      }
                     />
                   )}
                 />
