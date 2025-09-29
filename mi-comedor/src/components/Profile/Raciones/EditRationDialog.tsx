@@ -97,7 +97,7 @@ export default function EditRationDialog({
     BeneficiariosActivosLista();
     if (selectedBeneficiary && selectedBeneficiary.active === false) {
       setSnackbarMessageInactive(
-        "Este beneficiario está inactivo y no puede ser cambiado. Puede actualizar otros datos, pero el beneficiario no se puede modificar ya que lo eliminaste."
+        "Este beneficiario se encuentra eliminado de la lista de beneficiarios."
       );
       setSnackbarOpenInactive(true);
     } else {
