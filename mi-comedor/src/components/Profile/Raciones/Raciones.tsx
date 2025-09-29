@@ -426,52 +426,74 @@ const RegistroRaciones: React.FC = () => {
 
                     <div className="form-group-raciones">
                       <label className="titulo-arriba-form">
-                        Precio por ración
+                      Precio por ración
                       </label>
                       <Field name="price" className="boton-verde">
-                        {({ field }: FieldProps) => (
-                          <TextField
-                            {...field}
-                            className="form-input"
-                            error={touched.price && Boolean(errors.price)}
-                            helperText={touched.price && errors.price}
-                            InputProps={{
-                              startAdornment: (
-                                <InputAdornment position="start">
-                                  S/
-                                </InputAdornment>
-                              ),
-                              inputProps: {
-                                onKeyDown: (
-                                  e: React.KeyboardEvent<HTMLInputElement>
-                                ) => {
-                                  const allowedKeys = [
-                                    "Backspace",
-                                    "Tab",
-                                    "ArrowLeft",
-                                    "ArrowRight",
-                                    "Delete",
-                                  ];
-                                  const isNumber = /^[0-9.]$/.test(e.key);
+                      {({ field, form }: FieldProps) => (
+                        <TextField
+                        {...field}
+                        className="form-input"
+                        error={touched.price && Boolean(errors.price)}
+                        helperText={touched.price && errors.price}
+                        InputProps={{
+                          startAdornment: (
+                          <InputAdornment position="start">
+                            S/
+                          </InputAdornment>
+                          ),
+                          inputProps: {
+                          maxLength: 4, // 3 digits + dot + 2 decimals
+                          inputMode: "decimal",
+                          pattern: "^\\d{0,4}(\\.\\d{0,2})?$",
+                          onKeyDown: (
+                            e: React.KeyboardEvent<HTMLInputElement>
+                          ) => {
+                            const allowedKeys = [
+                            "Backspace",
+                            "Tab",
+                            "ArrowLeft",
+                            "ArrowRight",
+                            "Delete",
+                            ];
+                            const isNumber = /^[0-9.]$/.test(e.key);
 
-                                  if (
-                                    !isNumber &&
-                                    !allowedKeys.includes(e.key)
-                                  ) {
-                                    e.preventDefault();
-                                  }
+                            if (
+                            !isNumber &&
+                            !allowedKeys.includes(e.key)
+                            ) {
+                            e.preventDefault();
+                            }
 
-                                  if (
-                                    e.key === "." &&
-                                    field.value.includes(".")
-                                  ) {
-                                    e.preventDefault();
-                                  }
-                                },
-                              },
-                            }}
-                          />
-                        )}
+                            if (
+                            e.key === "." &&
+                            field.value.includes(".")
+                            ) {
+                            e.preventDefault();
+                            }
+                          },
+                          onInput: (e: React.ChangeEvent<HTMLInputElement>) => {
+                            let value = e.target.value.replace(/[^0-9.]/g, "");
+                            // Only allow one dot
+                            const parts = value.split(".");
+                            if (parts.length > 2) {
+                            value = parts[0] + "." + parts[1];
+                            }
+                            // Limit digits before and after dot
+                            if (parts[0].length > 3) {
+                            parts[0] = parts[0].slice(0, 3);
+                            }
+                            if (parts[1]) {
+                            parts[1] = parts[1].slice(0, 2);
+                            value = parts[0] + "." + parts[1];
+                            } else {
+                            value = parts[0];
+                            }
+                            form.setFieldValue("price", value);
+                          },
+                          },
+                        }}
+                        />
+                      )}
                       </Field>
                     </div>
 
