@@ -52,8 +52,11 @@
   margin-top: 20px;
 }
 
-
 .table-container-productos .MuiPaper-root {
   width: 1200px;
   max-width: 1500px;
+}
+
+.boton-verde {
+  top: 16px;
 }
