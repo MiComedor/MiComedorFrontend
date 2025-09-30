@@ -8,6 +8,7 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  Pagination,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
@@ -53,6 +54,10 @@ const BeneficiariosPage: React.FC = () => {
     useState<Beneficiary | null>(null);
   const [beneficiarioAEliminar, setBeneficiarioAEliminar] =
     useState<Beneficiary | null>(null);
+  
+  // Estados para paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(3);
 
   const handleOpen = () => setOpenDialog(true);
   const handleClose = () => setOpenDialog(false);
@@ -87,6 +92,23 @@ const BeneficiariosPage: React.FC = () => {
   const filtered = beneficiarios.filter((b) =>
     b.fullnameBenefeciary.toLowerCase().includes(search.toLowerCase())
   );
+
+  // Calcular paginación
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filtered.slice(indexOfFirstItem, indexOfLastItem);
+
+  // Manejar cambio de página
+  const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
+    setCurrentPage(value);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Resetear página cuando cambie la búsqueda
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
 
   return (
     <Box sx={{ p: { xs: 2, sm: 4, md: 8 }, pt: 1 }}>
@@ -274,9 +296,9 @@ const BeneficiariosPage: React.FC = () => {
                       const inputValue = parseInt(e.target.value, 10);
 
                       if (isNaN(inputValue)) {
-                        values.ageBeneficiary = "0"; // evita "NaN"
+                        values.ageBeneficiary = "0";
                       } else if (inputValue < 0) {
-                        values.ageBeneficiary = "0"; // trunca en 0
+                        values.ageBeneficiary = "0";
                       } else {
                         values.ageBeneficiary = inputValue.toString();
                       }
@@ -287,10 +309,10 @@ const BeneficiariosPage: React.FC = () => {
                       min: 0,
                       onKeyDown: (e) => {
                         if (["-", "e", "E", "+", "."].includes(e.key)) {
-                        e.preventDefault(); // bloquea caracteres no deseados
+                        e.preventDefault();
                         }
                       },
-                      onWheel: (e) => e.currentTarget.blur(), // evita scroll con el mouse
+                      onWheel: (e) => e.currentTarget.blur(),
                       }}
                       error={
                       touched.ageBeneficiary && Boolean(errors.ageBeneficiary)
@@ -328,9 +350,7 @@ const BeneficiariosPage: React.FC = () => {
                       size="medium"
                       value={values.dniBenefeciary}
                       onChange={(e) => {
-                        // Solo permite hasta 8 dígitos numéricos
                         const value = e.target.value.replace(/\D/g, "").slice(0, 8);
-                        // Simula el evento para Formik
                         handleChange({
                           target: {
                             name: "dniBenefeciary",
@@ -428,7 +448,7 @@ const BeneficiariosPage: React.FC = () => {
 
       {/* LISTADO DE BENEFICIARIOS */}
       <Stack spacing={2} mt={4}>
-        {filtered.map((beneficiario) => (
+        {currentItems.map((beneficiario) => (
           <Box
             key={beneficiario.idBeneficiary}
             sx={{
@@ -456,14 +476,24 @@ const BeneficiariosPage: React.FC = () => {
               <Button
                 variant="contained"
                 sx={{ backgroundColor: "#1976D2", minWidth: 0, p: 1 }}
-                onClick={() => handleEditClick(beneficiario)}
+                onClick={() =>
+                  handleEditClick({
+                    ...beneficiario,
+                    isActive: (beneficiario as any).isActive ?? true,
+                  })
+                }
               >
                 <EditIcon />
               </Button>
               { <Button
                 variant="contained"
                 sx={{ backgroundColor: "#D32F2F", minWidth: 0, p: 1 }}
-                onClick={() => handleDeleteClick(beneficiario)}
+                onClick={() =>
+                  handleDeleteClick({
+                    ...beneficiario,
+                    isActive: (beneficiario as any).isActive ?? true,
+                  })
+                }
               >
                 <DeleteIcon />
               </Button> }
@@ -471,6 +501,52 @@ const BeneficiariosPage: React.FC = () => {
           </Box>
         ))}
       </Stack>
+
+      {/* PAGINACIÓN */}
+      {filtered.length > 0 && (
+        <Box 
+          sx={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            mt: 4,
+            mb: 2
+          }}
+        >
+          <Pagination 
+            count={totalPages}
+            page={currentPage}
+            onChange={handlePageChange}
+            color="primary"
+            size="large"
+            showFirstButton
+            showLastButton
+            sx={{
+              '& .MuiPagination-ul': {
+                flexWrap: 'wrap',
+                justifyContent: 'center',
+              },
+              '& .MuiPaginationItem-root': {
+                fontSize: { xs: '0.875rem', sm: '1rem' },
+                minWidth: { xs: '32px', sm: '40px' },
+                height: { xs: '32px', sm: '40px' },
+              },
+            }}
+          />
+        </Box>
+      )}
+
+      {/* Mostrar mensaje si no hay resultados */}
+      {filtered.length === 0 && (
+        <Box 
+          sx={{ 
+            textAlign: 'center', 
+            py: 4,
+            color: 'text.secondary' 
+          }}
+        >
+          No se encontraron beneficiarios
+        </Box>
+      )}
 
       {/* Botón de regresar */}
       <Box sx={{ pt: 4 }}>
