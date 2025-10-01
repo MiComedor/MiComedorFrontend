@@ -17,9 +17,19 @@ import CheckIcon from "@mui/icons-material/Check";
 import Beneficiary from "../../../types/beneficiaty";
 
 const validationSchema = Yup.object({
-  fullnameBenefeciary: Yup.string().required("Campo obligatorio"),
-  dniBenefeciary: Yup.string().required("Campo obligatorio"),
-  ageBeneficiary: Yup.number().required("Campo obligatorio").positive(),
+  fullnameBenefeciary: Yup.string()
+    .required("Campo obligatorio")
+    .matches(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, "Solo se permiten letras"),
+
+  dniBenefeciary: Yup.string()
+    .required("Campo obligatorio")
+    .matches(/^\d{8}$/, "Debe tener exactamente 8 dígitos numéricos")
+    .matches(/^[0-9]+$/, "Solo se permiten números"),
+
+  ageBeneficiary: Yup.string()
+    .required("Campo obligatorio")
+    .matches(/^[1-9][0-9]?$/, "Debe ser un número válido entre 1 y 99"),
+
   observationsBeneficiary: Yup.string(),
 });
 
@@ -47,195 +57,257 @@ const EditBeneficiariosDialog: React.FC<Props> = ({
     }, 1500);
   };
 
-
-
   return (
     <>
-    <Dialog
-      open={open}
-      onClose={onClose}
-      fullWidth
-      maxWidth="sm"
-      scroll="paper"
-      PaperProps={{
-        sx: {
-          backgroundColor: "#E4FAA4",
-          borderRadius: 2,
-          overflow: "visible",
-          maxWidth: 420, // aumentado de 380 a 420
-        },
-      }}
-    >
-      <DialogTitle sx={{ fontWeight: "bold", fontSize: 22, py: 2 }}>
-        Editar beneficiario
-      </DialogTitle>
-
-      <Formik
-        initialValues={initialData}
-        validationSchema={validationSchema}
-        onSubmit={handleSubmit}
+      <Dialog
+        open={open}
+        onClose={onClose}
+        fullWidth
+        maxWidth="sm"
+        scroll="paper"
+        PaperProps={{
+          sx: {
+            backgroundColor: "#E4FAA4",
+            borderRadius: 2,
+            overflow: "visible",
+            maxWidth: 420, // aumentado de 380 a 420
+          },
+        }}
       >
-        {({ values, handleChange, errors, touched }) => (
-          <Form>
-            <DialogContent sx={{ px: 3, pb: 2 }}>
-              <Stack spacing={2.5}>
-                <Box>
-                  <h6 className="titulo-arriba-form" style={{ fontSize: 19, margin: 0 }}>Nombre completo</h6>
-                  <TextField
-                    name="fullnameBenefeciary"
-                    fullWidth
-                    size="medium"
-                    value={values.fullnameBenefeciary}
-                    onChange={handleChange}
-                    error={touched.fullnameBenefeciary && Boolean(errors.fullnameBenefeciary)}
-                    helperText={touched.fullnameBenefeciary && errors.fullnameBenefeciary}
-                    InputProps={{
-                      sx: {
-                        backgroundColor: "#fff",
-                        borderRadius: "12px",
-                        boxShadow: "1px 1px 4px rgba(0,0,0,0.10)",
-                        border: "none",
-                        fontSize: 17,
-                        height: 48,
-                      },
-                    }}
-                  />
-                </Box>
+        <DialogTitle sx={{ fontWeight: "bold", fontSize: 22, py: 2 }}>
+          Editar beneficiario
+        </DialogTitle>
 
-                <Box>
-                  <h6 className="titulo-arriba-form" style={{ fontSize: 19, margin: 0 }}>Edad</h6>
-                  <TextField
-                    name="ageBeneficiary"
-                    type="number"
-                    fullWidth
-                    size="medium"
-                    value={values.ageBeneficiary}
-                    onChange={(e) => {
-                      const inputValue = parseInt(e.target.value, 10);
-
-                      if (isNaN(inputValue)) {
-                        values.ageBeneficiary = 0;
-                      } else if (inputValue < 0) {
-                        values.ageBeneficiary = 0;
-                      } else {
-                        values.ageBeneficiary = inputValue;
+        <Formik
+          initialValues={initialData}
+          validationSchema={validationSchema}
+          onSubmit={handleSubmit}
+        >
+          {({ values, handleChange, errors, touched, setFieldValue }) => (
+            <Form>
+              <DialogContent sx={{ px: 3, pb: 2 }}>
+                <Stack spacing={2.5}>
+                  <Box>
+                    <h6
+                      className="titulo-arriba-form"
+                      style={{ fontSize: 19, margin: 0 }}
+                    >
+                      Nombre completo
+                    </h6>
+                    <TextField
+                      name="fullnameBenefeciary"
+                      fullWidth
+                      size="medium"
+                      value={values.fullnameBenefeciary}
+                      onChange={handleChange}
+                      error={
+                        touched.fullnameBenefeciary &&
+                        Boolean(errors.fullnameBenefeciary)
                       }
+                      helperText={
+                        touched.fullnameBenefeciary &&
+                        errors.fullnameBenefeciary
+                      }
+                      InputProps={{
+                        sx: {
+                          backgroundColor: "#fff",
+                          borderRadius: "12px",
+                          boxShadow: "1px 1px 4px rgba(0,0,0,0.10)",
+                          border: "none",
+                          fontSize: 17,
+                          height: 48,
+                        },
+                        onKeyDown: (e) => {
+                          if (
+                            !/^[a-zA-ZÁÉÍÓÚáéíóúÑñ\s]$/.test(e.key) &&
+                            e.key !== "Backspace" &&
+                            e.key !== "Tab"
+                          ) {
+                            e.preventDefault();
+                          }
+                        },
+                      }}
+                    />
+                  </Box>
 
-                      handleChange(e);
-                    }}
-                    inputProps={{
-                      min: 0,
-                      onKeyDown: (e) => {
-                        if (["-", "e", "E", "+", "."].includes(e.key)) {
-                          e.preventDefault();
+                  <Box>
+                    <h6
+                      className="titulo-arriba-form"
+                      style={{ fontSize: 19, margin: 0 }}
+                    >
+                      Edad
+                    </h6>
+                    <TextField
+                      name="ageBeneficiary"
+                      type="number"
+                      fullWidth
+                      size="medium"
+                      value={values.ageBeneficiary}
+                      onChange={(e) => {
+                        const inputValue = e.target.value;
+
+                        // Permitir solo hasta 2 dígitos
+                        if (/^\d{0,2}$/.test(inputValue)) {
+                          // Evitar que empiece con 0 si tiene más de 1 dígito
+                          if (inputValue.length === 1 && inputValue === "0") {
+                            setFieldValue("ageBeneficiary", "");
+                          } else {
+                            setFieldValue("ageBeneficiary", inputValue);
+                          }
                         }
-                      },
-                      onWheel: (e) => e.currentTarget.blur(),
+                      }}
+                      inputProps={{
+                        maxLength: 2, // seguridad extra
+                        onKeyDown: (e) => {
+                          if (["-", "e", "E", "+", ".", ","].includes(e.key)) {
+                            e.preventDefault();
+                          }
+                        },
+                        onWheel: (e) => e.currentTarget.blur(), // evita cambiar con scroll
+                      }}
+                      error={
+                        touched.ageBeneficiary && Boolean(errors.ageBeneficiary)
+                      }
+                      helperText={
+                        touched.ageBeneficiary && values.ageBeneficiary === 0
+                          ? "La edad debe ser mayor a 0."
+                          : touched.ageBeneficiary && errors.ageBeneficiary
+                          ? "Por favor ingrese una edad válida (mayor a 0)."
+                          : ""
+                      }
+                      InputProps={{
+                        sx: {
+                          backgroundColor: "#fff",
+                          borderRadius: "12px",
+                          boxShadow: "1px 1px 4px rgba(0,0,0,0.10)",
+                          border: "none",
+                          fontSize: 17,
+                          height: 48,
+                        },
+                      }}
+                    />
+                  </Box>
+
+                  <Box>
+                    <h6
+                      className="titulo-arriba-form"
+                      style={{ fontSize: 19, margin: 0 }}
+                    >
+                      DNI
+                    </h6>
+                    <TextField
+                      name="dniBenefeciary"
+                      fullWidth
+                      size="medium"
+                      value={values.dniBenefeciary}
+                      onChange={(e) => {
+                        let val = e.target.value;
+
+                        // 1) Solo dígitos
+                        val = val.replace(/\D/g, "");
+
+                        // 2) Máximo 8
+                        if (val.length > 8) val = val.slice(0, 8);
+
+                        // 3) No permitir que empiece con 0
+                        if (val.length > 0 && val[0] === "0") {
+                          val = val.replace(/^0+/, ""); // elimina ceros iniciales
+                        }
+
+                        setFieldValue("dniBenefeciary", val);
+                      }}
+                      inputProps={{
+                        maxLength: 8, // seguridad extra
+                        onKeyDown: (e) => {
+                          // bloquea caracteres no numéricos que algunos navegadores permiten
+                          if (["-", "e", "E", "+", ".", ","].includes(e.key)) {
+                            e.preventDefault();
+                          }
+                        },
+                        inputMode: "numeric", // teclado numérico en móviles
+                      }}
+                      error={
+                        touched.dniBenefeciary && Boolean(errors.dniBenefeciary)
+                      }
+                      helperText={
+                        touched.dniBenefeciary && errors.dniBenefeciary
+                      }
+                      InputProps={{
+                        sx: {
+                          backgroundColor: "#fff",
+                          borderRadius: "12px",
+                          boxShadow: "1px 1px 4px rgba(0,0,0,0.10)",
+                          border: "none",
+                          fontSize: 17,
+                          height: 48,
+                        },
+                      }}
+                    />
+                  </Box>
+
+                  <Box>
+                    <h6
+                      className="titulo-arriba-form"
+                      style={{ fontSize: 19, margin: 0 }}
+                    >
+                      Observaciones
+                    </h6>
+                    <TextField
+                      name="observationsBeneficiary"
+                      fullWidth
+                      multiline
+                      rows={3}
+                      size="medium"
+                      value={values.observationsBeneficiary}
+                      onChange={handleChange}
+                      InputProps={{
+                        sx: {
+                          backgroundColor: "#fff",
+                          borderRadius: "12px",
+                          boxShadow: "1px 1px 4px rgba(0,0,0,0.10)",
+                          border: "none",
+                          fontSize: 17,
+                          minHeight: 48,
+                        },
+                      }}
+                    />
+                  </Box>
+                </Stack>
+
+                <Stack direction="row" justifyContent="space-around" mt={3}>
+                  <Button
+                    type="button"
+                    onClick={onClose}
+                    sx={{
+                      backgroundColor: "red",
+                      color: "white",
+                      minWidth: 60,
+                      height: 60,
+                      borderRadius: 2.5,
+                      "&:hover": { backgroundColor: "#b71c1c" },
                     }}
-                    error={touched.ageBeneficiary && Boolean(errors.ageBeneficiary)}
-                    helperText={
-                      touched.ageBeneficiary && values.ageBeneficiary === 0
-                        ? "La edad debe ser mayor a 0."
-                        : touched.ageBeneficiary && errors.ageBeneficiary
-                        ? "Por favor ingrese una edad válida (mayor a 0)."
-                        : ""
-                    }
-                    InputProps={{
-                      sx: {
-                        backgroundColor: "#fff",
-                        borderRadius: "12px",
-                        boxShadow: "1px 1px 4px rgba(0,0,0,0.10)",
-                        border: "none",
-                        fontSize: 17,
-                        height: 48,
-                      },
+                  >
+                    <CloseIcon sx={{ fontSize: 34 }} />
+                  </Button>
+                  <Button
+                    type="submit"
+                    sx={{
+                      backgroundColor: "#1976D2",
+                      color: "white",
+                      minWidth: 60,
+                      height: 60,
+                      borderRadius: 2.5,
+                      "&:hover": { backgroundColor: "#0d47a1" },
                     }}
-                  />
-                </Box>
-
-
-
-                <Box>
-                  <h6 className="titulo-arriba-form" style={{ fontSize: 19, margin: 0 }}>DNI</h6>
-                  <TextField
-                    name="dniBenefeciary"
-                    fullWidth
-                    size="medium"
-                    value={values.dniBenefeciary}
-                    onChange={handleChange}
-                    error={touched.dniBenefeciary && Boolean(errors.dniBenefeciary)}
-                    helperText={touched.dniBenefeciary && errors.dniBenefeciary}
-                    InputProps={{
-                      sx: {
-                        backgroundColor: "#fff",
-                        borderRadius: "12px",
-                        boxShadow: "1px 1px 4px rgba(0,0,0,0.10)",
-                        border: "none",
-                        fontSize: 17,
-                        height: 48,
-                      },
-                    }}
-                  />
-                </Box>
-
-                <Box>
-                  <h6 className="titulo-arriba-form" style={{ fontSize: 19, margin: 0 }}>Observaciones</h6>
-                  <TextField
-                    name="observationsBeneficiary"
-                    fullWidth
-                    multiline
-                    rows={3}
-                    size="medium"
-                    value={values.observationsBeneficiary}
-                    onChange={handleChange}
-                    InputProps={{
-                      sx: {
-                        backgroundColor: "#fff",
-                        borderRadius: "12px",
-                        boxShadow: "1px 1px 4px rgba(0,0,0,0.10)",
-                        border: "none",
-                        fontSize: 17,
-                        minHeight: 48,
-                      },
-                    }}
-                  />
-                </Box>
-              </Stack>
-
-              <Stack direction="row" justifyContent="space-around" mt={3}>
-                <Button
-                  type="button"
-                  onClick={onClose}
-                  sx={{
-                    backgroundColor: "red",
-                    color: "white",
-                    minWidth: 60,
-                    height: 60,
-                    borderRadius: 2.5,
-                    "&:hover": { backgroundColor: "#b71c1c" },
-                  }}
-                >
-                  <CloseIcon sx={{ fontSize: 34 }} />
-                </Button>
-                <Button
-                  type="submit"
-                  sx={{
-                    backgroundColor: "#1976D2",
-                    color: "white",
-                    minWidth: 60,
-                    height: 60,
-                    borderRadius: 2.5,
-                    "&:hover": { backgroundColor: "#0d47a1" },
-                  }}
-                >
-                  <CheckIcon sx={{ fontSize: 34 }} />
-                </Button>
-              </Stack>
-            </DialogContent>
-          </Form>
-        )}
-      </Formik>
-    </Dialog>
+                  >
+                    <CheckIcon sx={{ fontSize: 34 }} />
+                  </Button>
+                </Stack>
+              </DialogContent>
+            </Form>
+          )}
+        </Formik>
+      </Dialog>
 
       <Snackbar
         open={showSuccess}

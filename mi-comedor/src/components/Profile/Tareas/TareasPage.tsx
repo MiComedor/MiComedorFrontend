@@ -48,7 +48,12 @@ const initialTaskCoordinationValues: TaskCoordination = {
 };
 
 const validationSchema = Yup.object({
-  fullname: Yup.string().required("Campo obligatorio"),
+  fullname: Yup.string()
+    .trim()
+    .matches(/^[A-Za-z\s]+$/, "Solo se permiten letras y espacios")
+    .min(2, "Mínimo 2 caracteres")
+    .max(60, "Máximo 60 caracteres")
+    .required("Campo obligatorio"),
   typeOfTask: Yup.object()
     .shape({
       idTypeOfTask: Yup.number().required(),
@@ -243,13 +248,39 @@ const RegistroTareas: React.FC = () => {
                     <div className="form-group-tareas">
                       <label className="titulo-arriba-form">Responsable</label>
                       <Field name="fullname">
-                        {({ field }: FieldProps) => (
+                        {({ field, form }: FieldProps) => (
                           <TextField
                             fullWidth
                             {...field}
                             className="form-input"
                             error={touched.fullname && Boolean(errors.fullname)}
                             helperText={touched.fullname && errors.fullname}
+                            onChange={(e) => {
+                              // 🔒 Filtra caracteres (solo letras, tildes, ñ y espacios)
+                              let value = e.target.value.replace(
+                                /[^A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]/g,
+                                ""
+                              );
+
+                              // 🔒 Aplica máximo 30 caracteres
+                              if (value.length > 30) {
+                                value = value.slice(0, 30);
+                              }
+
+                              form.setFieldValue("fullname", value);
+                            }}
+                            inputProps={{
+                              maxLength: 30, // ✅ adicional para limitar desde el navegador
+                              onKeyDown: (e) => {
+                                // Evita teclear números y caracteres especiales
+                                if (
+                                  !/^[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]$/.test(e.key) &&
+                                  e.key.length === 1
+                                ) {
+                                  e.preventDefault();
+                                }
+                              },
+                            }}
                           />
                         )}
                       </Field>

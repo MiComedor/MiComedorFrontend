@@ -31,8 +31,6 @@ import dayjs, { Dayjs } from "dayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import TextField from "@mui/material/TextField";
 import "./MisProductosPage.css";
-
-// Servicios y tipos
 import { unitOfMeasurement } from "../../../types/unitOfMeasurement";
 import unitOfMeasurementService from "../../../services/unitOfMeasurement.service";
 import { ProductType } from "../../../types/product.type";
@@ -66,6 +64,7 @@ const validationSchema = Yup.object({
       "format",
       "Formato inválido: máximo 2 enteros y 2 decimales",
       (val, ctx) =>
+        val !== undefined &&
         ctx.originalValue !== undefined &&
         /^[1-9]\d{0,1}(\.\d{1,2})?$/.test(ctx.originalValue)
     )
@@ -128,6 +127,7 @@ const MisProductosPage: React.FC = () => {
 
       setProductos(productosOrdenados);
     });
+    
   }, []);
 
   const handleChangePage = (_event: unknown, newPage: number) => {
@@ -138,7 +138,7 @@ const MisProductosPage: React.FC = () => {
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0); // Reinicia la página
+    setPage(0); 
   };
 
   const onSubmit = async (
@@ -207,7 +207,6 @@ const MisProductosPage: React.FC = () => {
                               errors.descriptionProduct
                             }
                             inputProps={{
-                              maxLength: 50,
                               onKeyDown: (e) => {
                                 if (/[0-9]/.test(e.key)) {
                                   e.preventDefault();
@@ -235,7 +234,6 @@ const MisProductosPage: React.FC = () => {
                               touched.amountProduct && errors.amountProduct
                             }
                             inputProps={{
-                              maxLength: 10,
                               onKeyDown: (e) => {
                                 if (
                                   !/[0-9.]/.test(e.key) &&
@@ -384,7 +382,6 @@ const MisProductosPage: React.FC = () => {
                                       gap={2}
                                     >
                                       {tipoSeleccionado === "Perecible" && (
-                                        // Agregamos LocalizationProvider con locale "es"
                                         <LocalizationProvider
                                           dateAdapter={AdapterDayjs}
                                           adapterLocale="es"

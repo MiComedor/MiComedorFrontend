@@ -1,6 +1,7 @@
 /*encabezado*/
 .titulo-dialog-editar-tarea {
     background-color: #e4faa4;
+    padding-bottom: 0px !important;
 }
 
 /*formulario*/
@@ -16,7 +17,7 @@
 }
 
 .textfield-tarea-edit {
-    background-color: white !important;
+    background-color: transparent !important;
     border-radius: 16px !important;
     margin: 12px 0 !important;
 }
@@ -30,6 +31,8 @@
 .textfield-tarea-edit .MuiOutlinedInput-notchedOutline {
     border: none !important;
 }
+
+
 
 /*botones*/
 .dialog-edit-actions-tarea {
@@ -52,4 +55,18 @@
 .dialog-edit-actions-tarea .MuiButton-root:last-child {
     background-color: #2b90f5;
     color: white;
+}
+
+.textfield-tarea-edit .MuiFormHelperText-root {
+  background-color: #e4faa4 !important; /* sin bloque de color */
+  padding: 0 !important;
+  color: #ff4444 !important; /* o el color que quieras */
+}
+
+/**/
+
+.textfield-tarea-edit-especial {
+    background-color: white !important;
+    border-radius: 16px !important;
+    margin: 12px 0 !important;
 }

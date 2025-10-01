@@ -34,8 +34,15 @@ const validationSchema = Yup.object({
   ageBeneficiary: Yup.number()
     .typeError("Debe ser un número")
     .integer("Debe ser un número entero")
-    .positive("Debe ser positivo")
+    .min(1, "La edad mínima es 1")
+    .max(99, "La edad máxima es 99")
+    .test("no-leading-zero", "La edad no puede empezar con 0", (val, ctx) => {
+      if (val === undefined || val === null) return false;
+      const raw = String(ctx.originalValue ?? "");
+      return !/^0\d/.test(raw);
+    })
     .required("Campo obligatorio"),
+
   observationsBeneficiary: Yup.string(),
 });
 
@@ -54,7 +61,7 @@ const BeneficiariosPage: React.FC = () => {
     useState<Beneficiary | null>(null);
   const [beneficiarioAEliminar, setBeneficiarioAEliminar] =
     useState<Beneficiary | null>(null);
-  
+
   // Estados para paginación
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(3);
@@ -100,9 +107,12 @@ const BeneficiariosPage: React.FC = () => {
   const currentItems = filtered.slice(indexOfFirstItem, indexOfLastItem);
 
   // Manejar cambio de página
-  const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
+  const handlePageChange = (
+    _event: React.ChangeEvent<unknown>,
+    value: number
+  ) => {
     setCurrentPage(value);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   // Resetear página cuando cambie la búsqueda
@@ -130,7 +140,18 @@ const BeneficiariosPage: React.FC = () => {
             variant="outlined"
             placeholder="Buscar"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              const soloLetras = e.target.value.replace(
+                /[^A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]/g,
+                ""
+              );
+              setSearch(soloLetras);
+            }}
+            onKeyDown={(e) => {
+              if (/[0-9]/.test(e.key)) {
+                e.preventDefault();
+              }
+            }}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -157,7 +178,7 @@ const BeneficiariosPage: React.FC = () => {
 
         <Button
           variant="contained"
-          onClick={handleOpen} 
+          onClick={handleOpen}
           sx={{
             backgroundColor: "#00C300",
             color: "#000",
@@ -257,7 +278,19 @@ const BeneficiariosPage: React.FC = () => {
                       fullWidth
                       size="medium"
                       value={values.fullnameBenefeciary}
-                      onChange={handleChange}
+                      onChange={(e) => {
+                        const soloLetras = e.target.value.replace(
+                          /[^A-Za-z\s]/g,
+                          ""
+                        );
+                        handleChange({
+                          ...e,
+                          target: {
+                            name: "fullnameBenefeciary",
+                            value: soloLetras,
+                          },
+                        });
+                      }}
                       error={
                         touched.fullnameBenefeciary &&
                         Boolean(errors.fullnameBenefeciary)
@@ -279,7 +312,7 @@ const BeneficiariosPage: React.FC = () => {
                     />
                   </Box>
 
-                    <Box>
+                  <Box>
                     <h6
                       className="titulo-arriba-form"
                       style={{ fontSize: 19, margin: 0 }}
@@ -293,49 +326,64 @@ const BeneficiariosPage: React.FC = () => {
                       size="medium"
                       value={values.ageBeneficiary}
                       onChange={(e) => {
-                      const inputValue = parseInt(e.target.value, 10);
+                        let inputValue = e.target.value;
 
-                      if (isNaN(inputValue)) {
-                        values.ageBeneficiary = "0";
-                      } else if (inputValue < 0) {
-                        values.ageBeneficiary = "0";
-                      } else {
-                        values.ageBeneficiary = inputValue.toString();
-                      }
+                        // 👉 cortar a 2 dígitos
+                        if (inputValue.length > 2) {
+                          inputValue = inputValue.slice(0, 2);
+                        }
 
-                      handleChange(e);
+                        // 👉 eliminar ceros a la izquierda
+                        if (
+                          inputValue.length > 1 &&
+                          inputValue.startsWith("0")
+                        ) {
+                          inputValue = inputValue.replace(/^0+/, "");
+                        }
+
+                        // si queda vacío, forzar "0"
+                        if (inputValue === "") {
+                          inputValue = "0";
+                        }
+
+                        values.ageBeneficiary = inputValue;
+
+                        handleChange({
+                          ...e,
+                          target: { name: "ageBeneficiary", value: inputValue },
+                        });
                       }}
                       inputProps={{
-                      min: 0,
-                      onKeyDown: (e) => {
-                        if (["-", "e", "E", "+", "."].includes(e.key)) {
-                        e.preventDefault();
-                        }
-                      },
-                      onWheel: (e) => e.currentTarget.blur(),
+                        min: 0,
+                        onKeyDown: (e) => {
+                          if (["-", "e", "E", "+", "."].includes(e.key)) {
+                            e.preventDefault();
+                          }
+                        },
+                        onWheel: (e) => e.currentTarget.blur(),
                       }}
                       error={
-                      touched.ageBeneficiary && Boolean(errors.ageBeneficiary)
+                        touched.ageBeneficiary && Boolean(errors.ageBeneficiary)
                       }
                       helperText={
-                      touched.ageBeneficiary && values.ageBeneficiary === "0"
-                        ? "La edad debe ser mayor a 0."
-                        : touched.ageBeneficiary && errors.ageBeneficiary
-                        ? "Por favor ingrese una edad válida (mayor a 0)."
-                        : ""
+                        touched.ageBeneficiary && values.ageBeneficiary === "0"
+                          ? "La edad debe ser mayor a 0."
+                          : touched.ageBeneficiary && errors.ageBeneficiary
+                          ? "Por favor ingrese una edad válida (mayor a 0)."
+                          : ""
                       }
                       InputProps={{
-                      sx: {
-                        backgroundColor: "#fff",
-                        borderRadius: "12px",
-                        boxShadow: "1px 1px 4px rgba(0,0,0,0.10)",
-                        border: "none",
-                        fontSize: 17,
-                        height: 48,
-                      },
+                        sx: {
+                          backgroundColor: "#fff",
+                          borderRadius: "12px",
+                          boxShadow: "1px 1px 4px rgba(0,0,0,0.10)",
+                          border: "none",
+                          fontSize: 17,
+                          height: 48,
+                        },
                       }}
                     />
-                    </Box>
+                  </Box>
 
                   <Box>
                     <h6
@@ -350,7 +398,9 @@ const BeneficiariosPage: React.FC = () => {
                       size="medium"
                       value={values.dniBenefeciary}
                       onChange={(e) => {
-                        const value = e.target.value.replace(/\D/g, "").slice(0, 8);
+                        const value = e.target.value
+                          .replace(/\D/g, "")
+                          .slice(0, 8);
                         handleChange({
                           target: {
                             name: "dniBenefeciary",
@@ -479,24 +529,26 @@ const BeneficiariosPage: React.FC = () => {
                 onClick={() =>
                   handleEditClick({
                     ...beneficiario,
-                    isActive: (beneficiario as any).isActive ?? true,
+                    isActive: beneficiario.active ?? true,
                   })
                 }
               >
                 <EditIcon />
               </Button>
-              { <Button
-                variant="contained"
-                sx={{ backgroundColor: "#D32F2F", minWidth: 0, p: 1 }}
-                onClick={() =>
-                  handleDeleteClick({
-                    ...beneficiario,
-                    isActive: (beneficiario as any).isActive ?? true,
-                  })
-                }
-              >
-                <DeleteIcon />
-              </Button> }
+              {
+                <Button
+                  variant="contained"
+                  sx={{ backgroundColor: "#D32F2F", minWidth: 0, p: 1 }}
+                  onClick={() =>
+                    handleDeleteClick({
+                      ...beneficiario,
+                      isActive: beneficiario.active ?? true,
+                    })
+                  }
+                >
+                  <DeleteIcon />
+                </Button>
+              }
             </Stack>
           </Box>
         ))}
@@ -504,15 +556,15 @@ const BeneficiariosPage: React.FC = () => {
 
       {/* PAGINACIÓN */}
       {filtered.length > 0 && (
-        <Box 
-          sx={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
             mt: 4,
-            mb: 2
+            mb: 2,
           }}
         >
-          <Pagination 
+          <Pagination
             count={totalPages}
             page={currentPage}
             onChange={handlePageChange}
@@ -521,14 +573,14 @@ const BeneficiariosPage: React.FC = () => {
             showFirstButton
             showLastButton
             sx={{
-              '& .MuiPagination-ul': {
-                flexWrap: 'wrap',
-                justifyContent: 'center',
+              "& .MuiPagination-ul": {
+                flexWrap: "wrap",
+                justifyContent: "center",
               },
-              '& .MuiPaginationItem-root': {
-                fontSize: { xs: '0.875rem', sm: '1rem' },
-                minWidth: { xs: '32px', sm: '40px' },
-                height: { xs: '32px', sm: '40px' },
+              "& .MuiPaginationItem-root": {
+                fontSize: { xs: "0.875rem", sm: "1rem" },
+                minWidth: { xs: "32px", sm: "40px" },
+                height: { xs: "32px", sm: "40px" },
               },
             }}
           />
@@ -537,11 +589,11 @@ const BeneficiariosPage: React.FC = () => {
 
       {/* Mostrar mensaje si no hay resultados */}
       {filtered.length === 0 && (
-        <Box 
-          sx={{ 
-            textAlign: 'center', 
+        <Box
+          sx={{
+            textAlign: "center",
             py: 4,
-            color: 'text.secondary' 
+            color: "text.secondary",
           }}
         >
           No se encontraron beneficiarios
