@@ -14,6 +14,8 @@ import {
   TableBody,
   TablePagination,
   Button,
+  Alert, //  AGREGADO: Importar Alert para mostrar mensajes
+  Snackbar, //  AGREGADO: Importar Snackbar para mostrar notificaciones
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -30,6 +32,11 @@ const PresupuestoPage: React.FC = () => {
   const [presupuestos, setPresupuestos] = useState<BudgetDTO[]>([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  
+  // 🔹 AGREGADO: Estados para controlar el mensaje de éxito
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
 
   const initialValues: BudgetDTO = {
     idBudget: 0,
@@ -57,32 +64,29 @@ const PresupuestoPage: React.FC = () => {
   };
 
   const getPresupuestos = async () => {
-  const userStr = localStorage.getItem("user");
-  const user = userStr ? JSON.parse(userStr) : null;
-  if (!user) return;
+    const userStr = localStorage.getItem("user");
+    const user = userStr ? JSON.parse(userStr) : null;
+    if (!user) return;
 
-  const data = await budgetService.listarPorUsuario(user.idUser);
-  setPresupuestos(data.reverse()); // si quieres los más recientes arriba
-};
-
-
+    const data = await budgetService.listarPorUsuario(user.idUser);
+    setPresupuestos(data.reverse()); // si quieres los más recientes arriba
+  };
 
   const calcularSaldo = () => {
-  let saldo = 0;
-  presupuestos.forEach((p) => {
-    const categoria = p.budgetCategory?.name?.toLowerCase();
+    let saldo = 0;
+    presupuestos.forEach((p) => {
+      const categoria = p.budgetCategory?.name?.toLowerCase();
 
-    if (categoria === "ingresos" || categoria === "ingreso") {
-      saldo += p.amountBudget;
-    } else if (categoria === "egresos" || categoria === "egreso") {
-      saldo -= p.amountBudget;
-    }
-  });
-  return saldo;
-};
+      if (categoria === "ingresos" || categoria === "ingreso") {
+        saldo += p.amountBudget;
+      } else if (categoria === "egresos" || categoria === "egreso") {
+        saldo -= p.amountBudget;
+      }
+    });
+    return saldo;
+  };
 
-const saldoActual = calcularSaldo();
-
+  const saldoActual = calcularSaldo();
 
   useEffect(() => {
     getCategorias();
@@ -101,11 +105,35 @@ const saldoActual = calcularSaldo();
 
     try {
       await budgetService.insertar(payload);
+      
+      //  AGREGADO: Determinar el tipo de categoría y mostrar mensaje apropiado
+      const categoria = values.budgetCategory?.name?.toLowerCase();
+      if (categoria === "ingreso" || categoria === "ingresos") {
+        setSnackbarMessage("Ingreso guardado satisfactoriamente");
+        setSnackbarSeverity("success");
+      } else if (categoria === "egreso" || categoria === "egresos") {
+        setSnackbarMessage("Egreso guardado satisfactoriamente");
+        setSnackbarSeverity("success");
+      } else {
+        setSnackbarMessage("Registro guardado satisfactoriamente");
+        setSnackbarSeverity("success");
+      }
+      setOpenSnackbar(true);
+      
       resetForm();
       getPresupuestos();
     } catch (error) {
       console.error("Error al guardar presupuesto:", error);
+      // 🔹 AGREGADO: Mensaje de error si falla
+      setSnackbarMessage("Error al guardar el registro");
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true);
     }
+  };
+
+  //  AGREGADO: Función para cerrar el Snackbar
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
   };
 
   const handleChangePage = (_event: unknown, newPage: number) => {
@@ -173,27 +201,27 @@ const saldoActual = calcularSaldo();
                 <Stack direction="column" sx={{ width: { xs: "100%", sm: 275 } }}>
                   <label className="titulo-arriba-form">Monto</label>
                   <Field name="amountBudget">
-                  {({ field, form }: FieldProps) => (
-                    <TextField
-                    {...field}
-                    type="number"
-                    className="form-input"
-                    fullWidth
-                    error={touched.amountBudget && Boolean(errors.amountBudget)}
-                    helperText={touched.amountBudget && errors.amountBudget}
-                    inputProps={{ min: 0, max: 99999, maxLength: 5 }}
-                    onInput={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      if (e.target.value.length > 4) {
-                      e.target.value = e.target.value.slice(0, 5);
-                      }
-                    }}
-                    onFocus={() => {
-                      if (field.value === 0) {
-                      form.setFieldValue("amountBudget", "");
-                      }
-                    }}
-                    />
-                  )}
+                    {({ field, form }: FieldProps) => (
+                      <TextField
+                        {...field}
+                        type="number"
+                        className="form-input"
+                        fullWidth
+                        error={touched.amountBudget && Boolean(errors.amountBudget)}
+                        helperText={touched.amountBudget && errors.amountBudget}
+                        inputProps={{ min: 0, max: 99999, maxLength: 5 }}
+                        onInput={(e: React.ChangeEvent<HTMLInputElement>) => {
+                          if (e.target.value.length > 4) {
+                            e.target.value = e.target.value.slice(0, 5);
+                          }
+                        }}
+                        onFocus={() => {
+                          if (field.value === 0) {
+                            form.setFieldValue("amountBudget", "");
+                          }
+                        }}
+                      />
+                    )}
                   </Field>
                 </Stack>
 
@@ -211,26 +239,26 @@ const saldoActual = calcularSaldo();
                       />
                     )}
                   </Field>
-                </Stack> 
+                </Stack>
 
                 {/* FECHA */}
                 <Stack direction="column" sx={{ width: { xs: "100%", sm: 275 } }}>
                   <label className="titulo-arriba-form">Fecha</label>
                   <Field name="dateBudget">
-                  {({ field }: FieldProps) => (
-                    <TextField
-                    {...field}
-                    type="date"
-                    className="form-input"
-                    fullWidth
-                    InputLabelProps={{ shrink: true }}
-                    error={touched.dateBudget && Boolean(errors.dateBudget)}
-                    helperText={touched.dateBudget && errors.dateBudget}
-                    inputProps={{
-                      min: dayjs().format("YYYY-MM-DD"),
-                    }}
-                    />
-                  )}
+                    {({ field }: FieldProps) => (
+                      <TextField
+                        {...field}
+                        type="date"
+                        className="form-input"
+                        fullWidth
+                        InputLabelProps={{ shrink: true }}
+                        error={touched.dateBudget && Boolean(errors.dateBudget)}
+                        helperText={touched.dateBudget && errors.dateBudget}
+                        inputProps={{
+                          min: dayjs().format("YYYY-MM-DD"),
+                        }}
+                      />
+                    )}
                   </Field>
                 </Stack>
 
@@ -255,6 +283,22 @@ const saldoActual = calcularSaldo();
         </Formik>
       </div>
 
+      {/* 🔹 AGREGADO: Snackbar para mostrar mensajes de éxito o error */}
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={5000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbarSeverity}
+          sx={{ width: "100%", fontSize: "1rem" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+
       <Box
         sx={{
           backgroundColor: saldoActual < 0 ? "#d32f2f" : "#f57c00", // rojo si negativo, naranja si positivo
@@ -270,8 +314,6 @@ const saldoActual = calcularSaldo();
       >
         {saldoActual < 0 ? "Déficit actual :" : "Saldo actual :"} &nbsp; S/{Math.abs(saldoActual).toFixed(2)}
       </Box>
-
-
 
       {/* Tabla responsive debajo del formulario */}
       <Box className="table-container-raciones" sx={{ mt: 5, width: "100%", overflowX: "auto" }}>
@@ -294,17 +336,17 @@ const saldoActual = calcularSaldo();
               {presupuestos
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((item) => (
-                 <TableRow
-                      key={item.idBudget}
-                      sx={{
-                        height: 70,
-                        backgroundColor:
-                          item.budgetCategory?.name?.toLowerCase().includes("egreso") ||
-                          item.budgetCategory?.name?.toLowerCase().includes("egresos")
-                            ? "#f8d7da" // rojo suave
-                            : "inherit", // color por defecto
-                      }}
-                    >
+                  <TableRow
+                    key={item.idBudget}
+                    sx={{
+                      height: 70,
+                      backgroundColor:
+                        item.budgetCategory?.name?.toLowerCase().includes("egreso") ||
+                        item.budgetCategory?.name?.toLowerCase().includes("egresos")
+                          ? "#f8d7da" // rojo suave
+                          : "inherit", // color por defecto
+                    }}
+                  >
                     <TableCell sx={{ fontSize: "1.1rem" }}>
                       {dayjs(item.dateBudget).format("DD/MM/YYYY")}
                     </TableCell>
@@ -317,54 +359,51 @@ const saldoActual = calcularSaldo();
                 ))}
             </TableBody>
           </Table>
-            <TablePagination
-              rowsPerPageOptions={[5, 10, 25]}
-              component="div"
-              count={presupuestos.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={handleChangePage}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-              labelRowsPerPage="Filas por página"
-              labelDisplayedRows={({ from, to, count }) =>
-                `Del ${from} al ${to} de ${count !== -1 ? count : `más de ${to}`} movimientos`
-              }
-              sx={{
-                '& .MuiTablePagination-toolbar': {
-                  flexDirection: { xs: 'row', sm: 'row' },
-                  flexWrap: { xs: 'wrap', sm: 'nowrap' },
-                  justifyContent: { xs: 'space-between', sm: 'flex-end' },
-                  alignItems: 'center',
-                  gap: 1,
-                  px: 1,
-                },
-                '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
-                  fontSize: '0.85rem',
-                  marginBottom: { xs: 0.5, sm: 0 },
-                },
-                '& .MuiTablePagination-actions': {
-                  marginLeft: { xs: 0, sm: 2 },
-                },
-              }}
-            />
-
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]}
+            component="div"
+            count={presupuestos.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            labelRowsPerPage="Filas por página"
+            labelDisplayedRows={({ from, to, count }) =>
+              `Del ${from} al ${to} de ${count !== -1 ? count : `más de ${to}`} movimientos`
+            }
+            sx={{
+              '& .MuiTablePagination-toolbar': {
+                flexDirection: { xs: 'row', sm: 'row' },
+                flexWrap: { xs: 'wrap', sm: 'nowrap' },
+                justifyContent: { xs: 'space-between', sm: 'flex-end' },
+                alignItems: 'center',
+                gap: 1,
+                px: 1,
+              },
+              '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
+                fontSize: '0.85rem',
+                marginBottom: { xs: 0.5, sm: 0 },
+              },
+              '& .MuiTablePagination-actions': {
+                marginLeft: { xs: 0, sm: 2 },
+              },
+            }}
+          />
         </TableContainer>
-
-        
       </Box>
 
       {/* Botón de regresar */}
-            <Box sx={{ pt: 4 }}>
-              <Button
-                variant="contained"
-                color="warning"
-                startIcon={<ArrowBackIcon />}
-                sx={{ fontWeight: "bold" }}
-                href="/profile"
-                >
-                  REGRESAR AL MENÚ
-              </Button>
-            </Box>
+      <Box sx={{ pt: 4 }}>
+        <Button
+          variant="contained"
+          color="warning"
+          startIcon={<ArrowBackIcon />}
+          sx={{ fontWeight: "bold" }}
+          href="/profile"
+        >
+          REGRESAR AL MENÚ
+        </Button>
+      </Box>
     </Box>
   );
 };
