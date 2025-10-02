@@ -5,7 +5,7 @@ import Stack from "@mui/material/Stack";
 import "./RegisterForm.css";
 import { useNavigate } from "react-router-dom";
 
-// ✅ NUEVO: helper para validar reglas de la contraseña
+//  NUEVO: helper para validar reglas de la contraseña
 const passwordChecks = [
   { test: (pwd: string) => /.{8,}/.test(pwd), label: "Mínimo 8 caracteres" },
   { test: (pwd: string) => /[A-Z]/.test(pwd), label: "Al menos 1 mayúscula" },
@@ -14,8 +14,11 @@ const passwordChecks = [
   { test: (pwd: string) => /[@$!%*?&.#]/.test(pwd), label: "Al menos 1 caracter especial (@$!%*?&.#)" },
 ];
 
-// ✅ NUEVO: componente visual
-const PasswordStrength: React.FC<{ password: string }> = ({ password }) => {
+// MODIFICADO: componente visual que se muestra/oculta según la prop 'show'
+const PasswordStrength: React.FC<{ password: string; show: boolean }> = ({ password, show }) => {
+  // 🔹 AGREGADO: Si show es false, no renderiza nada
+  if (!show) return null;
+  
   return (
     <ul className="password-checklist">
       {passwordChecks.map((rule, i) => {
@@ -55,6 +58,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
   message,
 }) => {
   const navigate = useNavigate();
+  
+  // 🔹 AGREGADO: Estado para controlar la visibilidad de las reglas de contraseña
+  const [showPasswordRules, setShowPasswordRules] = React.useState(false);
 
   return (
     <Stack direction="row" className="register-stack">
@@ -80,7 +86,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
             validationSchema={validationSchema}
             onSubmit={onSubmit}
           >
-            {({ values }) => ( // <-- ✅ para acceder a la contraseña
+            {({ values }) => (
               <Form>
                 <Stack spacing={1} className="register-form-stack">
                   <div className="form-group">
@@ -119,6 +125,10 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
                       name="password"
                       type="password"
                       className="form-input-login"
+                      // 🔹 AGREGADO: Muestra las reglas cuando el usuario hace clic en el campo
+                      onFocus={() => setShowPasswordRules(true)}
+                      // 🔹 AGREGADO: Oculta las reglas cuando el usuario sale del campo
+                      onBlur={() => setShowPasswordRules(false)}
                     />
                     <ErrorMessage
                       name="password"
@@ -126,8 +136,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
                       className="error-message"
                     />
 
-                    {/* ✅ NUEVO: reglas dinámicas */}
-                    <PasswordStrength password={values.password} />
+                    {/* 🔹 MODIFICADO: Ahora recibe la prop 'show' para controlar su visibilidad */}
+                    <PasswordStrength password={values.password} show={showPasswordRules} />
                   </div>
                 </Stack>
 
