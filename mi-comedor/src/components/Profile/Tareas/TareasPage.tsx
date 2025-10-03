@@ -157,10 +157,19 @@ const RegistroTareas: React.FC = () => {
         typeOfTask: { idTypeOfTask: values.typeOfTask.idTypeOfTask },
       });
 
+      // AGREGADO: Mostrar notificación de éxito al editar
+      setSnackbarMessage("Tarea actualizada exitosamente");
+      setSnackbarSeverity("success");
+      setOpenSnackbar(true);
+
       getTareas();
       handleCloseEdit();
     } catch (error) {
       console.error("Error al actualizar tarea:", error);
+      // AGREGADO: Mostrar notificación de error al editar
+      setSnackbarMessage("Error al actualizar la tarea");
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true);
     }
   };
   const getTareas = () => {
@@ -234,10 +243,19 @@ const RegistroTareas: React.FC = () => {
 
       await TaskOfCoordinatioService.eliminarTarea(values.idTaskCoordination);
 
+      // AGREGADO: Mostrar notificación de éxito al eliminar
+      setSnackbarMessage("Tarea eliminada exitosamente");
+      setSnackbarSeverity("success");
+      setOpenSnackbar(true);
+
       getTareas();
       handleCloseDelete();
     } catch (error) {
       console.error("Error al eliminar tarea:", error);
+      // AGREGADO: Mostrar notificación de error al eliminar
+      setSnackbarMessage("Error al eliminar la tarea");
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true);
     }
   };
 
@@ -441,7 +459,7 @@ const RegistroTareas: React.FC = () => {
           {/* AGREGADO: Snackbar para mostrar notificaciones en la esquina inferior derecha */}
           <Snackbar
             open={openSnackbar}
-            autoHideDuration={5000}
+            autoHideDuration={3000}
             onClose={handleCloseSnackbar}
             anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
           >
