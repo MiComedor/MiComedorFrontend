@@ -12,6 +12,8 @@ import {
   Stack,
   IconButton,
   TablePagination,
+  Snackbar, // AGREGADO: Importar Snackbar para notificaciones
+  Alert, // AGREGADO: Importar Alert para el diseño del mensaje
 } from "@mui/material";
 import { Formik, Form, Field, FieldProps, FormikHelpers } from "formik";
 import * as Yup from "yup";
@@ -79,6 +81,11 @@ const RegistroTareas: React.FC = () => {
   const startOfWeek = dayjs().startOf("week").add(1, "day"); // lunes
   const endOfWeek = dayjs().endOf("week").add(1, "day"); // domingo
 
+  // AGREGADO: Estados para controlar la notificación
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
+
   const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage);
   };
@@ -130,6 +137,11 @@ const RegistroTareas: React.FC = () => {
     setDialogOpenDelete(true);
   };
 
+  // AGREGADO: Función para cerrar el Snackbar
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
+  };
+
   const editTareas = async (values: typeof initialTaskCoordinationValues) => {
     const userStr = localStorage.getItem("user");
     const user = userStr ? JSON.parse(userStr) : null;
@@ -148,7 +160,7 @@ const RegistroTareas: React.FC = () => {
       getTareas();
       handleCloseEdit();
     } catch (error) {
-      console.error("❌ Error al actualizar ración:", error);
+      console.error("Error al actualizar tarea:", error);
     }
   };
   const getTareas = () => {
@@ -201,10 +213,19 @@ const RegistroTareas: React.FC = () => {
         },
       });
 
+      // AGREGADO: Mostrar notificación de éxito
+      setSnackbarMessage("Tarea guardada exitosamente");
+      setSnackbarSeverity("success");
+      setOpenSnackbar(true);
+
       actions.resetForm();
       getTareas();
     } catch (error) {
-      console.error("❌ Error al guardar ración:", error);
+      console.error("Error al guardar tarea:", error);
+      // AGREGADO: Mostrar notificación de error
+      setSnackbarMessage("Error al guardar la tarea");
+      setSnackbarSeverity("error");
+      setOpenSnackbar(true);
     }
   };
   const deleteTareas = async (values: TaskCoordination) => {
@@ -216,7 +237,7 @@ const RegistroTareas: React.FC = () => {
       getTareas();
       handleCloseDelete();
     } catch (error) {
-      console.error("❌ Error al eliminar ración:", error);
+      console.error("Error al eliminar tarea:", error);
     }
   };
 
@@ -256,13 +277,11 @@ const RegistroTareas: React.FC = () => {
                             error={touched.fullname && Boolean(errors.fullname)}
                             helperText={touched.fullname && errors.fullname}
                             onChange={(e) => {
-                              // 🔒 Filtra caracteres (solo letras, tildes, ñ y espacios)
                               let value = e.target.value.replace(
                                 /[^A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]/g,
                                 ""
                               );
 
-                              // 🔒 Aplica máximo 30 caracteres
                               if (value.length > 30) {
                                 value = value.slice(0, 30);
                               }
@@ -270,9 +289,8 @@ const RegistroTareas: React.FC = () => {
                               form.setFieldValue("fullname", value);
                             }}
                             inputProps={{
-                              maxLength: 30, // ✅ adicional para limitar desde el navegador
+                              maxLength: 30,
                               onKeyDown: (e) => {
-                                // Evita teclear números y caracteres especiales
                                 if (
                                   !/^[A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]$/.test(e.key) &&
                                   e.key.length === 1
@@ -419,6 +437,22 @@ const RegistroTareas: React.FC = () => {
               )}
             </Formik>
           </div>
+
+          {/* AGREGADO: Snackbar para mostrar notificaciones en la esquina inferior derecha */}
+          <Snackbar
+            open={openSnackbar}
+            autoHideDuration={5000}
+            onClose={handleCloseSnackbar}
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+          >
+            <Alert
+              onClose={handleCloseSnackbar}
+              severity={snackbarSeverity}
+              sx={{ width: "100%", fontSize: "1rem" }}
+            >
+              {snackbarMessage}
+            </Alert>
+          </Snackbar>
 
           {/* Tabla */}
           {isMobile ? (
