@@ -24,7 +24,7 @@ import BeneficiaryByUserId from "../../../types/BeneficiaryByUserId";
 import Beneficiary from "../../../types/beneficiaty";
 import EditBeneficiariosDialog from "./EditBeneficariosDialog";
 import DeleteBeneficiariosDialog from "./DeleteBeneficariosDialog";
-import DuplicateDialog from "./DuplicateDialog";
+import { Snackbar, Alert } from "@mui/material";
 
 const validationSchema = Yup.object({
   fullnameBenefeciary: Yup.string().required("Campo obligatorio"),
@@ -62,14 +62,16 @@ const BeneficiariosPage: React.FC = () => {
     useState<Beneficiary | null>(null);
   const [beneficiarioAEliminar, setBeneficiarioAEliminar] =
     useState<Beneficiary | null>(null);
-  const [openDuplicateDialog, setOpenDuplicateDialog] = useState(false);
-  const [duplicateMessage, setDuplicateMessage] = useState("");
-  // Estados para paginación
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(3);
 
   const handleOpen = () => setOpenDialog(true);
   const handleClose = () => setOpenDialog(false);
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);  
+  };
 
   const handleEditClick = (beneficiario: Beneficiary) => {
     setBeneficiarioAEditar(beneficiario);
@@ -102,13 +104,11 @@ const BeneficiariosPage: React.FC = () => {
     b.fullnameBenefeciary.toLowerCase().includes(search.toLowerCase())
   );
 
-  // Calcular paginación
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filtered.slice(indexOfFirstItem, indexOfLastItem);
 
-  // Manejar cambio de página
   const handlePageChange = (
     _event: React.ChangeEvent<unknown>,
     value: number
@@ -116,8 +116,6 @@ const BeneficiariosPage: React.FC = () => {
     setCurrentPage(value);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-
-  // Resetear página cuando cambie la búsqueda
   useEffect(() => {
     setCurrentPage(1);
   }, [search]);
@@ -232,7 +230,7 @@ const BeneficiariosPage: React.FC = () => {
             observationsBeneficiary: "",
           }}
           validationSchema={validationSchema}
-          onSubmit={async (values: FormValues, { resetForm }: any) => {
+          onSubmit={async (values, { resetForm }) => {
             try {
               const userStr = localStorage.getItem("user");
               const user = userStr ? JSON.parse(userStr) : null;
@@ -240,6 +238,7 @@ const BeneficiariosPage: React.FC = () => {
                 alert("Usuario no autenticado");
                 return;
               }
+
               const response =
                 await BeneficiaryService.insertarBeneficiarySaveConfirm({
                   fullnameBenefeciary: values.fullnameBenefeciary,
@@ -248,14 +247,16 @@ const BeneficiariosPage: React.FC = () => {
                   observationsBeneficiary: values.observationsBeneficiary,
                   users: { idUser: user.idUser },
                 });
-
+              console.log("Response:", response);
               if (response.status === 400) {
-                setDuplicateMessage(response.data.message); // Asegúrate de usar el mensaje de la respuesta del backend
-                setOpenDuplicateDialog(true); // Abrir el diálogo
+                setSnackbarMessage(
+                  "El beneficiario ya está registrado y activo."
+                );
+                setOpenSnackbar(true); // Mostrar el Snackbar
               } else {
                 resetForm();
                 handleClose();
-                loadBeneficiarios();
+                loadBeneficiarios(); // Recargar la lista de beneficiarios después de agregar uno
               }
             } catch (error) {
               console.error("Error al guardar beneficiario:", error);
@@ -335,12 +336,10 @@ const BeneficiariosPage: React.FC = () => {
                       onChange={(e) => {
                         let inputValue = e.target.value;
 
-                        // 👉 cortar a 2 dígitos
                         if (inputValue.length > 2) {
                           inputValue = inputValue.slice(0, 2);
                         }
 
-                        // 👉 eliminar ceros a la izquierda
                         if (
                           inputValue.length > 1 &&
                           inputValue.startsWith("0")
@@ -348,7 +347,6 @@ const BeneficiariosPage: React.FC = () => {
                           inputValue = inputValue.replace(/^0+/, "");
                         }
 
-                        // si queda vacío, forzar "0"
                         if (inputValue === "") {
                           inputValue = "0";
                         }
@@ -648,11 +646,32 @@ const BeneficiariosPage: React.FC = () => {
           }}
         />
       )}
-      <DuplicateDialog
-        open={openDuplicateDialog}
-        message={duplicateMessage}
-        onClose={() => setOpenDuplicateDialog(false)} // Cerrar diálogo
-      />
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{
+          vertical: "top", 
+          horizontal: "center", 
+        }}
+      >
+        <Alert
+          severity="error"
+          onClose={handleCloseSnackbar}
+          sx={{
+            backgroundColor: "#F57C00", 
+            color: "white", 
+            borderRadius: "8px", 
+            fontWeight: "bold",
+            fontSize: "1.08rem", 
+            boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.2)", 
+            padding: "10px 20px ",
+            textAlign: "center", 
+          }}
+        >
+          {snackbarMessage} 
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

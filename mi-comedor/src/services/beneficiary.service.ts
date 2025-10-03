@@ -2,8 +2,13 @@ import api from "../axiosInstance";
 import BeneficiaryByUserId from "../types/BeneficiaryByUserId";
 import Beneficiary from "../types/beneficiaty";
 
-
 const API_URL = "/beneficiary";
+
+interface ApiResponse {
+  status: number;
+  message: string;
+  data: Beneficiary; 
+}
 
 class BeneficiaryService {
   insertarBeneficiary = async (
@@ -15,10 +20,30 @@ class BeneficiaryService {
 
   insertarBeneficiarySaveConfirm = async (
     beneficiary: Partial<Beneficiary>
-  ): Promise<Beneficiary> => {
-    const response = await api.post<Beneficiary>(`${API_URL}/saveConfirm`, beneficiary);
-    return response.data;
-  }
+  ): Promise<ApiResponse> => {
+    try {
+      const response = await api.post<ApiResponse>(
+        `${API_URL}/saveConfirm`,
+        beneficiary
+      );
+      return response.data; 
+    } catch (error: unknown) {
+      interface AxiosErrorWithResponse {
+        response?: {
+          data: ApiResponse;
+        };
+      }
+      const err = error as AxiosErrorWithResponse;
+      if (
+        error instanceof Error &&
+        err.response &&
+        err.response.data
+      ) {
+        return err.response.data; 
+      }
+      throw error;
+    }
+  };
 
   listarBeneficiarios = async (): Promise<Beneficiary[]> => {
     const response = await api.get<Beneficiary[]>(API_URL);
