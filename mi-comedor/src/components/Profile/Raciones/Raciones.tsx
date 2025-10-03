@@ -268,7 +268,7 @@ const RegistroRaciones: React.FC = () => {
       getRaciones();
       handleCloseDelete();
       setSnackbarMessage("Ración eliminada correctamente");
-      setSnackbarSeverity("success");
+      setSnackbarSeverity("error");
       setSnackbarOpen(true);
     } catch (error) {
       console.error("Error al eliminar ración:", error);
