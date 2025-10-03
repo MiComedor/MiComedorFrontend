@@ -134,7 +134,7 @@ const Profile: React.FC = () => {
         .then(() => {
           getNotas();
           handleCloseDeleteDialog();
-          showSnackbar("Nota eliminada correctamente", "success");
+          showSnackbar("Nota eliminada correctamente", "error");
         })
         .catch((error) => {
           console.error(
@@ -363,7 +363,7 @@ const Profile: React.FC = () => {
         open={snackbar.open}
         autoHideDuration={6000}
         onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       >
         <Alert
           onClose={handleCloseSnackbar}
