@@ -224,7 +224,7 @@ const RegistroRaciones: React.FC = () => {
       setSnackbarSeverity("success");
       setSnackbarOpen(true);
     } catch (error) {
-      console.error("❌ Error al guardar ración:", error);
+      console.error("Error al guardar ración:", error);
       setSnackbarMessage("Error al guardar la ración");
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
@@ -252,7 +252,7 @@ const RegistroRaciones: React.FC = () => {
       setSnackbarSeverity("success");
       setSnackbarOpen(true);
     } catch (error) {
-      console.error("❌ Error al actualizar ración:", error);
+      console.error("Error al actualizar ración:", error);
       setSnackbarMessage("Error al actualizar la ración");
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
@@ -271,7 +271,7 @@ const RegistroRaciones: React.FC = () => {
       setSnackbarSeverity("success");
       setSnackbarOpen(true);
     } catch (error) {
-      console.error("❌ Error al eliminar ración:", error);
+      console.error("Error al eliminar ración:", error);
     }
   };
 
@@ -310,12 +310,14 @@ const RegistroRaciones: React.FC = () => {
                             <MobileDatePicker
                               format="DD/MM/YYYY"
                               value={field.value ? dayjs(field.value) : null}
-                              onChange={(date) =>
-                                form.setFieldValue(
-                                  "date",
-                                  date?.format("YYYY-MM-DD")
-                                )
-                              }
+                              onChange={(date) => {
+                                // CORREGIDO: Validación mejorada para manejar correctamente la fecha
+                                if (date && date.isValid()) {
+                                  form.setFieldValue("date", date.format("YYYY-MM-DD"));
+                                } else {
+                                  form.setFieldValue("date", "");
+                                }
+                              }}
                               minDate={dayjs().subtract(2, "day")}
                               maxDate={dayjs()}
                               slotProps={{
@@ -442,7 +444,7 @@ const RegistroRaciones: React.FC = () => {
                           </InputAdornment>
                           ),
                           inputProps: {
-                          maxLength: 4, // 3 digits + dot + 2 decimals
+                          maxLength: 4,
                           inputMode: "decimal",
                           pattern: "^\\d{0,4}(\\.\\d{0,2})?$",
                           onKeyDown: (
@@ -473,12 +475,10 @@ const RegistroRaciones: React.FC = () => {
                           },
                           onInput: (e: React.ChangeEvent<HTMLInputElement>) => {
                             let value = e.target.value.replace(/[^0-9.]/g, "");
-                            // Only allow one dot
                             const parts = value.split(".");
                             if (parts.length > 2) {
                             value = parts[0] + "." + parts[1];
                             }
-                            // Limit digits before and after dot
                             if (parts[0].length > 3) {
                             parts[0] = parts[0].slice(0, 3);
                             }
@@ -735,15 +735,17 @@ const RegistroRaciones: React.FC = () => {
           )}
         </Stack>
       </Box>
+      {/* MODIFICADO: Agregada posición bottom-right al Snackbar */}
       <Snackbar
         open={snackbarOpen}
-        autoHideDuration={6000} // El Snackbar se cerrará automáticamente después de 6 segundos
+        autoHideDuration={6000}
         onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       >
         <Alert
           onClose={() => setSnackbarOpen(false)}
-          severity={snackbarSeverity} // 'success', 'error', 'info', 'warning'
-          sx={{ width: "100%" }}
+          severity={snackbarSeverity}
+          sx={{ width: "100%", fontSize: "1rem" }}
         >
           {snackbarMessage}
         </Alert>
