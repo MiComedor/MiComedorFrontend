@@ -12,6 +12,14 @@ class BeneficiaryService {
     const response = await api.post<Beneficiary>(API_URL, beneficiary);
     return response.data;
   };
+
+  insertarBeneficiarySaveConfirm = async (
+    beneficiary: Partial<Beneficiary>
+  ): Promise<Beneficiary> => {
+    const response = await api.post<Beneficiary>(`${API_URL}/saveConfirm`, beneficiary);
+    return response.data;
+  }
+
   listarBeneficiarios = async (): Promise<Beneficiary[]> => {
     const response = await api.get<Beneficiary[]>(API_URL);
     return response.data;

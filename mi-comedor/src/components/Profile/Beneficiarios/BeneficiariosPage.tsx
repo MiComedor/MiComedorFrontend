@@ -24,6 +24,7 @@ import BeneficiaryByUserId from "../../../types/BeneficiaryByUserId";
 import Beneficiary from "../../../types/beneficiaty";
 import EditBeneficiariosDialog from "./EditBeneficariosDialog";
 import DeleteBeneficiariosDialog from "./DeleteBeneficariosDialog";
+import DuplicateDialog from "./DuplicateDialog";
 
 const validationSchema = Yup.object({
   fullnameBenefeciary: Yup.string().required("Campo obligatorio"),
@@ -61,7 +62,8 @@ const BeneficiariosPage: React.FC = () => {
     useState<Beneficiary | null>(null);
   const [beneficiarioAEliminar, setBeneficiarioAEliminar] =
     useState<Beneficiary | null>(null);
-
+  const [openDuplicateDialog, setOpenDuplicateDialog] = useState(false);
+  const [duplicateMessage, setDuplicateMessage] = useState("");
   // Estados para paginación
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(3);
@@ -230,7 +232,7 @@ const BeneficiariosPage: React.FC = () => {
             observationsBeneficiary: "",
           }}
           validationSchema={validationSchema}
-          onSubmit={async (values, { resetForm }) => {
+          onSubmit={async (values: FormValues, { resetForm }: any) => {
             try {
               const userStr = localStorage.getItem("user");
               const user = userStr ? JSON.parse(userStr) : null;
@@ -238,18 +240,23 @@ const BeneficiariosPage: React.FC = () => {
                 alert("Usuario no autenticado");
                 return;
               }
+              const response =
+                await BeneficiaryService.insertarBeneficiarySaveConfirm({
+                  fullnameBenefeciary: values.fullnameBenefeciary,
+                  dniBenefeciary: Number(values.dniBenefeciary),
+                  ageBeneficiary: Number(values.ageBeneficiary),
+                  observationsBeneficiary: values.observationsBeneficiary,
+                  users: { idUser: user.idUser },
+                });
 
-              await BeneficiaryService.insertarBeneficiary({
-                fullnameBenefeciary: values.fullnameBenefeciary,
-                dniBenefeciary: Number(values.dniBenefeciary),
-                ageBeneficiary: Number(values.ageBeneficiary),
-                observationsBeneficiary: values.observationsBeneficiary,
-                users: { idUser: user.idUser },
-              });
-
-              resetForm();
-              handleClose();
-              loadBeneficiarios();
+              if (response.status === 400) {
+                setDuplicateMessage(response.data.message); // Asegúrate de usar el mensaje de la respuesta del backend
+                setOpenDuplicateDialog(true); // Abrir el diálogo
+              } else {
+                resetForm();
+                handleClose();
+                loadBeneficiarios();
+              }
             } catch (error) {
               console.error("Error al guardar beneficiario:", error);
             }
@@ -641,6 +648,11 @@ const BeneficiariosPage: React.FC = () => {
           }}
         />
       )}
+      <DuplicateDialog
+        open={openDuplicateDialog}
+        message={duplicateMessage}
+        onClose={() => setOpenDuplicateDialog(false)} // Cerrar diálogo
+      />
     </Box>
   );
 };
