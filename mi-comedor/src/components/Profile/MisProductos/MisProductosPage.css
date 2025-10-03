@@ -57,6 +57,25 @@
   max-width: 1500px;
 }
 
-.boton-verde {
-  top: 16px;
+.boton-verde-producto.MuiIconButton-root {
+    border-radius: 8px !important;
+    top: 16px;
+}
+
+.boton-verde-producto {
+    background-color: #2FD10F !important;
+    color: black !important;
+    width: 64px;
+    height: 64px;
+    min-width: unset;
+    border-radius: 8px !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.boton-verde-producto:hover {
+    background-color: #28b80f !important;
 }

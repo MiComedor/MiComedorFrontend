@@ -468,7 +468,7 @@ const MisProductosPage: React.FC = () => {
                       </Field>
                     </div>
 
-                    <IconButton className="boton-verde" type="submit">
+                    <IconButton className="boton-verde-producto" type="submit">
                       <AddIcon sx={{ fontSize: 42 }} />
                     </IconButton>
                   </Stack>
