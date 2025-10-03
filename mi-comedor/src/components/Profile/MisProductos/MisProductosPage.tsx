@@ -83,6 +83,8 @@ const MisProductosPage: React.FC = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [mensajeExito, setMensajeExito] = useState<string | null>(null);
+  // AGREGADO: Estado para controlar el tipo de mensaje (success o error)
+  const [tipoMensaje, setTipoMensaje] = useState<"success" | "error">("success");
   const [productoAEditar, setProductoAEditar] =
     useState<ProductListResponse | null>(null);
   const [productoAEliminar, setProductoAEliminar] =
@@ -156,7 +158,9 @@ const MisProductosPage: React.FC = () => {
       };
 
       await ProductService.insertar(payload);
-      setMensajeExito("✅ Producto guardado exitosamente");
+      // MODIFICADO: Establecer tipo de mensaje como success
+      setTipoMensaje("success");
+      setMensajeExito("Producto guardado exitosamente");
       actions.resetForm();
       setTipoSeleccionado("");
 
@@ -473,9 +477,9 @@ const MisProductosPage: React.FC = () => {
             </Formik>
           </div>
 
-          {/* Mensajes de error y éxito */}
+          {/* MODIFICADO: Alert ahora usa la prop severity dinámica según el tipo de mensaje */}
           {mensajeExito && (
-            <Alert severity="success" sx={{ fontWeight: "bold" }}>
+            <Alert severity={tipoMensaje} sx={{ fontWeight: "bold" }}>
               {mensajeExito}
             </Alert>
           )}
@@ -622,7 +626,9 @@ const MisProductosPage: React.FC = () => {
                         (a, b) => b.idProduct - a.idProduct
                       )
                     );
-                    setMensajeExito("✅ Producto actualizado exitosamente");
+                    // MODIFICADO: Establecer tipo de mensaje como success
+                    setTipoMensaje("success");
+                    setMensajeExito("Producto actualizado exitosamente");
                     setProductoAEditar(null);
                   }}
                 />
@@ -630,19 +636,21 @@ const MisProductosPage: React.FC = () => {
 
             {productoAEliminar && (
               <DeleteProductsDialog
-                producto={productoAEliminar}
-                onClose={() => setProductoAEliminar(null)}
-                onDeleted={async () => {
-                  const productosActualizados =
-                    await ProductService.listarPorUsuario(USER_ID);
-                  setProductos(
-                    productosActualizados.sort(
-                      (a, b) => b.idProduct - a.idProduct
-                    )
-                  );
-                  setProductoAEliminar(null);
-                  setMensajeExito("🗑️ Producto eliminado exitosamente");
-                }}
+              producto={productoAEliminar}
+              onClose={() => setProductoAEliminar(null)}
+              onDeleted={async () => {
+                const productosActualizados =
+                await ProductService.listarPorUsuario(USER_ID);
+                setProductos(
+                productosActualizados.sort(
+                  (a, b) => b.idProduct - a.idProduct
+                )
+                );
+                setProductoAEliminar(null);
+                // MODIFICADO: Establecer tipo de mensaje como error para mostrar en rojo
+                setTipoMensaje("error");
+                setMensajeExito("Producto eliminado exitosamente");
+              }}
               />
             )}
           </Box>
