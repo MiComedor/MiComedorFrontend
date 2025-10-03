@@ -245,7 +245,7 @@ const RegistroTareas: React.FC = () => {
 
       // AGREGADO: Mostrar notificación de éxito al eliminar
       setSnackbarMessage("Tarea eliminada exitosamente");
-      setSnackbarSeverity("success");
+      setSnackbarSeverity("error");
       setOpenSnackbar(true);
 
       getTareas();
