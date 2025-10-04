@@ -62,7 +62,7 @@ const validationSchema = Yup.object({
     .positive("Debe ser positivo")
     .test(
       "format",
-      "Formato inválido: máximo 2 enteros y 2 decimales",
+      "Maximo hasta 4 digitos",
       (val, ctx) =>
         val !== undefined &&
         ctx.originalValue !== undefined &&
@@ -242,7 +242,7 @@ const MisProductosPage: React.FC = () => {
                               onKeyDown: (e) => {
                                 const value = (e.target as HTMLInputElement)
                                   .value;
-                                const regex = /^[0-9]{0,2}(\.[0-9]{0,2})?$/;
+                                const regex = /^[0-9]{0,4}(\.[0-9]{0,2})?$/;
 
                                 // Permitir teclas especiales
                                 if (

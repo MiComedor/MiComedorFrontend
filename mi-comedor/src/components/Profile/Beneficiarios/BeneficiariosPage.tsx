@@ -9,6 +9,8 @@ import {
   DialogTitle,
   DialogContent,
   Pagination,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
@@ -24,7 +26,6 @@ import BeneficiaryByUserId from "../../../types/BeneficiaryByUserId";
 import Beneficiary from "../../../types/beneficiaty";
 import EditBeneficiariosDialog from "./EditBeneficariosDialog";
 import DeleteBeneficiariosDialog from "./DeleteBeneficariosDialog";
-import { Snackbar, Alert } from "@mui/material";
 import ActivateBeneficiariosDialog from "./ActiveDialog"; 
 
 const validationSchema = Yup.object({
@@ -63,8 +64,12 @@ const BeneficiariosPage: React.FC = () => {
     useState<Beneficiary | null>(null);
   const [beneficiarioAEliminar, setBeneficiarioAEliminar] =
     useState<Beneficiary | null>(null);
+  
+  // Estados para el snackbar con diseño mejorado
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error" | "warning" | "info">("success");
+  
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(3);
   const [openReactivateDialog, setOpenReactivateDialog] = useState(false);
@@ -72,17 +77,23 @@ const BeneficiariosPage: React.FC = () => {
     userId: number;
     dni: number;
   } | null>(null);
+  
   const handleOpen = () => setOpenDialog(true);
   const handleClose = () => setOpenDialog(false);
+  
+  // Funcion para cerrar el snackbar
   const handleCloseSnackbar = () => {
     setOpenSnackbar(false);
   };
+  
   const handleEditClick = (beneficiario: Beneficiary) => {
     setBeneficiarioAEditar(beneficiario);
   };
+  
   const handleDeleteClick = (beneficiario: Beneficiary) => {
     setBeneficiarioAEliminar(beneficiario);
   };
+  
   const loadBeneficiarios = async () => {
     const userStr = localStorage.getItem("user");
     const user = userStr ? JSON.parse(userStr) : null;
@@ -118,6 +129,7 @@ const BeneficiariosPage: React.FC = () => {
     setCurrentPage(value);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+  
   useEffect(() => {
     setCurrentPage(1);
   }, [search]);
@@ -133,14 +145,21 @@ const BeneficiariosPage: React.FC = () => {
       setOpenReactivateDialog(false);
       setBeneficiarioToReactivate(null);
       loadBeneficiarios();
-      setSnackbarMessage("Beneficiario reactivado exitosamente.");
+      
+      // Mostrar snackbar de exito al reactivar beneficiario
+      setSnackbarSeverity("success");
+      setSnackbarMessage("Beneficiario reactivado exitosamente");
       setOpenSnackbar(true);
     } catch (error) {
       console.error("Error al reactivar beneficiario:", error);
-      setSnackbarMessage("Error al reactivar el beneficiario.");
+      
+      // Mostrar snackbar de error al fallar la reactivacion
+      setSnackbarSeverity("error");
+      setSnackbarMessage("Error al reactivar el beneficiario");
       setOpenSnackbar(true);
     }
   };
+  
   const handleReactivateCancel = () => {
     setOpenReactivateDialog(false);
     setBeneficiarioToReactivate(null);
@@ -274,9 +293,9 @@ const BeneficiariosPage: React.FC = () => {
                 });
 
               if (response.status === 400) {
-                setSnackbarMessage(
-                  "El beneficiario ya está registrado y activo."
-                );
+                // Mostrar snackbar de advertencia para beneficiario ya registrado
+                setSnackbarSeverity("warning");
+                setSnackbarMessage("El beneficiario ya está registrado y activo");
                 setOpenSnackbar(true);
               } else if (response.status === 409) {
                 setBeneficiarioToReactivate({
@@ -287,12 +306,22 @@ const BeneficiariosPage: React.FC = () => {
                 handleClose(); 
               }
               else {
+                // Mostrar snackbar de exito al registrar beneficiario
+                setSnackbarSeverity("success");
+                setSnackbarMessage("Beneficiario guardado satisfactoriamente");
+                setOpenSnackbar(true);
+                
                 resetForm();
                 handleClose();
                 loadBeneficiarios();
               }
             } catch (error) {
               console.error("Error al guardar beneficiario:", error);
+              
+              // Mostrar snackbar de error si falla el registro
+              setSnackbarSeverity("error");
+              setSnackbarMessage("Error al guardar el beneficiario");
+              setOpenSnackbar(true);
             }
           }}
         >
@@ -658,9 +687,23 @@ const BeneficiariosPage: React.FC = () => {
           onClose={() => setBeneficiarioAEditar(null)}
           initialData={beneficiarioAEditar}
           onSubmit={async (dataActualizada) => {
-            await BeneficiaryService.actualizarBeneficiary(dataActualizada);
-            loadBeneficiarios();
-            setBeneficiarioAEditar(null);
+            try {
+              await BeneficiaryService.actualizarBeneficiary(dataActualizada);
+              loadBeneficiarios();
+              setBeneficiarioAEditar(null);
+              
+              // Mostrar snackbar de exito al editar beneficiario
+              setSnackbarSeverity("success");
+              setSnackbarMessage("Beneficiario actualizado satisfactoriamente");
+              setOpenSnackbar(true);
+            } catch (error) {
+              console.error("Error al actualizar beneficiario:", error);
+              
+              // Mostrar snackbar de error si falla la edicion
+              setSnackbarSeverity("error");
+              setSnackbarMessage("Error al actualizar el beneficiario");
+              setOpenSnackbar(true);
+            }
           }}
         />
       )}
@@ -671,40 +714,48 @@ const BeneficiariosPage: React.FC = () => {
           onClose={() => setBeneficiarioAEliminar(null)}
           nombre={beneficiarioAEliminar.fullnameBenefeciary}
           onConfirm={async () => {
-            await BeneficiaryService.eliminarBeneficiaryActive(
-              beneficiarioAEliminar.idBeneficiary
-            );
-            loadBeneficiarios();
-            setBeneficiarioAEliminar(null);
+            try {
+              await BeneficiaryService.eliminarBeneficiaryActive(
+                beneficiarioAEliminar.idBeneficiary
+              );
+              loadBeneficiarios();
+              setBeneficiarioAEliminar(null);
+              
+              // Mostrar snackbar de exito al eliminar beneficiario
+              setSnackbarSeverity("error");
+              setSnackbarMessage("Beneficiario eliminado satisfactoriamente");
+              setOpenSnackbar(true);
+            } catch (error) {
+              console.error("Error al eliminar beneficiario:", error);
+              
+              // Mostrar snackbar de error si falla la eliminacion
+              setSnackbarSeverity("error");
+              setSnackbarMessage("Error al eliminar el beneficiario");
+              setOpenSnackbar(true);
+            }
           }}
         />
       )}
+      
+      {/* Snackbar unificado con diseño similar al de PresupuestoPage */}
       <Snackbar
         open={openSnackbar}
-        autoHideDuration={6000}
+        autoHideDuration={5000}
         onClose={handleCloseSnackbar}
         anchorOrigin={{
-          vertical: "top",
-          horizontal: "center",
+          vertical: "bottom",
+          horizontal: "right",
         }}
       >
         <Alert
-          severity="error"
           onClose={handleCloseSnackbar}
-          sx={{
-            backgroundColor: "#1976D2",
-            color: "white",
-            borderRadius: "8px",
-            fontWeight: "bold",
-            fontSize: "1.08rem",
-            boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.2)",
-            padding: "10px 20px ",
-            textAlign: "center",
-          }}
+          severity={snackbarSeverity}
+          sx={{ width: "100%", fontSize: "1rem" }}
         >
           {snackbarMessage}
         </Alert>
       </Snackbar>
+      
       <ActivateBeneficiariosDialog
         open={openReactivateDialog}
         onClose={handleReactivateCancel}
