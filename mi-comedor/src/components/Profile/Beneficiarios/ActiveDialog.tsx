@@ -20,7 +20,7 @@ const ActivateBeneficiariosDialog: React.FC<Props> = ({
   open,
   onClose,
   onConfirm,
-  activar, // ✅ Removido ": boolean" - el tipo ya está definido en Props
+  activar, 
 }) => {
   return (
     <Dialog
@@ -28,7 +28,7 @@ const ActivateBeneficiariosDialog: React.FC<Props> = ({
       onClose={onClose}
       PaperProps={{
         sx: {
-          backgroundColor: "#FDEBEB",
+          backgroundColor: "#F5F5F5",
           borderRadius: 2,
           textAlign: "center",
           px: 8,
@@ -37,8 +37,7 @@ const ActivateBeneficiariosDialog: React.FC<Props> = ({
       }}
     >
       <DialogContent sx={{ width: 250 }}>
-        <Typography variant="h5" fontWeight="bold" color="error" sx={{ mb: 4 }}>
-          {/* Mensaje condicional basado en el prop 'activar' */}
+        <Typography variant="h5" fontWeight="bold" color="black" sx={{ mb: 4 }}>
           {activar 
             ? "¿Deseas activar el beneficiario? ya lo tenías registrado"
             : "¿Deseas continuar con esta acción?"
@@ -49,14 +48,14 @@ const ActivateBeneficiariosDialog: React.FC<Props> = ({
         <Button
           onClick={onClose}
           sx={{
-            backgroundColor: "#9E9E9E",
+            backgroundColor: "#F57C00",
             color: "white",
             width: 60,
             height: 60,
             borderRadius: 1,
             mr: 8,
             "&:hover": {
-              backgroundColor: "#757575",
+              backgroundColor: "#87490bff",
             },
           }}
         >
@@ -65,13 +64,13 @@ const ActivateBeneficiariosDialog: React.FC<Props> = ({
         <Button
           onClick={onConfirm}
           sx={{
-            backgroundColor: "#D32F2F",
+            backgroundColor: "#2E7D32",
             color: "white",
             width: 60,
             height: 60,
             borderRadius: 1,
             "&:hover": {
-              backgroundColor: "#B71C1C",
+              backgroundColor: "#09450dff",
             },
           }}
         >

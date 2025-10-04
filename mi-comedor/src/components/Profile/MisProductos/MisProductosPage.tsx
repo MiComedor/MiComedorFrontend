@@ -84,7 +84,9 @@ const MisProductosPage: React.FC = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [mensajeExito, setMensajeExito] = useState<string | null>(null);
   // AGREGADO: Estado para controlar el tipo de mensaje (success o error)
-  const [tipoMensaje, setTipoMensaje] = useState<"success" | "error">("success");
+  const [tipoMensaje, setTipoMensaje] = useState<"success" | "error">(
+    "success"
+  );
   const [productoAEditar, setProductoAEditar] =
     useState<ProductListResponse | null>(null);
   const [productoAEliminar, setProductoAEliminar] =
@@ -129,7 +131,6 @@ const MisProductosPage: React.FC = () => {
 
       setProductos(productosOrdenados);
     });
-    
   }, []);
 
   const handleChangePage = (_event: unknown, newPage: number) => {
@@ -140,7 +141,7 @@ const MisProductosPage: React.FC = () => {
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0); 
+    setPage(0);
   };
 
   const onSubmit = async (
@@ -189,7 +190,7 @@ const MisProductosPage: React.FC = () => {
               {({ errors, touched }) => (
                 <Form>
                   <Stack
-                    direction={{ xs: "column", sm: "row" }} 
+                    direction={{ xs: "column", sm: "row" }}
                     spacing={2}
                     justifyContent="center"
                     alignItems="center"
@@ -239,12 +240,27 @@ const MisProductosPage: React.FC = () => {
                             }
                             inputProps={{
                               onKeyDown: (e) => {
+                                const value = (e.target as HTMLInputElement)
+                                  .value;
+                                const regex = /^[0-9]{0,2}(\.[0-9]{0,2})?$/;
+
+                                // Permitir teclas especiales
                                 if (
-                                  !/[0-9.]/.test(e.key) &&
-                                  e.key !== "Backspace" &&
-                                  e.key !== "Tab"
+                                  [
+                                    "Backspace",
+                                    "Tab",
+                                    "ArrowLeft",
+                                    "ArrowRight",
+                                  ].includes(e.key)
                                 ) {
-                                  e.preventDefault();
+                                  return;
+                                }
+
+                                // Valor potencial si se agrega la tecla presionada
+                                const newValue = value + e.key;
+
+                                if (!regex.test(newValue)) {
+                                  e.preventDefault(); // ❌ Bloquea el carácter
                                 }
                               },
                             }}
@@ -636,21 +652,21 @@ const MisProductosPage: React.FC = () => {
 
             {productoAEliminar && (
               <DeleteProductsDialog
-              producto={productoAEliminar}
-              onClose={() => setProductoAEliminar(null)}
-              onDeleted={async () => {
-                const productosActualizados =
-                await ProductService.listarPorUsuario(USER_ID);
-                setProductos(
-                productosActualizados.sort(
-                  (a, b) => b.idProduct - a.idProduct
-                )
-                );
-                setProductoAEliminar(null);
-                // MODIFICADO: Establecer tipo de mensaje como error para mostrar en rojo
-                setTipoMensaje("error");
-                setMensajeExito("Producto eliminado exitosamente");
-              }}
+                producto={productoAEliminar}
+                onClose={() => setProductoAEliminar(null)}
+                onDeleted={async () => {
+                  const productosActualizados =
+                    await ProductService.listarPorUsuario(USER_ID);
+                  setProductos(
+                    productosActualizados.sort(
+                      (a, b) => b.idProduct - a.idProduct
+                    )
+                  );
+                  setProductoAEliminar(null);
+                  // MODIFICADO: Establecer tipo de mensaje como error para mostrar en rojo
+                  setTipoMensaje("error");
+                  setMensajeExito("Producto eliminado exitosamente");
+                }}
               />
             )}
           </Box>

@@ -692,7 +692,7 @@ const BeneficiariosPage: React.FC = () => {
           severity="error"
           onClose={handleCloseSnackbar}
           sx={{
-            backgroundColor: "#F57C00",
+            backgroundColor: "#1976D2",
             color: "white",
             borderRadius: "8px",
             fontWeight: "bold",
