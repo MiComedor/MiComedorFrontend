@@ -25,6 +25,7 @@ import Beneficiary from "../../../types/beneficiaty";
 import EditBeneficiariosDialog from "./EditBeneficariosDialog";
 import DeleteBeneficiariosDialog from "./DeleteBeneficariosDialog";
 import { Snackbar, Alert } from "@mui/material";
+import ActivateBeneficiariosDialog from "./ActiveDialog"; 
 
 const validationSchema = Yup.object({
   fullnameBenefeciary: Yup.string().required("Campo obligatorio"),
@@ -66,21 +67,22 @@ const BeneficiariosPage: React.FC = () => {
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(3);
-
+  const [openReactivateDialog, setOpenReactivateDialog] = useState(false);
+  const [beneficiarioToReactivate, setBeneficiarioToReactivate] = useState<{
+    userId: number;
+    dni: number;
+  } | null>(null);
   const handleOpen = () => setOpenDialog(true);
   const handleClose = () => setOpenDialog(false);
   const handleCloseSnackbar = () => {
-    setOpenSnackbar(false);  
+    setOpenSnackbar(false);
   };
-
   const handleEditClick = (beneficiario: Beneficiary) => {
     setBeneficiarioAEditar(beneficiario);
   };
-
   const handleDeleteClick = (beneficiario: Beneficiary) => {
     setBeneficiarioAEliminar(beneficiario);
   };
-
   const loadBeneficiarios = async () => {
     const userStr = localStorage.getItem("user");
     const user = userStr ? JSON.parse(userStr) : null;
@@ -119,6 +121,30 @@ const BeneficiariosPage: React.FC = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [search]);
+
+  const handleReactivateConfirm = async () => {
+    if (!beneficiarioToReactivate) return;
+
+    try {
+      await BeneficiaryService.reactivarBeneficiary(
+        beneficiarioToReactivate.userId,
+        beneficiarioToReactivate.dni
+      );
+      setOpenReactivateDialog(false);
+      setBeneficiarioToReactivate(null);
+      loadBeneficiarios();
+      setSnackbarMessage("Beneficiario reactivado exitosamente.");
+      setOpenSnackbar(true);
+    } catch (error) {
+      console.error("Error al reactivar beneficiario:", error);
+      setSnackbarMessage("Error al reactivar el beneficiario.");
+      setOpenSnackbar(true);
+    }
+  };
+  const handleReactivateCancel = () => {
+    setOpenReactivateDialog(false);
+    setBeneficiarioToReactivate(null);
+  };
 
   return (
     <Box sx={{ p: { xs: 2, sm: 4, md: 8 }, pt: 1 }}>
@@ -238,7 +264,6 @@ const BeneficiariosPage: React.FC = () => {
                 alert("Usuario no autenticado");
                 return;
               }
-
               const response =
                 await BeneficiaryService.insertarBeneficiarySaveConfirm({
                   fullnameBenefeciary: values.fullnameBenefeciary,
@@ -247,16 +272,24 @@ const BeneficiariosPage: React.FC = () => {
                   observationsBeneficiary: values.observationsBeneficiary,
                   users: { idUser: user.idUser },
                 });
-              console.log("Response:", response);
+
               if (response.status === 400) {
                 setSnackbarMessage(
                   "El beneficiario ya está registrado y activo."
                 );
-                setOpenSnackbar(true); // Mostrar el Snackbar
-              } else {
+                setOpenSnackbar(true);
+              } else if (response.status === 409) {
+                setBeneficiarioToReactivate({
+                  userId: user.idUser,
+                  dni: Number(values.dniBenefeciary),
+                });
+                setOpenReactivateDialog(true); 
+                handleClose(); 
+              }
+              else {
                 resetForm();
                 handleClose();
-                loadBeneficiarios(); // Recargar la lista de beneficiarios después de agregar uno
+                loadBeneficiarios();
               }
             } catch (error) {
               console.error("Error al guardar beneficiario:", error);
@@ -651,29 +684,34 @@ const BeneficiariosPage: React.FC = () => {
         autoHideDuration={6000}
         onClose={handleCloseSnackbar}
         anchorOrigin={{
-          vertical: "top", 
-          horizontal: "center", 
+          vertical: "top",
+          horizontal: "center",
         }}
       >
         <Alert
           severity="error"
           onClose={handleCloseSnackbar}
           sx={{
-            backgroundColor: "#F57C00", 
-            color: "white", 
-            borderRadius: "8px", 
+            backgroundColor: "#F57C00",
+            color: "white",
+            borderRadius: "8px",
             fontWeight: "bold",
-            fontSize: "1.08rem", 
-            boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.2)", 
+            fontSize: "1.08rem",
+            boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.2)",
             padding: "10px 20px ",
-            textAlign: "center", 
+            textAlign: "center",
           }}
         >
-          {snackbarMessage} 
+          {snackbarMessage}
         </Alert>
       </Snackbar>
+      <ActivateBeneficiariosDialog
+        open={openReactivateDialog}
+        onClose={handleReactivateCancel}
+        onConfirm={handleReactivateConfirm}
+        activar={true}
+      />
     </Box>
   );
 };
-
 export default BeneficiariosPage;

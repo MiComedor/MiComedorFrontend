@@ -7,7 +7,7 @@ const API_URL = "/beneficiary";
 interface ApiResponse {
   status: number;
   message: string;
-  data: Beneficiary; 
+  data: Beneficiary;
 }
 
 class BeneficiaryService {
@@ -26,7 +26,7 @@ class BeneficiaryService {
         `${API_URL}/saveConfirm`,
         beneficiary
       );
-      return response.data; 
+      return response.data;
     } catch (error: unknown) {
       interface AxiosErrorWithResponse {
         response?: {
@@ -34,16 +34,20 @@ class BeneficiaryService {
         };
       }
       const err = error as AxiosErrorWithResponse;
-      if (
-        error instanceof Error &&
-        err.response &&
-        err.response.data
-      ) {
-        return err.response.data; 
+      if (error instanceof Error && err.response && err.response.data) {
+        return err.response.data;
       }
       throw error;
     }
   };
+
+async reactivarBeneficiary(userId: number, dni: number) {
+  const response = await api.put(
+    `${API_URL}/reactivate/${userId}/${dni}`,
+    {}
+  );
+  return response.data;
+}
 
   listarBeneficiarios = async (): Promise<Beneficiary[]> => {
     const response = await api.get<Beneficiary[]>(API_URL);
