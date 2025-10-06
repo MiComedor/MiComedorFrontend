@@ -21,12 +21,13 @@ import EditIcon from "@mui/icons-material/Edit";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
+import axios from "axios";
 import BeneficiaryService from "../../../services/beneficiary.service";
 import BeneficiaryByUserId from "../../../types/BeneficiaryByUserId";
 import Beneficiary from "../../../types/beneficiaty";
 import EditBeneficiariosDialog from "./EditBeneficariosDialog";
 import DeleteBeneficiariosDialog from "./DeleteBeneficariosDialog";
-import ActivateBeneficiariosDialog from "./ActiveDialog"; 
+import ActivateBeneficiariosDialog from "./ActiveDialog";
 
 const validationSchema = Yup.object({
   fullnameBenefeciary: Yup.string().required("Campo obligatorio"),
@@ -45,7 +46,6 @@ const validationSchema = Yup.object({
       return !/^0\d/.test(raw);
     })
     .required("Campo obligatorio"),
-
   observationsBeneficiary: Yup.string(),
 });
 
@@ -64,12 +64,13 @@ const BeneficiariosPage: React.FC = () => {
     useState<Beneficiary | null>(null);
   const [beneficiarioAEliminar, setBeneficiarioAEliminar] =
     useState<Beneficiary | null>(null);
-  
-  // Estados para el snackbar con diseño mejorado
+
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error" | "warning" | "info">("success");
-  
+  const [snackbarSeverity, setSnackbarSeverity] = useState<
+    "success" | "error" | "warning" | "info"
+  >("success");
+
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(3);
   const [openReactivateDialog, setOpenReactivateDialog] = useState(false);
@@ -77,28 +78,24 @@ const BeneficiariosPage: React.FC = () => {
     userId: number;
     dni: number;
   } | null>(null);
-  
+
   const handleOpen = () => setOpenDialog(true);
   const handleClose = () => setOpenDialog(false);
-  
-  // Funcion para cerrar el snackbar
-  const handleCloseSnackbar = () => {
-    setOpenSnackbar(false);
-  };
-  
+
+  const handleCloseSnackbar = () => setOpenSnackbar(false);
+
   const handleEditClick = (beneficiario: Beneficiary) => {
     setBeneficiarioAEditar(beneficiario);
   };
-  
+
   const handleDeleteClick = (beneficiario: Beneficiary) => {
     setBeneficiarioAEliminar(beneficiario);
   };
-  
+
   const loadBeneficiarios = async () => {
     const userStr = localStorage.getItem("user");
     const user = userStr ? JSON.parse(userStr) : null;
     if (!user) return;
-
     try {
       const data = await BeneficiaryService.buscarBeneficiaryPorUserId(
         user.idUser
@@ -122,21 +119,17 @@ const BeneficiariosPage: React.FC = () => {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filtered.slice(indexOfFirstItem, indexOfLastItem);
 
-  const handlePageChange = (
-    _event: React.ChangeEvent<unknown>,
-    value: number
-  ) => {
+  const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
     setCurrentPage(value);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-  
+
   useEffect(() => {
     setCurrentPage(1);
   }, [search]);
 
   const handleReactivateConfirm = async () => {
     if (!beneficiarioToReactivate) return;
-
     try {
       await BeneficiaryService.reactivarBeneficiary(
         beneficiarioToReactivate.userId,
@@ -145,21 +138,17 @@ const BeneficiariosPage: React.FC = () => {
       setOpenReactivateDialog(false);
       setBeneficiarioToReactivate(null);
       loadBeneficiarios();
-      
-      // Mostrar snackbar de exito al reactivar beneficiario
       setSnackbarSeverity("success");
       setSnackbarMessage("Beneficiario reactivado exitosamente");
       setOpenSnackbar(true);
     } catch (error) {
       console.error("Error al reactivar beneficiario:", error);
-      
-      // Mostrar snackbar de error al fallar la reactivacion
       setSnackbarSeverity("error");
       setSnackbarMessage("Error al reactivar el beneficiario");
       setOpenSnackbar(true);
     }
   };
-  
+
   const handleReactivateCancel = () => {
     setOpenReactivateDialog(false);
     setBeneficiarioToReactivate(null);
@@ -193,9 +182,7 @@ const BeneficiariosPage: React.FC = () => {
               setSearch(soloLetras);
             }}
             onKeyDown={(e) => {
-              if (/[0-9]/.test(e.key)) {
-                e.preventDefault();
-              }
+              if (/[0-9]/.test(e.key)) e.preventDefault();
             }}
             InputProps={{
               startAdornment: (
@@ -293,7 +280,6 @@ const BeneficiariosPage: React.FC = () => {
                 });
 
               if (response.status === 400) {
-                // Mostrar snackbar de advertencia para beneficiario ya registrado
                 setSnackbarSeverity("warning");
                 setSnackbarMessage("El beneficiario ya está registrado y activo");
                 setOpenSnackbar(true);
@@ -302,23 +288,18 @@ const BeneficiariosPage: React.FC = () => {
                   userId: user.idUser,
                   dni: Number(values.dniBenefeciary),
                 });
-                setOpenReactivateDialog(true); 
-                handleClose(); 
-              }
-              else {
-                // Mostrar snackbar de exito al registrar beneficiario
+                setOpenReactivateDialog(true);
+                handleClose();
+              } else {
                 setSnackbarSeverity("success");
                 setSnackbarMessage("Beneficiario guardado satisfactoriamente");
                 setOpenSnackbar(true);
-                
                 resetForm();
                 handleClose();
                 loadBeneficiarios();
               }
             } catch (error) {
               console.error("Error al guardar beneficiario:", error);
-              
-              // Mostrar snackbar de error si falla el registro
               setSnackbarSeverity("error");
               setSnackbarMessage("Error al guardar el beneficiario");
               setOpenSnackbar(true);
@@ -337,10 +318,7 @@ const BeneficiariosPage: React.FC = () => {
               >
                 <Stack spacing={2.5}>
                   <Box>
-                    <h6
-                      className="titulo-arriba-form"
-                      style={{ fontSize: 19, margin: 0 }}
-                    >
+                    <h6 className="titulo-arriba-form" style={{ fontSize: 19, margin: 0 }}>
                       Nombre completo
                     </h6>
                     <TextField
@@ -349,26 +327,14 @@ const BeneficiariosPage: React.FC = () => {
                       size="medium"
                       value={values.fullnameBenefeciary}
                       onChange={(e) => {
-                        const soloLetras = e.target.value.replace(
-                          /[^A-Za-z\s]/g,
-                          ""
-                        );
+                        const soloLetras = e.target.value.replace(/[^A-Za-z\s]/g, "");
                         handleChange({
                           ...e,
-                          target: {
-                            name: "fullnameBenefeciary",
-                            value: soloLetras,
-                          },
+                          target: { name: "fullnameBenefeciary", value: soloLetras },
                         });
                       }}
-                      error={
-                        touched.fullnameBenefeciary &&
-                        Boolean(errors.fullnameBenefeciary)
-                      }
-                      helperText={
-                        touched.fullnameBenefeciary &&
-                        errors.fullnameBenefeciary
-                      }
+                      error={touched.fullnameBenefeciary && Boolean(errors.fullnameBenefeciary)}
+                      helperText={touched.fullnameBenefeciary && errors.fullnameBenefeciary}
                       InputProps={{
                         sx: {
                           backgroundColor: "#fff",
@@ -383,10 +349,7 @@ const BeneficiariosPage: React.FC = () => {
                   </Box>
 
                   <Box>
-                    <h6
-                      className="titulo-arriba-form"
-                      style={{ fontSize: 19, margin: 0 }}
-                    >
+                    <h6 className="titulo-arriba-form" style={{ fontSize: 19, margin: 0 }}>
                       Edad
                     </h6>
                     <TextField
@@ -397,24 +360,12 @@ const BeneficiariosPage: React.FC = () => {
                       value={values.ageBeneficiary}
                       onChange={(e) => {
                         let inputValue = e.target.value;
-
-                        if (inputValue.length > 2) {
-                          inputValue = inputValue.slice(0, 2);
-                        }
-
-                        if (
-                          inputValue.length > 1 &&
-                          inputValue.startsWith("0")
-                        ) {
+                        if (inputValue.length > 2) inputValue = inputValue.slice(0, 2);
+                        if (inputValue.length > 1 && inputValue.startsWith("0")) {
                           inputValue = inputValue.replace(/^0+/, "");
                         }
-
-                        if (inputValue === "") {
-                          inputValue = "0";
-                        }
-
+                        if (inputValue === "") inputValue = "0";
                         values.ageBeneficiary = inputValue;
-
                         handleChange({
                           ...e,
                           target: { name: "ageBeneficiary", value: inputValue },
@@ -423,15 +374,11 @@ const BeneficiariosPage: React.FC = () => {
                       inputProps={{
                         min: 0,
                         onKeyDown: (e) => {
-                          if (["-", "e", "E", "+", "."].includes(e.key)) {
-                            e.preventDefault();
-                          }
+                          if (["-", "e", "E", "+", "."].includes(e.key)) e.preventDefault();
                         },
                         onWheel: (e) => e.currentTarget.blur(),
                       }}
-                      error={
-                        touched.ageBeneficiary && Boolean(errors.ageBeneficiary)
-                      }
+                      error={touched.ageBeneficiary && Boolean(errors.ageBeneficiary)}
                       helperText={
                         touched.ageBeneficiary && values.ageBeneficiary === "0"
                           ? "La edad debe ser mayor a 0."
@@ -453,10 +400,7 @@ const BeneficiariosPage: React.FC = () => {
                   </Box>
 
                   <Box>
-                    <h6
-                      className="titulo-arriba-form"
-                      style={{ fontSize: 19, margin: 0 }}
-                    >
+                    <h6 className="titulo-arriba-form" style={{ fontSize: 19, margin: 0 }}>
                       DNI
                     </h6>
                     <TextField
@@ -465,27 +409,12 @@ const BeneficiariosPage: React.FC = () => {
                       size="medium"
                       value={values.dniBenefeciary}
                       onChange={(e) => {
-                        const value = e.target.value
-                          .replace(/\D/g, "")
-                          .slice(0, 8);
-                        handleChange({
-                          target: {
-                            name: "dniBenefeciary",
-                            value,
-                          },
-                        });
+                        const value = e.target.value.replace(/\D/g, "").slice(0, 8);
+                        handleChange({ target: { name: "dniBenefeciary", value } as any });
                       }}
-                      inputProps={{
-                        maxLength: 8,
-                        inputMode: "numeric",
-                        pattern: "[0-9]{8}",
-                      }}
-                      error={
-                        touched.dniBenefeciary && Boolean(errors.dniBenefeciary)
-                      }
-                      helperText={
-                        touched.dniBenefeciary && errors.dniBenefeciary
-                      }
+                      inputProps={{ maxLength: 8, inputMode: "numeric", pattern: "[0-9]{8}" }}
+                      error={touched.dniBenefeciary && Boolean(errors.dniBenefeciary)}
+                      helperText={touched.dniBenefeciary && errors.dniBenefeciary}
                       InputProps={{
                         sx: {
                           backgroundColor: "#fff",
@@ -500,10 +429,7 @@ const BeneficiariosPage: React.FC = () => {
                   </Box>
 
                   <Box>
-                    <h6
-                      className="titulo-arriba-form"
-                      style={{ fontSize: 19, margin: 0 }}
-                    >
+                    <h6 className="titulo-arriba-form" style={{ fontSize: 19, margin: 0 }}>
                       Observaciones
                     </h6>
                     <TextField
@@ -584,8 +510,7 @@ const BeneficiariosPage: React.FC = () => {
               <Box>Edad: {beneficiario.ageBeneficiary}</Box>
               <Box>DNI: {beneficiario.dniBenefeciary}</Box>
               <Box>
-                Observación:{" "}
-                {beneficiario.observationsBeneficiary || "Sin observaciones"}
+                Observación: {beneficiario.observationsBeneficiary || "Sin observaciones"}
               </Box>
             </Box>
 
@@ -596,26 +521,24 @@ const BeneficiariosPage: React.FC = () => {
                 onClick={() =>
                   handleEditClick({
                     ...beneficiario,
-                    isActive: beneficiario.active ?? true,
-                  })
+                    isActive: (beneficiario as any).active ?? true,
+                  } as Beneficiary)
                 }
               >
                 <EditIcon />
               </Button>
-              {
-                <Button
-                  variant="contained"
-                  sx={{ backgroundColor: "#D32F2F", minWidth: 0, p: 1 }}
-                  onClick={() =>
-                    handleDeleteClick({
-                      ...beneficiario,
-                      isActive: beneficiario.active ?? true,
-                    })
-                  }
-                >
-                  <DeleteIcon />
-                </Button>
-              }
+              <Button
+                variant="contained"
+                sx={{ backgroundColor: "#D32F2F", minWidth: 0, p: 1 }}
+                onClick={() =>
+                  handleDeleteClick({
+                    ...beneficiario,
+                    isActive: (beneficiario as any).active ?? true,
+                  } as Beneficiary)
+                }
+              >
+                <DeleteIcon />
+              </Button>
             </Stack>
           </Box>
         ))}
@@ -623,14 +546,7 @@ const BeneficiariosPage: React.FC = () => {
 
       {/* PAGINACIÓN */}
       {filtered.length > 0 && (
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            mt: 4,
-            mb: 2,
-          }}
-        >
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 4, mb: 2 }}>
           <Pagination
             count={totalPages}
             page={currentPage}
@@ -640,10 +556,7 @@ const BeneficiariosPage: React.FC = () => {
             showFirstButton
             showLastButton
             sx={{
-              "& .MuiPagination-ul": {
-                flexWrap: "wrap",
-                justifyContent: "center",
-              },
+              "& .MuiPagination-ul": { flexWrap: "wrap", justifyContent: "center" },
               "& .MuiPaginationItem-root": {
                 fontSize: { xs: "0.875rem", sm: "1rem" },
                 minWidth: { xs: "32px", sm: "40px" },
@@ -654,15 +567,9 @@ const BeneficiariosPage: React.FC = () => {
         </Box>
       )}
 
-      {/* Mostrar mensaje si no hay resultados */}
+      {/* Si no hay resultados */}
       {filtered.length === 0 && (
-        <Box
-          sx={{
-            textAlign: "center",
-            py: 4,
-            color: "text.secondary",
-          }}
-        >
+        <Box sx={{ textAlign: "center", py: 4, color: "text.secondary" }}>
           No se encontraron beneficiarios
         </Box>
       )}
@@ -686,23 +593,32 @@ const BeneficiariosPage: React.FC = () => {
           open={Boolean(beneficiarioAEditar)}
           onClose={() => setBeneficiarioAEditar(null)}
           initialData={beneficiarioAEditar}
-          onSubmit={async (dataActualizada) => {
+          onSubmit={async (dataActualizada, { setFieldError, setSubmitting }) => {
             try {
               await BeneficiaryService.actualizarBeneficiary(dataActualizada);
-              loadBeneficiarios();
+              await loadBeneficiarios();
               setBeneficiarioAEditar(null);
-              
-              // Mostrar snackbar de exito al editar beneficiario
               setSnackbarSeverity("success");
               setSnackbarMessage("Beneficiario actualizado satisfactoriamente");
               setOpenSnackbar(true);
-            } catch (error) {
+            } catch (error: any) {
               console.error("Error al actualizar beneficiario:", error);
-              
-              // Mostrar snackbar de error si falla la edicion
+              if (axios.isAxiosError(error) && error.response?.status === 409) {
+                setFieldError("dniBenefeciary", "Ya existe un beneficiario con ese DNI");
+                return;
+              }
+              if (axios.isAxiosError(error) && error.response?.status === 401) {
+                setSnackbarSeverity("error");
+                setSnackbarMessage("Ya existe un beneficiario con ese DNI.");
+                setOpenSnackbar(true);
+                // Opcional: window.location.href = "/login";
+                return;
+              }
               setSnackbarSeverity("error");
               setSnackbarMessage("Error al actualizar el beneficiario");
               setOpenSnackbar(true);
+            } finally {
+              setSubmitting(false);
             }
           }}
         />
@@ -718,17 +634,13 @@ const BeneficiariosPage: React.FC = () => {
               await BeneficiaryService.eliminarBeneficiaryActive(
                 beneficiarioAEliminar.idBeneficiary
               );
-              loadBeneficiarios();
+              await loadBeneficiarios();
               setBeneficiarioAEliminar(null);
-              
-              // Mostrar snackbar de exito al eliminar beneficiario
               setSnackbarSeverity("error");
               setSnackbarMessage("Beneficiario eliminado satisfactoriamente");
               setOpenSnackbar(true);
             } catch (error) {
               console.error("Error al eliminar beneficiario:", error);
-              
-              // Mostrar snackbar de error si falla la eliminacion
               setSnackbarSeverity("error");
               setSnackbarMessage("Error al eliminar el beneficiario");
               setOpenSnackbar(true);
@@ -736,26 +648,19 @@ const BeneficiariosPage: React.FC = () => {
           }}
         />
       )}
-      
-      {/* Snackbar unificado con diseño similar al de PresupuestoPage */}
+
+      {/* Snackbar */}
       <Snackbar
         open={openSnackbar}
         autoHideDuration={5000}
         onClose={handleCloseSnackbar}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "right",
-        }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       >
-        <Alert
-          onClose={handleCloseSnackbar}
-          severity={snackbarSeverity}
-          sx={{ width: "100%", fontSize: "1rem" }}
-        >
+        <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity} sx={{ width: "100%", fontSize: "1rem" }}>
           {snackbarMessage}
         </Alert>
       </Snackbar>
-      
+
       <ActivateBeneficiariosDialog
         open={openReactivateDialog}
         onClose={handleReactivateCancel}
@@ -765,4 +670,5 @@ const BeneficiariosPage: React.FC = () => {
     </Box>
   );
 };
+
 export default BeneficiariosPage;
