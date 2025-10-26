@@ -445,6 +445,7 @@ const RegistroRaciones: React.FC = () => {
                           ),
                           inputProps: {
                           maxLength: 4,
+                          step: "0.01",
                           inputMode: "decimal",
                           pattern: "^\\d{0,4}(\\.\\d{0,2})?$",
                           onKeyDown: (
