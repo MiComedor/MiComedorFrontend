@@ -73,6 +73,18 @@ const ReportePage: React.FC = () => {
   }
   const [chartData, setChartData] = useState<PieData[]>([]);
 
+  // Función auxiliar para formatear valores monetarios con 2 decimales en la visualización
+  const formatCurrency = (value: number | undefined | null): string => {
+    if (value === undefined || value === null) return "0.00";
+    return Number(value).toFixed(2);
+  };
+  
+  // Función auxiliar para asegurar que los valores sean números flotantes
+  const ensureFloat = (value: any): number => {
+    const parsed = parseFloat(value);
+    return isNaN(parsed) ? 0 : parsed;
+  };
+
   /*------------------DIARIO-------------------------*/
   const getRacionesPorDia = () => {
     const userStr = localStorage.getItem("user");
@@ -102,7 +114,14 @@ const ReportePage: React.FC = () => {
     BudgetService.presupuestoPorDia(user.idUser)
       .then((response) => {
         if (Array.isArray(response) && response.length > 0) {
-          setPresupuestoPorDia(response[0]);
+          // Convertir explícitamente los valores a números flotantes
+          const budgetData = {
+            ...response[0],
+            ingresosHoy: ensureFloat(response[0].ingresosHoy),
+            egresosHoy: ensureFloat(response[0].egresosHoy),
+            saldoFinal: ensureFloat(response[0].saldoFinal),
+          };
+          setPresupuestoPorDia(budgetData);
         } else {
           console.warn("Respuesta vacía o no válida:", response);
           setPresupuestoPorDia(null);
@@ -164,7 +183,7 @@ const ReportePage: React.FC = () => {
           }));
 
         setChartData(pieData);
-        console.log("✅ Datos listos para el gráfico:", pieData);
+        console.log("Datos listos para el gráfico:", pieData);
       })
       .catch((err) => {
         console.error("Error al obtener raciones:", err);
@@ -177,13 +196,14 @@ const ReportePage: React.FC = () => {
     if (!user) return;
 
     BudgetService.presupuestoPorSemana(user.idUser).then((budgetList) => {
+      // Convertir explícitamente los valores numéricos a flotantes
       const listaPresupuesto = budgetList.map((r) => ({
         fecha: r.fecha,
         dia: r.dia,
         fechasDiaMes: r.fechasDiaMes,
-        ingresosPorDia: r.ingresosPorDia,
-        egresosPorDia: r.egresosPorDia,
-        saldoPorDia: r.saldoPorDia,
+        ingresosPorDia: ensureFloat(r.ingresosPorDia),
+        egresosPorDia: ensureFloat(r.egresosPorDia),
+        saldoPorDia: ensureFloat(r.saldoPorDia),
       }));
       setPresupuestoPorSemana(listaPresupuesto);
     });
@@ -339,7 +359,7 @@ const ReportePage: React.FC = () => {
                   </CardContent>
                 </Card>
 
-                {/* PRESUPUESTO */}
+                {/* PRESUPUESTO - Modificado para mostrar decimales correctamente */}
                 <Card
                   sx={{
                     minWidth: 250,
@@ -374,7 +394,7 @@ const ReportePage: React.FC = () => {
                             sx={{ color: "green", fontSize: 30, mr: 1 }}
                           />
                           <Typography fontSize={18} fontWeight="bold">
-                            Ingresos: S/ {presupuestoPorDia.ingresosHoy}
+                            Ingresos: S/ {formatCurrency(presupuestoPorDia.ingresosHoy)}
                           </Typography>
                         </Box>
 
@@ -383,7 +403,7 @@ const ReportePage: React.FC = () => {
                             sx={{ color: "red", fontSize: 30, mr: 1 }}
                           />
                           <Typography fontSize={18} fontWeight="bold">
-                            Egresos: S/ {presupuestoPorDia.egresosHoy}
+                            Egresos: S/ {formatCurrency(presupuestoPorDia.egresosHoy)}
                           </Typography>
                         </Box>
 
@@ -392,7 +412,7 @@ const ReportePage: React.FC = () => {
                             sx={{ color: "#F57C00", fontSize: 30, mr: 1 }}
                           />
                           <Typography fontSize={18} fontWeight="bold">
-                            Saldo final: S/ {presupuestoPorDia.saldoFinal}
+                            Saldo final: S/ {formatCurrency(presupuestoPorDia.saldoFinal)}
                           </Typography>
                         </Box>
                       </Box>
@@ -541,7 +561,7 @@ const ReportePage: React.FC = () => {
                 useFlexGap
                 sx={{ flexWrap: "wrap" }}
               >
-                {/********************************* Tarjetas semanales **************************/}
+                {/* Raciones por días */}
                 <Card
                   sx={{
                     minWidth: 250,
@@ -589,6 +609,7 @@ const ReportePage: React.FC = () => {
                   </CardContent>
                 </Card>
 
+                {/* Presupuesto semanal - Modificado para mostrar decimales */}
                 <Card
                   sx={{
                     minWidth: 250,
@@ -642,19 +663,19 @@ const ReportePage: React.FC = () => {
                               variant="body2"
                               sx={{ color: "green", fontWeight: 500 }}
                             >
-                              Ingresos: S/ {p.ingresosPorDia}
+                              Ingresos: S/ {formatCurrency(p.ingresosPorDia)}
                             </Typography>
                             <Typography
                               variant="body2"
                               sx={{ color: "red", fontWeight: 500 }}
                             >
-                              Egresos: S/ {p.egresosPorDia}
+                              Egresos: S/ {formatCurrency(p.egresosPorDia)}
                             </Typography>
                             <Typography
                               variant="body2"
                               sx={{ color: "#F57C00", fontWeight: "bold" }}
                             >
-                              Saldo: S/ {p.saldoPorDia}
+                              Saldo: S/ {formatCurrency(p.saldoPorDia)}
                             </Typography>
                           </Box>
                         ))
@@ -666,6 +687,7 @@ const ReportePage: React.FC = () => {
                   </CardContent>
                 </Card>
 
+                {/* Productos por vencer */}
                 <Card
                   sx={{
                     minWidth: 250,
@@ -725,11 +747,12 @@ const ReportePage: React.FC = () => {
                   </CardContent>
                 </Card>
 
+                {/* Beneficiarios por días */}
                 <Card
                   sx={{
                     minWidth: 250,
                     flexGrow: 1,
-                    bgcolor: "#f5f5f5", // Fondo gris claro
+                    bgcolor: "#f5f5f5",
                     borderRadius: 3,
                     boxShadow: 2,
                     p: 2,
