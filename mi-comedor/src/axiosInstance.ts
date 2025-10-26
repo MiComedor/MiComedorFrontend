@@ -10,7 +10,7 @@ const getToken = () => {
 };
 
 const api = axios.create({
-  baseURL: "http://localhost:8084",
+  baseURL: "https://micomedorbackend-3t75.onrender.com",
 });
 
 api.interceptors.request.use((config) => {
