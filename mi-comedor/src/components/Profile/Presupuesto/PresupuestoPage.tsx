@@ -209,7 +209,7 @@ const PresupuestoPage: React.FC = () => {
                         fullWidth
                         error={touched.amountBudget && Boolean(errors.amountBudget)}
                         helperText={touched.amountBudget && errors.amountBudget}
-                        inputProps={{ min: 0, max: 99999, maxLength: 5 }}
+                        inputProps={{ min: 0, max: 99999, maxLength: 5, step: '0.01', inputMode:'decimal'}}
                         onInput={(e: React.ChangeEvent<HTMLInputElement>) => {
                           if (e.target.value.length > 4) {
                             e.target.value = e.target.value.slice(0, 5);
