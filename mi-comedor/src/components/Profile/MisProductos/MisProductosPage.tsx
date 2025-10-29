@@ -17,6 +17,8 @@ import {
   DialogContent,
   TablePagination,
   Alert,
+  CircularProgress,
+  Fade,
 } from "@mui/material";
 import { Formik, Form, Field, FieldProps, FormikHelpers } from "formik";
 import * as Yup from "yup";
@@ -51,6 +53,7 @@ const initialValues = {
   unitOfMeasurement_id: "",
   expirationDate: "",
 };
+
 
 const validationSchema = Yup.object({
   descriptionProduct: Yup.string()
@@ -187,7 +190,7 @@ const MisProductosPage: React.FC = () => {
               validationSchema={validationSchema}
               onSubmit={onSubmit}
             >
-              {({ errors, touched }) => (
+              {({ errors, touched, isSubmitting }) => (
                 <Form>
                   <Stack
                     direction={{ xs: "column", sm: "row" }}
@@ -484,9 +487,39 @@ const MisProductosPage: React.FC = () => {
                       </Field>
                     </div>
 
-                    <IconButton className="boton-verde-producto" type="submit">
-                      <AddIcon sx={{ fontSize: 42 }} />
+                    <IconButton
+                      className="boton-verde-producto"
+                      type="submit"
+                      disabled={isSubmitting}
+                      sx={{
+                        backgroundColor: "#4caf50",
+                        color: "white",
+                        "&:hover": { backgroundColor: "#c6dcc7ff" },
+                        position: "relative",
+                        width: 64,
+                        height: 64,
+                        transition: "transform 0.10s ease-in-out",
+                      }}
+                    >
+                      {/* Spinner visible mientras se envía */}
+                      <Fade in={isSubmitting} timeout={1000} unmountOnExit>
+                        <CircularProgress
+                          size={42}
+                          thickness={5}
+                          sx={{
+                            color: "white",
+                            position: "absolute",
+                          }}
+                        />
+                      </Fade>
+
+                      {/* Icono visible cuando no está enviando */}
+                      <Fade in={!isSubmitting} timeout={1000} unmountOnExit>
+                        <AddIcon sx={{ fontSize: 42 }} />
+                      </Fade>
                     </IconButton>
+
+
                   </Stack>
                 </Form>
               )}
