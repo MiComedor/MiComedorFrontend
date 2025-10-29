@@ -15,7 +15,9 @@ import {
   TablePagination,
   Button,
   Alert, //  AGREGADO: Importar Alert para mostrar mensajes
-  Snackbar, //  AGREGADO: Importar Snackbar para mostrar notificaciones
+  Snackbar,
+  Fade,
+  CircularProgress, //  AGREGADO: Importar Snackbar para mostrar notificaciones
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -153,7 +155,7 @@ const PresupuestoPage: React.FC = () => {
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
         >
-          {({ errors, touched }) => (
+          {({ errors, touched, isSubmitting }) => (
             <Form>
               <Stack
                 direction={{ xs: "column", sm: "row" }}
@@ -264,19 +266,37 @@ const PresupuestoPage: React.FC = () => {
 
                 {/* BOTÓN */}
                 <IconButton
-                  className="boton-verde"
+                  className="boton-verde-producto"
                   type="submit"
+                  disabled={isSubmitting}
                   sx={{
-                    height: 70,
-                    width: 75,
-                    mt: { xs: 2, sm: "25px" },
-                    alignSelf: { xs: "center", sm: "flex-end" },
-                    boxShadow: 2,
-                    borderRadius: 1,
+                    backgroundColor: "#4caf50",
+                    color: "white",
+                    "&:hover": { backgroundColor: "#c6dcc7ff" },
+                    position: "relative",
+                    width: 64,
+                    height: 64,
+                    transition: "transform 0.10s ease-in-out",
                   }}
                 >
-                  <AddIcon sx={{ fontSize: 30 }} />
+                  {/* Spinner visible mientras se envía */}
+                  <Fade in={isSubmitting} timeout={1000} unmountOnExit>
+                    <CircularProgress
+                      size={42}
+                      thickness={5}
+                      sx={{
+                        color: "white",
+                        position: "absolute",
+                      }}
+                    />
+                  </Fade>
+
+                  {/* Icono visible cuando no está enviando */}
+                  <Fade in={!isSubmitting} timeout={1000} unmountOnExit>
+                    <AddIcon sx={{ fontSize: 42 }} />
+                  </Fade>
                 </IconButton>
+
               </Stack>
             </Form>
           )}

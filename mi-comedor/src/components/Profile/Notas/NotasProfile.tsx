@@ -25,6 +25,7 @@ const NotasProfile: React.FC<NotasProfileProps> = ({
         onChange={onChange}
         className="notas-input-custom"
       />
+      
       <IconButton
         className="boton-verde"
         onClick={() => {
