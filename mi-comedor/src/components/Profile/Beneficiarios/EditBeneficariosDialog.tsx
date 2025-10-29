@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useMemo } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -7,6 +7,8 @@ import {
   Stack,
   Box,
   TextField,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
@@ -40,12 +42,30 @@ type Props = {
   initialData: Beneficiary;
 };
 
+// Normaliza y crea un "shape" comparable para evitar falsos positivos/negativos
+const toComparable = (v: Beneficiary) => ({
+  fullnameBenefeciary: (v.fullnameBenefeciary || "").trim(),
+  dniBenefeciary: String(v.dniBenefeciary || ""),
+  ageBeneficiary: String(v.ageBeneficiary ?? "").trim(),
+  observationsBeneficiary: (v.observationsBeneficiary || "").trim(),
+  idBeneficiary: v.idBeneficiary ?? null, // por si lo necesitas arriba
+});
+
 const EditBeneficiariosDialog: React.FC<Props> = ({
   open,
   onClose,
   onSubmit,
   initialData,
 }) => {
+  // Snackbar
+  const [snackOpen, setSnackOpen] = useState(false);
+  const [snackMsg, setSnackMsg] = useState("");
+  const [snackSeverity, setSnackSeverity] = useState<
+    "success" | "error" | "warning" | "info"
+  >("info");
+
+  const initialComparable = useMemo(() => toComparable(initialData), [initialData]);
+
   return (
     <Dialog
       open={open}
@@ -71,6 +91,18 @@ const EditBeneficiariosDialog: React.FC<Props> = ({
         enableReinitialize
         validationSchema={validationSchema}
         onSubmit={async (values, helpers) => {
+          // Comparación adicional por seguridad: si no hay cambios, no enviamos
+          const currentComparable = toComparable(values);
+          if (
+            JSON.stringify(currentComparable) === JSON.stringify(initialComparable)
+          ) {
+            setSnackMsg("No hay cambios para guardar.");
+            setSnackSeverity("info");
+            setSnackOpen(true);
+            helpers.setSubmitting(false);
+            return;
+          }
+
           // 👉 PASA helpers AL PADRE
           await onSubmit(values, {
             setFieldError: helpers.setFieldError,
@@ -78,7 +110,16 @@ const EditBeneficiariosDialog: React.FC<Props> = ({
           });
         }}
       >
-        {({ values, handleChange, errors, touched, setFieldValue, isSubmitting }) => (
+        {({
+          values,
+          handleChange,
+          errors,
+          touched,
+          setFieldValue,
+          isSubmitting,
+          dirty,
+          isValid,
+        }) => (
           <Form>
             <DialogContent sx={{ px: 3, pb: 2 }}>
               <Stack spacing={2.5}>
@@ -92,7 +133,9 @@ const EditBeneficiariosDialog: React.FC<Props> = ({
                     size="medium"
                     value={values.fullnameBenefeciary}
                     onChange={handleChange}
-                    error={touched.fullnameBenefeciary && Boolean(errors.fullnameBenefeciary)}
+                    error={
+                      touched.fullnameBenefeciary && Boolean(errors.fullnameBenefeciary)
+                    }
                     helperText={touched.fullnameBenefeciary && errors.fullnameBenefeciary}
                     InputProps={{
                       sx: {
@@ -249,17 +292,28 @@ const EditBeneficiariosDialog: React.FC<Props> = ({
                 >
                   <CloseIcon sx={{ fontSize: 34 }} />
                 </Button>
+
+                {/* ✔ Gris cuando !dirty || !isValid, color normal cuando se edita y es válido */}
                 <Button
                   type="submit"
+                  disabled={isSubmitting || !dirty || !isValid}
                   sx={{
-                    backgroundColor: "#1976D2",
+                    backgroundColor:
+                      isSubmitting || !dirty || !isValid ? "#bdbdbd" : "#1976D2",
                     color: "white",
                     minWidth: 60,
                     height: 60,
                     borderRadius: 2.5,
-                    "&:hover": { backgroundColor: "#0d47a1" },
+                    "&:hover": {
+                      backgroundColor:
+                        isSubmitting || !dirty || !isValid ? "#bdbdbd" : "#0d47a1",
+                      cursor:
+                        isSubmitting || !dirty || !isValid
+                          ? "not-allowed"
+                          : "pointer",
+                    },
+                    transition: "background-color 0.2s ease-in-out",
                   }}
-                  disabled={isSubmitting}
                 >
                   <CheckIcon sx={{ fontSize: 34 }} />
                 </Button>
@@ -268,6 +322,23 @@ const EditBeneficiariosDialog: React.FC<Props> = ({
           </Form>
         )}
       </Formik>
+
+      {/* Snackbar */}
+      <Snackbar
+        open={snackOpen}
+        autoHideDuration={2500}
+        onClose={() => setSnackOpen(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSnackOpen(false)}
+          severity={snackSeverity}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {snackMsg}
+        </Alert>
+      </Snackbar>
     </Dialog>
   );
 };
