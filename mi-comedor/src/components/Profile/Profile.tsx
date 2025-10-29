@@ -42,11 +42,15 @@ const Profile: React.FC = () => {
   const [notasList, setNotasList] = useState<NotaTransformada[]>([]);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [deleteNoteId, setDeleteNoteId] = useState<number | null>(null);
+
+  // 🔧 Edit dialog: guardamos texto ORIGINAL y actual para detectar cambios
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [editingNote, setEditingNote] = useState<{
     idNote: number;
     text: string;
+    originalText: string;
   } | null>(null);
+
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -66,9 +70,9 @@ const Profile: React.FC = () => {
     NoteService.buscarNotaPorUserId(user.idUser)
       .then((notas) => {
         const transformadas = notas.map((n) => ({
-          idNote: n.idNote, // CAMBIA ESTO
-          noteText: n.noteTextByUser, // CAMBIA ESTO
-          userId: n.userId ?? 0, // si es necesario
+          idNote: n.idNote,
+          noteText: n.noteTextByUser,
+          userId: n.userId ?? 0,
         }));
 
         setNotasList(transformadas);
@@ -134,7 +138,8 @@ const Profile: React.FC = () => {
         .then(() => {
           getNotas();
           handleCloseDeleteDialog();
-          showSnackbar("Nota eliminada correctamente", "error");
+          // 👀 mejor como "success" al eliminar correctamente
+          showSnackbar("Nota eliminada correctamente", "success");
         })
         .catch((error) => {
           console.error(
@@ -147,8 +152,9 @@ const Profile: React.FC = () => {
     }
   };
 
+  // 🔧 Abrir diálogo de edición guardando el texto original
   const handleOpenEditDialog = (idNote: number, text: string) => {
-    setEditingNote({ idNote, text });
+    setEditingNote({ idNote, text, originalText: text });
     setOpenEditDialog(true);
   };
 
@@ -166,11 +172,18 @@ const Profile: React.FC = () => {
   };
 
   const saveEditedNote = async () => {
-    if (
-      editingNote &&
-      editingNote.text.trim() &&
-      typeof editingNote.idNote === "number"
-    ) {
+    if (!editingNote) return;
+
+    const hasChanges =
+      editingNote.text.trim() !== editingNote.originalText.trim();
+
+    // ⚠️ Si no hay cambios, mostramos info y no guardamos
+    if (!hasChanges) {
+      showSnackbar("No hay cambios para guardar.", "info");
+      return;
+    }
+
+    if (editingNote.text.trim() && typeof editingNote.idNote === "number") {
       const userStr = localStorage.getItem("user");
       const user = userStr ? JSON.parse(userStr) : null;
 
@@ -205,6 +218,13 @@ const Profile: React.FC = () => {
       handleCloseEditDialog();
     }
   };
+
+  // 🔧 Computamos si hay cambios para controlar el color del botón Guardar
+  const isEditDirty =
+    editingNote &&
+    editingNote.text.trim() !== editingNote.originalText.trim();
+
+  const isEditInvalid = editingNote ? editingNote.text.trim().length === 0 : true;
 
   return (
     <>
@@ -302,6 +322,7 @@ const Profile: React.FC = () => {
         )}
       </Box>
 
+      {/* Diálogo de eliminación */}
       <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
         <DialogTitle>¿Estás seguro de eliminar esta nota?</DialogTitle>
         <DialogContent>
@@ -318,6 +339,7 @@ const Profile: React.FC = () => {
         </DialogActions>
       </Dialog>
 
+      {/* Diálogo de edición */}
       <Dialog
         open={openEditDialog}
         onClose={handleCloseEditDialog}
@@ -346,10 +368,20 @@ const Profile: React.FC = () => {
               <Button
                 onClick={saveEditedNote}
                 variant="contained"
+                disabled={!isEditDirty || isEditInvalid}
                 sx={{
-                  backgroundColor: "#F57C00",
+                  backgroundColor:
+                    !isEditDirty || isEditInvalid ? "#bdbdbd" : "#F57C00",
                   color: "#fff",
-                  "&:hover": { backgroundColor: "#ef6c00" },
+                  "&:hover": {
+                    backgroundColor:
+                      !isEditDirty || isEditInvalid ? "#bdbdbd" : "#ef6c00",
+                    cursor:
+                      !isEditDirty || isEditInvalid
+                        ? "not-allowed"
+                        : "pointer",
+                  },
+                  transition: "background-color 0.2s ease-in-out",
                 }}
               >
                 Guardar
@@ -359,9 +391,10 @@ const Profile: React.FC = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Snackbar */}
       <Snackbar
         open={snackbar.open}
-        autoHideDuration={6000}
+        autoHideDuration={3000}
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       >
@@ -369,11 +402,12 @@ const Profile: React.FC = () => {
           onClose={handleCloseSnackbar}
           severity={snackbar.severity}
           sx={{ width: "100%" }}
+          variant="filled"
         >
           {snackbar.message}
         </Alert>
       </Snackbar>
-      </>
+    </>
   );
 };
 
