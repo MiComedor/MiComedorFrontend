@@ -6,6 +6,8 @@ import {
   Button,
   TextField,
   InputAdornment,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
@@ -13,14 +15,13 @@ import Autocomplete from "@mui/material/Autocomplete";
 import Ration from "../../../types/ration.type";
 import RationType from "../../../types/TypeRation";
 import BeneficiaryByUserId from "../../../types/BeneficiaryByUserId";
-import { Snackbar, Alert } from "@mui/material";
 import { useState, useMemo, useEffect } from "react";
 import beneficiaryService from "../../../services/beneficiary.service";
 import "./EditRacionesDialog.css";
 
 type FormRationValues = {
   date: string;
-  price: number;
+  price: number | string;
   rationType: RationType | null;
   beneficiary: BeneficiaryByUserId | null;
 };
@@ -29,7 +30,7 @@ type Props = {
   open: boolean;
   onClose: () => void;
   data: Ration;
-  onSubmit: (values: Ration) => void;
+  onSubmit: (values: Ration) => void | Promise<void>;
   rationTypes: RationType[];
   beneficiaries: BeneficiaryByUserId[];
 };
@@ -54,6 +55,21 @@ const validationSchema = Yup.object({
     .required("Campo obligatorio"),
 });
 
+// === Helpers ===
+const normalizeDate = (d?: string) => (d ? d.split("T")[0] : "");
+
+const toComparable = (v: {
+  date: string;
+  price: number | string;
+  rationType?: { idRationType?: number } | null;
+  beneficiary?: { idBeneficiary?: number } | null;
+}) => ({
+  date: normalizeDate(v.date),
+  price: Number(v.price),
+  rationTypeId: v.rationType?.idRationType ?? null,
+  beneficiaryId: v.beneficiary?.idBeneficiary ?? null,
+});
+
 export default function EditRationDialog({
   open,
   onClose,
@@ -64,10 +80,14 @@ export default function EditRationDialog({
 }: Props) {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<
+    "success" | "error" | "warning" | "info"
+  >("info");
   const [snackbarOpenInactive, setSnackbarOpenInactive] = useState(false);
   const [snackbarMessageInactive, setSnackbarMessageInactive] = useState("");
+
   const [beneficiariosActivos, setBeneficiariosActivos] = useState<
-    (BeneficiaryByUserId & { firstLetter: string })[]
+    (BeneficiaryByUserId & { firstLetter: string; isActive: boolean })[]
   >([]);
 
   const selectedBeneficiary = useMemo(
@@ -78,16 +98,45 @@ export default function EditRationDialog({
     [beneficiaries, data.beneficiary?.idBeneficiary]
   );
 
+  const initialComparable = useMemo(
+    () =>
+      toComparable({
+        date: data.date,
+        price: data.price,
+        rationType: data.rationType,
+        beneficiary: data.beneficiary,
+      }),
+    [data]
+  );
+
+  const initialFormikValues: FormRationValues = useMemo(
+    () => ({
+      date: normalizeDate(data.date),
+      price: Number(data.price),
+      rationType:
+        rationTypes.find(
+          (r) => r.idRationType === data.rationType?.idRationType
+        ) ?? null,
+      beneficiary:
+        beneficiaries.find(
+          (b) => b.idBeneficiary === data.beneficiary?.idBeneficiary
+        ) ?? null,
+    }),
+    [data, rationTypes, beneficiaries]
+  );
+
   const BeneficiariosActivosLista = () => {
     const userStr = localStorage.getItem("user");
     const user = userStr ? JSON.parse(userStr) : null;
     if (!user) return;
 
     beneficiaryService.buscarBeneficiaryPorUserId(user.idUser).then((data) => {
-      const beneficiariosConLetra = data.map((b) => ({
+      const beneficiariosConLetra = data.map((b: any) => ({
         ...b,
-        firstLetter: b.fullnameBenefeciary.charAt(0).toUpperCase(),
-        isActive: b.active === undefined ? true : b.active,
+        firstLetter: String(b.fullnameBenefeciary || "")
+          .charAt(0)
+          .toUpperCase(),
+        isActive: b.active === undefined ? true : Boolean(b.active),
       }));
       setBeneficiariosActivos(beneficiariosConLetra);
     });
@@ -108,7 +157,7 @@ export default function EditRationDialog({
   const handleSnackClose = (_?: unknown, reason?: string) => {
     if (reason === "clickaway") return;
     setSnackbarOpen(false);
-    onClose(); // cierra el dialog cuando el snackbar termina
+    onClose();
   };
 
   return (
@@ -129,23 +178,14 @@ export default function EditRationDialog({
 
         <Formik<FormRationValues>
           enableReinitialize
-          initialValues={{
-            date: data.date,
-            price: data.price,
-            rationType:
-              rationTypes.find(
-                (r) => r.idRationType === data.rationType?.idRationType
-              ) || null,
-            beneficiary: selectedBeneficiary,
-          }}
+          initialValues={initialFormikValues}
           validationSchema={validationSchema}
-          onSubmit={(values) => {
-            const isRationTypeInvalid =
-              !values.rationType || !values.rationType.idRationType;
-            const isBeneficiaryInvalid =
-              !values.beneficiary || !values.beneficiary.idBeneficiary;
-            const isDateInvalid = !values.date || values.date.trim() === "";
-            const isPriceInvalid = !values.price || isNaN(Number(values.price));
+          onSubmit={async (values) => {
+            const isRationTypeInvalid = !values.rationType?.idRationType;
+            const isBeneficiaryInvalid = !values.beneficiary?.idBeneficiary;
+            const isDateInvalid = !values.date?.trim();
+            const isPriceInvalid =
+              values.price === undefined || isNaN(Number(values.price));
 
             if (
               isRationTypeInvalid ||
@@ -154,28 +194,51 @@ export default function EditRationDialog({
               isPriceInvalid
             ) {
               setSnackbarMessage("❌ ¡No puede haber campos vacíos!");
+              setSnackbarSeverity("error");
+              setSnackbarOpen(true);
+              return;
+            }
+
+            const currentComparable = toComparable(values);
+
+            if (
+              JSON.stringify(currentComparable) ===
+              JSON.stringify(initialComparable)
+            ) {
+              setSnackbarMessage("ℹ️ No hay cambios para guardar.");
+              setSnackbarSeverity("info");
               setSnackbarOpen(true);
               return;
             }
 
             const updatedRation: Ration = {
               ...data,
-              date: values.date,
-              price: Number(values.price),
+              date: currentComparable.date,
+              price: currentComparable.price,
               rationType: {
-                idRationType: values.rationType!.idRationType,
+                idRationType: currentComparable.rationTypeId!,
               },
               beneficiary: {
-                idBeneficiary: values.beneficiary!.idBeneficiary,
+                idBeneficiary: currentComparable.beneficiaryId!,
               },
             };
 
-            onSubmit(updatedRation);
-            setSnackbarMessage("✅ ¡Ración actualizada correctamente!");
-            setSnackbarOpen(true); // Mostrar Snackbar
+            try {
+              const maybePromise = onSubmit(updatedRation) as any;
+              if (maybePromise?.then) {
+                await maybePromise;
+              }
+              setSnackbarMessage("✅ ¡Ración actualizada correctamente!");
+              setSnackbarSeverity("success");
+              setSnackbarOpen(true);
+            } catch {
+              setSnackbarMessage("❌ Ocurrió un error al actualizar.");
+              setSnackbarSeverity("error");
+              setSnackbarOpen(true);
+            }
           }}
         >
-          {({ values, errors, touched, setFieldValue }) => (
+          {({ values, errors, touched, setFieldValue, dirty, isValid }) => (
             <Form>
               <DialogContent className="dialog-content-ration">
                 <label className="titulo-arriba-form-racion">Fecha</label>
@@ -190,19 +253,8 @@ export default function EditRationDialog({
                   onChange={(e) => setFieldValue("date", e.target.value)}
                   error={touched.date && Boolean(errors.date)}
                   helperText={touched.date && errors.date}
-                  inputProps={{
-                    min: (() => {
-                      const today = new Date();
-                      const minDate = new Date(today);
-                      minDate.setDate(today.getDate() - 2);
-                      return minDate.toISOString().split("T")[0];
-                    })(),
-                    max: (() => {
-                      const today = new Date();
-                      return today.toISOString().split("T")[0];
-                    })(),
-                  }}
                 />
+
                 <label className="titulo-arriba-form-racion">
                   Tipo de Ración
                 </label>
@@ -222,15 +274,17 @@ export default function EditRationDialog({
                       fullWidth
                       error={touched.rationType && Boolean(errors.rationType)}
                       helperText={
-                        touched.rationType &&
-                        typeof errors.rationType === "object"
+                        touched.rationType && errors.rationType
+                          ? "Campo obligatorio"
+                          : ""
                       }
                     />
                   )}
                 />
+
                 <label className="titulo-arriba-form-racion">Dni</label>
                 <Autocomplete
-                  options={beneficiariosActivos.sort((a, b) =>
+                  options={[...beneficiariosActivos].sort((a, b) =>
                     a.firstLetter.localeCompare(b.firstLetter)
                   )}
                   getOptionLabel={(option) =>
@@ -268,12 +322,8 @@ export default function EditRationDialog({
                   margin="dense"
                   value={values.price}
                   onChange={(e) => {
-                    let rawValue = e.target.value;
-
-                    // Permitir solo hasta 3 dígitos antes del punto y hasta 2 después
+                    const rawValue = e.target.value;
                     const regex = /^\d{0,4}(\.\d{0,2})?$/;
-
-                    // Si el valor cumple con el regex, actualizamos el estado
                     if (regex.test(rawValue)) {
                       setFieldValue("price", rawValue);
                     }
@@ -281,24 +331,54 @@ export default function EditRationDialog({
                   error={touched.price && Boolean(errors.price)}
                   helperText={touched.price && errors.price}
                   InputProps={{
-                    startAdornment: <InputAdornment position="start">S/</InputAdornment>,
+                    startAdornment: (
+                      <InputAdornment position="start">S/</InputAdornment>
+                    ),
                   }}
                 />
-
               </DialogContent>
 
               <DialogActions
                 className="dialog-actions-ration"
                 sx={{ justifyContent: "center", gap: 4 }}
               >
-                <Button onClick={onClose}>X</Button>
-                <Button type="submit">✔</Button>
+                <Button
+                  onClick={onClose}
+                  sx={{
+                    backgroundColor: "#ff4d4d",
+                    color: "#fff",
+                    "&:hover": { backgroundColor: "#e53935" },
+                  }}
+                >
+                  X
+                </Button>
+
+                {/* ✅ Botón guardar con color dinámico */}
+                <Button
+                  type="submit"
+                  disabled={!dirty || !isValid}
+                  sx={{
+                    backgroundColor: !dirty || !isValid ? "#bdbdbd" : "#2196f3",
+                    color: "#fff",
+                    "&:hover": {
+                      backgroundColor:
+                        !dirty || !isValid ? "#bdbdbd" : "#1976d2",
+                      cursor: !dirty || !isValid ? "not-allowed" : "pointer",
+                    },
+                    transition: "background-color 0.2s ease-in-out",
+                  }}
+                >
+                  ✔
+                </Button>
+
               </DialogActions>
+
             </Form>
           )}
         </Formik>
       </Dialog>
 
+      {/* Snackbar principal */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={2500}
@@ -308,17 +388,18 @@ export default function EditRationDialog({
       >
         <Alert
           onClose={handleSnackClose}
-          severity={snackbarMessage.startsWith("❌") ? "error" : "success"}
+          severity={snackbarSeverity}
           variant="filled"
           sx={{ width: "100%" }}
         >
           {snackbarMessage}
         </Alert>
-      </Snackbar> 
+      </Snackbar>
 
+      {/* Snackbar de beneficiario inactivo */}
       <Snackbar
         open={snackbarOpenInactive}
-        autoHideDuration={10000} // 10 segundos para el mensaje del beneficiario inactivo
+        autoHideDuration={10000}
         onClose={() => setSnackbarOpenInactive(false)}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
         sx={{ zIndex: 1500 }}
@@ -329,9 +410,9 @@ export default function EditRationDialog({
           variant="filled"
           sx={{
             width: "100%",
-            backgroundColor: "#ff9800", // Naranja
-            color: "#000000ff", // Color del texto
-            "& .MuiAlert-icon": { color: "#000000ff" }, // Color del icono
+            backgroundColor: "#ff9800",
+            color: "#000000ff",
+            "& .MuiAlert-icon": { color: "#000000ff" },
           }}
         >
           {snackbarMessageInactive}
