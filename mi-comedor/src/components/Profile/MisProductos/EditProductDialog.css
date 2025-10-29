@@ -39,10 +39,7 @@
   color: #fff;
 }
 
-.edit-button.save {
-  background-color: #1976D2;
-  color: #fff;
-}
+
 
 /* Responsive para móviles pequeños */
 @media (max-width: 480px) {
