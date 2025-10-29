@@ -49,6 +49,15 @@ label {
   display: none;
 }
 
+.menu-cerrar-sesion .MuiMenuItem-root {
+  transition: background-color 0.3s ease;
+}
+
+.menu-cerrar-sesion .MuiMenuItem-root:hover {
+  background-color: #f57c00; 
+  color: white;
+}
+
 /* Responsive */
 
 @media (max-width: 600px) {
