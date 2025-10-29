@@ -5,8 +5,8 @@ import {
   DialogActions,
   Button,
   TextField,
-  Snackbar, // AGREGADO: Importar Snackbar para notificaciones
-  Alert, // AGREGADO: Importar Alert para el diseño del mensaje
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import { Formik, Form, getIn } from "formik";
 import * as Yup from "yup";
@@ -15,7 +15,7 @@ import TypeOfTask from "../../../types/TypeTask";
 import TaskCoordination from "../../../types/taskCoordination";
 import { MobileDatePicker, TimePicker } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
-import { useState } from "react"; // AGREGADO: Importar useState para manejar el estado del Snackbar
+import { useState, useMemo } from "react";
 
 import "./EditTareasDialog.css";
 
@@ -52,6 +52,14 @@ const validationSchema = Yup.object({
   timeTask: Yup.string().required("Campo obligatorio"),
 });
 
+// función para comparar el estado inicial vs el actual
+const toComparable = (v: FormTareasValues) => ({
+  fullname: v.fullname.trim(),
+  typeOfTaskId: v.typeOfTask?.idTypeOfTask ?? null,
+  dateTask: v.dateTask,
+  timeTask: v.timeTask,
+});
+
 export default function EditTareasDialog({
   open,
   onClose,
@@ -59,15 +67,28 @@ export default function EditTareasDialog({
   onSubmit,
   typesTasks,
 }: Props) {
-  // AGREGADO: Estados para controlar la notificación
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "error">("success");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<
+    "success" | "error" | "info"
+  >("success");
 
-  // AGREGADO: Función para cerrar el Snackbar
-  const handleCloseSnackbar = () => {
-    setOpenSnackbar(false);
-  };
+  const handleCloseSnackbar = () => setOpenSnackbar(false);
+
+  // estado inicial comparable (memoriza para evitar recomputar)
+  const initialComparable = useMemo(
+    () =>
+      toComparable({
+        fullname: data.fullname,
+        typeOfTask:
+          typesTasks.find(
+            (r) => r.idTypeOfTask === data.typeOfTask?.idTypeOfTask
+          ) || null,
+        dateTask: data.dateTask,
+        timeTask: data.timeTask,
+      }),
+    [data, typesTasks]
+  );
 
   return (
     <>
@@ -98,6 +119,19 @@ export default function EditTareasDialog({
           }}
           validationSchema={validationSchema}
           onSubmit={(values) => {
+            const currentComparable = toComparable(values);
+
+            // ⚠️ Si no hay cambios, no enviamos y mostramos snackbar info
+            if (
+              JSON.stringify(currentComparable) ===
+              JSON.stringify(initialComparable)
+            ) {
+              setSnackbarMessage("No hay cambios para guardar.");
+              setSnackbarSeverity("info");
+              setOpenSnackbar(true);
+              return;
+            }
+
             try {
               const updatedTask: TaskCoordination = {
                 ...data,
@@ -108,20 +142,18 @@ export default function EditTareasDialog({
                   idTypeOfTask: values.typeOfTask!.idTypeOfTask ?? 0,
                 },
               };
+
               onSubmit(updatedTask);
-              
-              // AGREGADO: Mostrar notificación de éxito
-              setSnackbarMessage("Tarea actualizada exitosamente");
+
+              setSnackbarMessage("Tarea actualizada exitosamente.");
               setSnackbarSeverity("success");
               setOpenSnackbar(true);
-              
               onClose();
             } catch (error) {
-              // AGREGADO: Mostrar notificación de error
-              setSnackbarMessage("Error al actualizar la tarea");
+              console.error("Error al actualizar tarea:", error);
+              setSnackbarMessage("Error al actualizar la tarea.");
               setSnackbarSeverity("error");
               setOpenSnackbar(true);
-              console.error("Error al actualizar tarea:", error);
             }
           }}
         >
@@ -131,7 +163,8 @@ export default function EditTareasDialog({
             touched,
             setFieldValue,
             setFieldTouched,
-            submitCount,
+            dirty,
+            isValid,
           }) => (
             <Form>
               <DialogContent className="dialog-edit-content-tarea">
@@ -147,11 +180,7 @@ export default function EditTareasDialog({
                       /[^A-Za-zÁÉÍÓÚáéíóúÑñÜü\s]/g,
                       ""
                     );
-
-                    if (value.length > 30) {
-                      value = value.slice(0, 30);
-                    }
-
+                    if (value.length > 30) value = value.slice(0, 30);
                     setFieldValue("fullname", value);
                   }}
                   inputProps={{
@@ -167,14 +196,6 @@ export default function EditTareasDialog({
                   }}
                   error={touched.fullname && Boolean(errors.fullname)}
                   helperText={touched.fullname && errors.fullname}
-                  FormHelperTextProps={{
-                    sx: {
-                      backgroundColor: "#e4faa4",
-                      padding: 0,
-                      display: "inline-block",
-                      borderRadius: "4px",
-                    },
-                  }}
                 />
 
                 <label className="titulo-arriba-form-tarea">Tipo de Tarea</label>
@@ -197,9 +218,8 @@ export default function EditTareasDialog({
                       typeof errors.typeOfTask === "string"
                         ? errors.typeOfTask
                         : undefined;
-
                     const showError = Boolean(
-                      (touchedInner || touched.typeOfTask || submitCount > 0) &&
+                      (touchedInner || touched.typeOfTask) &&
                         (errorInner || errorTop)
                     );
                     const helper = errorInner || errorTop || "Campo obligatorio";
@@ -213,14 +233,6 @@ export default function EditTareasDialog({
                         placeholder="Seleccione un tipo de tarea"
                         error={showError}
                         helperText={showError ? helper : ""}
-                        FormHelperTextProps={{
-                          sx: {
-                            backgroundColor: "#e4faa4",
-                            padding: 0,
-                            display: "inline-block",
-                            borderRadius: "4px",
-                          },
-                        }}
                       />
                     );
                   }}
@@ -243,9 +255,7 @@ export default function EditTareasDialog({
                       margin: "dense",
                       error: touched.dateTask && Boolean(errors.dateTask),
                       helperText: touched.dateTask && errors.dateTask,
-                      sx: {
-                        border: "2.45px solid black",
-                      },
+                      sx: { border: "2.45px solid black" },
                     },
                   }}
                 />
@@ -274,9 +284,7 @@ export default function EditTareasDialog({
                       margin: "dense",
                       error: touched.timeTask && Boolean(errors.timeTask),
                       helperText: touched.timeTask && errors.timeTask,
-                      sx: {
-                        border: "2.45px solid black",
-                      },
+                      sx: { border: "2.45px solid black" },
                     },
                   }}
                 />
@@ -286,15 +294,48 @@ export default function EditTareasDialog({
                 className="dialog-edit-actions-tarea"
                 sx={{ justifyContent: "center", gap: 4 }}
               >
-                <Button onClick={onClose}>X</Button>
-                <Button type="submit">✔</Button>
+                <Button
+                  onClick={onClose}
+                  sx={{
+                    backgroundColor: "red",
+                    color: "white",
+                    minWidth: 60,
+                    height: 60,
+                    borderRadius: 2.5,
+                    "&:hover": { backgroundColor: "#b71c1c" },
+                  }}
+                >
+                  X
+                </Button>
+
+                {/* ✔ botón gris cuando no hay cambios o inválido */}
+                <Button
+                  type="submit"
+                  disabled={!dirty || !isValid}
+                  sx={{
+                    backgroundColor: !dirty || !isValid ? "#bdbdbd" : "#1976d2",
+                    color: "#fff",
+                    minWidth: 60,
+                    height: 60,
+                    borderRadius: 2.5,
+                    "&:hover": {
+                      backgroundColor:
+                        !dirty || !isValid ? "#bdbdbd" : "#0d47a1",
+                      cursor:
+                        !dirty || !isValid ? "not-allowed" : "pointer",
+                    },
+                    transition: "background-color 0.2s ease-in-out",
+                  }}
+                >
+                  ✔
+                </Button>
               </DialogActions>
             </Form>
           )}
         </Formik>
       </Dialog>
 
-      {/* AGREGADO: Snackbar para mostrar notificaciones en la esquina inferior derecha */}
+      {/* Snackbar informativo */}
       <Snackbar
         open={openSnackbar}
         autoHideDuration={3000}
@@ -304,6 +345,7 @@ export default function EditTareasDialog({
         <Alert
           onClose={handleCloseSnackbar}
           severity={snackbarSeverity}
+          variant="filled"
           sx={{ width: "100%", fontSize: "1rem" }}
         >
           {snackbarMessage}

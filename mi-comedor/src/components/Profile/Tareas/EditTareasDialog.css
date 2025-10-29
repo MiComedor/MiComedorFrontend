@@ -52,10 +52,7 @@
     color: white;
 }
 
-.dialog-edit-actions-tarea .MuiButton-root:last-child {
-    background-color: #2b90f5;
-    color: white;
-}
+
 
 .textfield-tarea-edit .MuiFormHelperText-root {
   background-color: #e4faa4 !important; /* sin bloque de color */
