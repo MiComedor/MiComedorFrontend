@@ -4,8 +4,7 @@ import { useIdleLogout } from "../guards/useIdleLogout";
 
 const RequireAuth = ({ children }: { children: ReactNode }) => {
   const user = localStorage.getItem("user");
- useIdleLogout({ idleLimitMs: 60000 });
+  useIdleLogout({ idleLimitMs: 10 * 60 * 1000 });
   return user ? <>{children}</> : <Navigate to="/login" replace />;
 };
-
 export default RequireAuth;
