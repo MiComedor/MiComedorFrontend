@@ -258,6 +258,7 @@ const PresupuestoPage: React.FC = () => {
                         helperText={touched.dateBudget && errors.dateBudget}
                         inputProps={{
                           min: dayjs().format("YYYY-MM-DD"),
+                          max: dayjs().add(2, 'day').format("YYYY-MM-DD"),
                         }}
                       />
                     )}
